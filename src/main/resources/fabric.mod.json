@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "continuity",
+  "version": "${version}",
+
+  "name": "Continuity",
+  "description": "Continuity is a Fabric mod built around modern APIs to allow for the most efficient connected textures experience possible. It is designed to provide full Optifine parity for all resource packs that use the Optifine/MCPatcher CTM format.",
+  "authors": [
+    "Pepper_Bell"
+  ],
+  "contact": {
+    "homepage": "",
+    "issues": "",
+    "sources": ""
+  },
+
+  "license": "LGPL-3.0-only",
+  "icon": "assets/continuity/icon.png",
+
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "me.pepperbell.continuity.client.ContinuityClient"
+    ],
+    "modmenu": [
+      "me.pepperbell.continuity.client.config.ModMenuApiImpl"
+    ]
+  },
+  "mixins": [
+    "continuity.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.11.3",
+    "fabric": "*",
+    "minecraft": "1.17.x",
+    "java": ">=16"
+  },
+
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://discord.gg/7rnTYXu"
+      }
+    }
+  }
+}

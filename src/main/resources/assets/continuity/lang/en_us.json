@@ -1,0 +1,7 @@
+{
+  "options.continuity.title": "Continuity Configuration",
+  "options.continuity.disable_ctm": "Disable CTM",
+  "options.continuity.disable_ctm.tooltip": "Disables connected textures entirely.",
+  "options.continuity.use_manual_culling": "Use Manual Culling",
+  "options.continuity.use_manual_culling.tooltip": "Significantly improves performance by only applying CTM to visible quads, but may cause incorrect behavior with some mods."
+}
