@@ -35,7 +35,7 @@ public class ContinuityConfig {
 
 	protected final File file;
 	protected final Object2ObjectLinkedOpenHashMap<String, Option<?>> optionMap = new Object2ObjectLinkedOpenHashMap<>();
-	protected final Map<String, Option<?>> unmodifiableOptionMap = Collections.unmodifiableMap(optionMap);
+	protected final Map<String, Option<?>> optionMapView = Collections.unmodifiableMap(optionMap);
 
 	public final Option.BooleanOption disableCTM = addOption(new Option.BooleanOption("disable_ctm", false));
 	public final Option.BooleanOption useManualCulling = addOption(new Option.BooleanOption("use_manual_culling", true));
@@ -106,7 +106,7 @@ public class ContinuityConfig {
 		return optionMap.get(key);
 	}
 
-	public Map<String, Option<?>> getUnmodifiableOptionMap() {
-		return unmodifiableOptionMap;
+	public Map<String, Option<?>> getOptionMapView() {
+		return optionMapView;
 	}
 }

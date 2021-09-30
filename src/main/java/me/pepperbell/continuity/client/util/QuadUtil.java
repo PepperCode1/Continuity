@@ -39,10 +39,9 @@ public final class QuadUtil {
 	}
 
 	public static void emitOverlayQuad(QuadEmitter emitter, Direction face, Sprite sprite, int color, RenderMaterial material) {
-		emitter.square(face,0, 0, 1, 1, 0);
+		emitter.square(face, 0, 0, 1, 1, 0);
 		emitter.spriteColor(0, color, color, color, color);
 		assignLerpedUVs(emitter, sprite);
-		emitter.cullFace(face);
 		emitter.material(material);
 		emitter.emit();
 	}

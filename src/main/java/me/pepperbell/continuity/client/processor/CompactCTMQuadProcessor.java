@@ -74,7 +74,9 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 			int ctmIndex = CTMSpriteProvider.SPRITE_INDEX_MAP[connections];
 			Sprite replacementSprite = replacementSprites[ctmIndex];
 			if (replacementSprite != null) {
-				QuadUtil.interpolate(quad, sprite, replacementSprite);
+				if (!TextureUtil.isMissingSprite(replacementSprite)) {
+					QuadUtil.interpolate(quad, sprite, replacementSprite);
+				}
 				return ProcessingResult.STOP;
 			}
 		}
@@ -203,6 +205,8 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 
 		//
 
+		Sprite newSprite;
+
 		// Quad 0
 		quad.copyTo(quadEmitter);
 		quadEmitter.cullFace(cullFace);
@@ -222,7 +226,10 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 		if (n01) quadEmitter.normal(1, nx01, ny01, nz01);
 		if (n4) quadEmitter.normal(2, nx4, ny4, nz4);
 		if (n30) quadEmitter.normal(3, nx30, ny30, nz30);
-		QuadUtil.interpolate(quadEmitter, sprite, sprites[getSpriteIndex(quadIndices[0], connections)]);
+		newSprite = sprites[getSpriteIndex(quadIndices[0], connections)];
+		if (!TextureUtil.isMissingSprite(newSprite)) {
+			QuadUtil.interpolate(quadEmitter, sprite, newSprite);
+		}
 		quadEmitter.emit();
 
 		// Quad 1
@@ -244,7 +251,10 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 		if (n01) quadEmitter.normal(0, nx01, ny01, nz01);
 		if (n12) quadEmitter.normal(2, nx12, ny12, nz12);
 		if (n4) quadEmitter.normal(3, nx4, ny4, nz4);
-		QuadUtil.interpolate(quadEmitter, sprite, sprites[getSpriteIndex(quadIndices[1], connections)]);
+		newSprite = sprites[getSpriteIndex(quadIndices[1], connections)];
+		if (!TextureUtil.isMissingSprite(newSprite)) {
+			QuadUtil.interpolate(quadEmitter, sprite, newSprite);
+		}
 		quadEmitter.emit();
 
 		// Quad 2
@@ -266,7 +276,10 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 		if (n4) quadEmitter.normal(0, nx4, ny4, nz4);
 		if (n12) quadEmitter.normal(1, nx12, ny12, nz12);
 		if (n23) quadEmitter.normal(3, nx23, ny23, nz23);
-		QuadUtil.interpolate(quadEmitter, sprite, sprites[getSpriteIndex(quadIndices[2], connections)]);
+		newSprite = sprites[getSpriteIndex(quadIndices[2], connections)];
+		if (!TextureUtil.isMissingSprite(newSprite)) {
+			QuadUtil.interpolate(quadEmitter, sprite, newSprite);
+		}
 		quadEmitter.emit();
 
 		// Quad 3
@@ -288,7 +301,10 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 		if (n30) quadEmitter.normal(0, nx30, ny30, nz30);
 		if (n4) quadEmitter.normal(1, nx4, ny4, nz4);
 		if (n23) quadEmitter.normal(2, nx23, ny23, nz23);
-		QuadUtil.interpolate(quadEmitter, sprite, sprites[getSpriteIndex(quadIndices[3], connections)]);
+		newSprite = sprites[getSpriteIndex(quadIndices[3], connections)];
+		if (!TextureUtil.isMissingSprite(newSprite)) {
+			QuadUtil.interpolate(quadEmitter, sprite, newSprite);
+		}
 		quadEmitter.emit();
 
 		//
