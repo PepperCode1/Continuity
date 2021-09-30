@@ -1,5 +1,6 @@
 package me.pepperbell.continuity.client.mixin;
 
+import net.minecraft.util.math.ChunkSectionPos;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -16,13 +17,10 @@ import net.minecraft.world.biome.Biome;
 public class ChunkRendererRegionMixin implements BiomeView {
 	@Shadow
 	@Final
-	protected BlockPos offset;
+	protected int chunkXOffset;
 	@Shadow
 	@Final
-	protected int sizeX;
-	@Shadow
-	@Final
-	protected int sizeZ;
+	protected int chunkZOffset;
 	@Shadow
 	@Final
 	protected World world;
@@ -32,6 +30,8 @@ public class ChunkRendererRegionMixin implements BiomeView {
 
 	@Override
 	public Biome getBiome(BlockPos pos) {
+		int sizeX = ChunkSectionPos.getSectionCoord(pos.getX()) - this.chunkXOffset;
+		int sizeZ = ChunkSectionPos.getSectionCoord(pos.getZ()) - this.chunkZOffset;
 		if (biomeCache == null) {
 			if (sizeX == 20 && sizeZ == 20) {
 				biomeCache = BiomeCaches.getStandardCache();
@@ -39,7 +39,7 @@ public class ChunkRendererRegionMixin implements BiomeView {
 				biomeCache = BiomeCaches.createCache(sizeX, sizeZ);
 			}
 		}
-		int index = BiomeCaches.getBiomeIndex(pos.getX() - offset.getX(), pos.getZ() - offset.getZ(), sizeX);
+		int index = BiomeCaches.getBiomeIndex(pos.getX() - chunkXOffset, pos.getZ() - chunkZOffset, sizeX);
 		Biome biome = biomeCache[index];
 		if (biome == null) {
 			biome = world.getBiome(pos);

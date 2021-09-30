@@ -41,7 +41,7 @@ dependencies {
 	// Fabric API
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	modImplementation('com.terraformersmc:modmenu:2.0.10') {
+	modImplementation('com.terraformersmc:modmenu:2.1.1') {
 		exclude group: 'net.fabricmc.fabric-api'
 	}
 
