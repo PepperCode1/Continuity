@@ -43,6 +43,34 @@ public class StandardOverlayQuadProcessor extends AbstractQuadProcessor {
 	protected BlockState tintBlock;
 	protected RenderMaterial material;
 
+	public enum OverlayQuadIndex
+	{
+		DOWN_RIGHT_CORNER(0),
+		DOWN(1),
+		LEFT_DOWN_CORNER(2),
+		DOWN_RIGHT(3),
+		LEFT_DOWN(4),
+		LEFT_DOWN_RIGHT(5),
+		LEFT_DOWN_TOP(6),
+		RIGHT(7),
+		LEFT_DOWN_RIGHT_UP(8),
+		LEFT(9),
+		RIGHT_UP(10),
+		LEFT_UP(11),
+		DOWN_RIGHT_UP(12),
+		LEFT_RIGHT_UP(13),
+		RIGHT_UP_CORNER(14),
+		UP(15),
+		LEFT_UP_CORNER(16);
+
+		private final int spiteIndex;
+
+		OverlayQuadIndex(int spiteIndex)
+		{
+			this.spiteIndex = spiteIndex;
+		}
+	}
+
 	public StandardOverlayQuadProcessor(Sprite[] sprites, ProcessingPredicate processingPredicate, Set<Identifier> matchTilesSet, Predicate<BlockState> matchBlocksPredicate, Set<Identifier> connectTilesSet, Predicate<BlockState> connectBlocksPredicate, int tintIndex, BlockState tintBlock, BlendMode layer) {
 		super(sprites, processingPredicate);
 		this.matchTilesSet = matchTilesSet;
@@ -199,25 +227,6 @@ public class StandardOverlayQuadProcessor extends AbstractQuadProcessor {
 		return renderer;
 	}
 
-	/*
-	0:	D R (CORNER)
-	1:	D
-	2:	L D (CORNER)
-	3:	D R
-	4:	L D
-	5:	L D R
-	6:	L D T
-	7:	R
-	8:	L D R U
-	9:	L
-	10:	R U
-	11:	L U
-	12:	D R U
-	13:	L R U
-	14:	R U (CORNER)
-	15:	U
-	16:	L U (CORNER)
-	 */
 	protected OverlayRenderer getRenderer(BlockRenderView blockView, BlockPos pos, BlockState state, Direction lightFace, Direction[] directions, ProcessingDataProvider dataProvider) {
 		BlockPos.Mutable mutablePos = dataProvider.getData(ProcessingDataKeys.MUTABLE_POS_KEY).set(pos);
 		BlockStateAndBoolean blockStateAndBoolean = dataProvider.getData(ProcessingDataKeys.BLOCK_STATE_AND_BOOLEAN_KEY);
@@ -240,54 +249,66 @@ public class StandardOverlayQuadProcessor extends AbstractQuadProcessor {
 		//
 
 		if (left & down & right & up) {
-			return prepareRenderer(getRenderer(dataProvider), lightFace, blockView, pos, 8);
+			return prepareRenderer(getRenderer(dataProvider), lightFace, blockView, pos, OverlayQuadIndex.LEFT_DOWN_RIGHT_UP.spiteIndex);
 		}
 		if (left & down & right) {
-			return prepareRenderer(getRenderer(dataProvider), lightFace, blockView, pos, 5);
+			return prepareRenderer(getRenderer(dataProvider), lightFace, blockView, pos, OverlayQuadIndex.LEFT_DOWN_RIGHT.spiteIndex);
 		}
 		if (left & down & up) {
-			return prepareRenderer(getRenderer(dataProvider), lightFace, blockView, pos, 6);
+			return prepareRenderer(getRenderer(dataProvider), lightFace, blockView, pos, OverlayQuadIndex.LEFT_DOWN_TOP.spiteIndex);
 		}
 		if (left & right & up) {
-			return prepareRenderer(getRenderer(dataProvider), lightFace, blockView, pos, 13);
+			return prepareRenderer(getRenderer(dataProvider), lightFace, blockView, pos, OverlayQuadIndex.LEFT_RIGHT_UP.spiteIndex);
 		}
 		if (down & right & up) {
-			return prepareRenderer(getRenderer(dataProvider), lightFace, blockView, pos, 12);
+			return prepareRenderer(getRenderer(dataProvider), lightFace, blockView, pos, OverlayQuadIndex.DOWN_RIGHT_UP.spiteIndex);
 		}
 
 		if (left & right) {
-			return prepareRenderer(getRenderer(dataProvider), lightFace, blockView, pos, 9, 7);
+			return prepareRenderer(getRenderer(dataProvider), lightFace, blockView, pos, OverlayQuadIndex.LEFT.spiteIndex, OverlayQuadIndex.RIGHT.spiteIndex);
 		}
 		if (up & down) {
-			return prepareRenderer(getRenderer(dataProvider), lightFace, blockView, pos, 15, 1);
+			return prepareRenderer(getRenderer(dataProvider), lightFace, blockView, pos, OverlayQuadIndex.UP.spiteIndex, OverlayQuadIndex.DOWN.spiteIndex);
 		}
 
 		if (left & down) {
-			return fromCorner(directions[2], directions[3], 4, 14, getRenderer(dataProvider), blockView, pos, state, lightFace, mutablePos);
+			return fromCorner(directions[2], directions[3], OverlayQuadIndex.LEFT_DOWN.spiteIndex, OverlayQuadIndex.RIGHT_UP_CORNER.spiteIndex,
+					getRenderer(dataProvider), blockView, pos, state, lightFace, mutablePos);
 		}
 		if (down & right) {
-			return fromCorner(directions[0], directions[3], 3, 16, getRenderer(dataProvider), blockView, pos, state, lightFace, mutablePos);
+			return fromCorner(directions[0], directions[3], OverlayQuadIndex.DOWN_RIGHT.spiteIndex, OverlayQuadIndex.LEFT_UP_CORNER.spiteIndex,
+					getRenderer(dataProvider), blockView, pos, state, lightFace, mutablePos);
 		}
 		if (right & up) {
-			return fromCorner(directions[0], directions[1], 10, 2, getRenderer(dataProvider), blockView, pos, state, lightFace, mutablePos);
+			return fromCorner(directions[0], directions[1], OverlayQuadIndex.RIGHT_UP.spiteIndex, OverlayQuadIndex.LEFT_DOWN_CORNER.spiteIndex,
+					getRenderer(dataProvider), blockView, pos, state, lightFace, mutablePos);
 		}
 		if (up & left) {
-			return fromCorner(directions[1], directions[2], 11, 0, getRenderer(dataProvider), blockView, pos, state, lightFace, mutablePos);
+			return fromCorner(directions[1], directions[2], OverlayQuadIndex.LEFT_UP.spiteIndex, OverlayQuadIndex.DOWN_RIGHT_CORNER.spiteIndex,
+					getRenderer(dataProvider), blockView, pos, state, lightFace, mutablePos);
 		}
 
 		//
 
 		if (left) {
-			return fromOneSide(state1, state2, state3, directions[1], directions[2], directions[3], 9, 0, 14, getRenderer(dataProvider), blockView, pos, state, lightFace, mutablePos);
+			return fromOneSide(state1, state2, state3, directions[1], directions[2], directions[3],
+					OverlayQuadIndex.LEFT.spiteIndex, OverlayQuadIndex.DOWN_RIGHT_CORNER.spiteIndex, OverlayQuadIndex.RIGHT_UP_CORNER.spiteIndex,
+					getRenderer(dataProvider), blockView, pos, state, lightFace, mutablePos);
 		}
 		if (down) {
-			return fromOneSide(state2, state3, state0, directions[2], directions[3], directions[0], 1, 14, 16, getRenderer(dataProvider), blockView, pos, state, lightFace, mutablePos);
+			return fromOneSide(state2, state3, state0, directions[2], directions[3], directions[0],
+					OverlayQuadIndex.DOWN.spiteIndex, OverlayQuadIndex.RIGHT_UP_CORNER.spiteIndex, OverlayQuadIndex.LEFT_UP_CORNER.spiteIndex,
+					getRenderer(dataProvider), blockView, pos, state, lightFace, mutablePos);
 		}
 		if (right) {
-			return fromOneSide(state3, state0, state1, directions[3], directions[0], directions[1], 7, 16, 2, getRenderer(dataProvider), blockView, pos, state, lightFace, mutablePos);
+			return fromOneSide(state3, state0, state1, directions[3], directions[0], directions[1],
+					OverlayQuadIndex.RIGHT.spiteIndex, OverlayQuadIndex.LEFT_UP_CORNER.spiteIndex, OverlayQuadIndex.LEFT_DOWN_CORNER.spiteIndex,
+					getRenderer(dataProvider), blockView, pos, state, lightFace, mutablePos);
 		}
 		if (up) {
-			return fromOneSide(state0, state1, state2, directions[0], directions[1], directions[2], 15, 2, 0, getRenderer(dataProvider), blockView, pos, state, lightFace, mutablePos);
+			return fromOneSide(state0, state1, state2, directions[0], directions[1], directions[2],
+					OverlayQuadIndex.UP.spiteIndex, OverlayQuadIndex.LEFT_DOWN_CORNER.spiteIndex, OverlayQuadIndex.DOWN_RIGHT_CORNER.spiteIndex,
+					getRenderer(dataProvider), blockView, pos, state, lightFace, mutablePos);
 		}
 
 		//
@@ -318,16 +339,16 @@ public class StandardOverlayQuadProcessor extends AbstractQuadProcessor {
 			OverlayRenderer renderer = getRenderer(dataProvider);
 			Sprite[] rendererSprites = prepareRenderer(renderer, lightFace, blockView, pos);
 			if (corner0) {
-				rendererSprites[0] = sprites[2];
+				rendererSprites[0] = sprites[OverlayQuadIndex.LEFT_DOWN_CORNER.spiteIndex];
 			}
 			if (corner1) {
-				rendererSprites[1] = sprites[0];
+				rendererSprites[1] = sprites[OverlayQuadIndex.DOWN_RIGHT_CORNER.spiteIndex];
 			}
 			if (corner2) {
-				rendererSprites[2] = sprites[14];
+				rendererSprites[2] = sprites[OverlayQuadIndex.RIGHT_UP_CORNER.spiteIndex];
 			}
 			if (corner3) {
-				rendererSprites[3] = sprites[16];
+				rendererSprites[3] = sprites[OverlayQuadIndex.LEFT_UP_CORNER.spiteIndex];
 			}
 			return renderer;
 		}
