@@ -1,0 +1,7 @@
+{
+  "options.continuity.title": "Continuity seadistus",
+  "options.continuity.disable_ctm": "CTM'i keelamine",
+  "options.continuity.disable_ctm.tooltip": "Keelab ühendatud tekstuurid täielikult.",
+  "options.continuity.use_manual_culling": "Nähtavuse kontroll",
+  "options.continuity.use_manual_culling.tooltip": "Suurendab jõudlust märgatavalt, rakendades CTM'i vaid nähtavatel külgedel, kuid võib teatud modidega ebakorrektselt käituda."
+}
