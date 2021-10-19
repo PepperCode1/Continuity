@@ -10,7 +10,7 @@ import net.minecraft.util.Identifier;
 
 @Mixin(Identifier.class)
 public class IdentifierMixin {
-	@Inject(at = @At("HEAD"), method = "isPathValid(Ljava/lang/String;)Z", cancellable = true)
+	@Inject(method = "isPathValid(Ljava/lang/String;)Z", at = @At("HEAD"), cancellable = true)
 	private static void onIsPathValid(String path, CallbackInfoReturnable<Boolean> cir) {
 		if (InvalidIdentifierHandler.areInvalidPathsEnabled()) {
 			cir.setReturnValue(true);

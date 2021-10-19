@@ -11,12 +11,12 @@ import net.minecraft.util.Identifier;
 
 @Mixin(NamespaceResourceManager.class)
 public class NamespaceResourceManagerMixin {
-	@Inject(at = @At("HEAD"), method = "getMetadataPath(Lnet/minecraft/util/Identifier;)Lnet/minecraft/util/Identifier;")
+	@Inject(method = "getMetadataPath(Lnet/minecraft/util/Identifier;)Lnet/minecraft/util/Identifier;", at = @At("HEAD"))
 	private static void onHeadGetMetadataPath(Identifier id, CallbackInfoReturnable<Identifier> cir) {
 		InvalidIdentifierHandler.enableInvalidPaths();
 	}
 
-	@Inject(at = @At("TAIL"), method = "getMetadataPath(Lnet/minecraft/util/Identifier;)Lnet/minecraft/util/Identifier;")
+	@Inject(method = "getMetadataPath(Lnet/minecraft/util/Identifier;)Lnet/minecraft/util/Identifier;", at = @At("TAIL"))
 	private static void onTailGetMetadataPath(Identifier id, CallbackInfoReturnable<Identifier> cir) {
 		InvalidIdentifierHandler.disableInvalidPaths();
 	}
