@@ -36,24 +36,24 @@ public class ModelLoaderMixin {
 	@Unique
 	private BlockState currentBlockState;
 
-	@Inject(at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;push(Ljava/lang/String;)V", args = "ldc=missing_model", shift = At.Shift.BEFORE), method = "<init>(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/client/color/block/BlockColors;Lnet/minecraft/util/profiler/Profiler;I)V")
+	@Inject(method = "<init>(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/client/color/block/BlockColors;Lnet/minecraft/util/profiler/Profiler;I)V", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;push(Ljava/lang/String;)V", args = "ldc=missing_model", shift = At.Shift.BEFORE))
 	private void afterStoreArgs(ResourceManager resourceManager, BlockColors blockColors, Profiler profiler, int mipmap, CallbackInfo ci) {
 		BiomeHolderManager.clearCache(); // TODO: move BiomeHolderManager calls elsewhere?
 		CTMPropertiesLoader.loadAll(resourceManager);
 	}
 
-	@Inject(at = @At("TAIL"), method = "<init>(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/client/color/block/BlockColors;Lnet/minecraft/util/profiler/Profiler;I)V")
+	@Inject(method = "<init>(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/client/color/block/BlockColors;Lnet/minecraft/util/profiler/Profiler;I)V", at = @At("TAIL"))
 	private void onTailInit(ResourceManager resourceManager, BlockColors blockColors, Profiler profiler, int mipmap, CallbackInfo ci) {
 		BiomeHolderManager.refreshHolders(); // TODO: move BiomeHolderManager calls elsewhere?
 		CTMPropertiesLoader.clearAll();
 	}
 
-	@Inject(at = @At("HEAD"), method = "method_4716(Lnet/minecraft/block/BlockState;)V")
+	@Inject(method = "method_4716(Lnet/minecraft/block/BlockState;)V", at = @At("HEAD"))
 	private void onAddBlockStateModel(BlockState state, CallbackInfo ci) {
 		currentBlockState = state;
 	}
 
-	@Inject(at = @At(value = "TAIL"), method = "addModel(Lnet/minecraft/client/util/ModelIdentifier;)V", locals = LocalCapture.CAPTURE_FAILHARD)
+	@Inject(method = "addModel(Lnet/minecraft/client/util/ModelIdentifier;)V", at = @At(value = "TAIL"), locals = LocalCapture.CAPTURE_FAILHARD)
 	private void afterAddModel(ModelIdentifier id, CallbackInfo ci, UnbakedModel model) {
 		if (currentBlockState != null) {
 			AddBlockStateModelCallback.EVENT.invoker().onAddBlockStateModel(id, currentBlockState, model, (ModelLoader) (Object) this);
@@ -61,7 +61,7 @@ public class ModelLoaderMixin {
 		}
 	}
 
-	@Inject(at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = "ldc=textures"), method = "<init>(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/client/color/block/BlockColors;Lnet/minecraft/util/profiler/Profiler;I)V")
+	@Inject(method = "<init>(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/client/color/block/BlockColors;Lnet/minecraft/util/profiler/Profiler;I)V", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = "ldc=textures"))
 	private void onFinishAddingModels(ResourceManager resourceManager, BlockColors blockColors, Profiler profiler, int mipmap, CallbackInfo ci) {
 		ModelsAddedCallback.EVENT.invoker().onModelsAdded((ModelLoader) (Object) this, resourceManager, profiler, unbakedModels, modelsToBake);
 	}

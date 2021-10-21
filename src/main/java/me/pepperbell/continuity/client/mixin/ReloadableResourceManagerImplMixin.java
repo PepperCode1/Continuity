@@ -39,23 +39,23 @@ public class ReloadableResourceManagerImplMixin implements ReloadableResourceMan
 		return id;
 	}
 
-	@ModifyVariable(at = @At("HEAD"), method = "getResource")
+	@ModifyVariable(method = "getResource(Lnet/minecraft/util/Identifier;)Lnet/minecraft/resource/Resource;", at = @At("HEAD"))
 	private Identifier redirectGetResourceId(Identifier id) {
 		return redirect(id);
 	}
 
-	@ModifyVariable(at = @At("HEAD"), method = "containsResource")
+	@ModifyVariable(method = "containsResource(Lnet/minecraft/util/Identifier;)Z", at = @At("HEAD"))
 	private Identifier redirectContainsResourceId(Identifier id) {
 		return redirect(id);
 	}
 
-	@ModifyVariable(at = @At("HEAD"), method = "getAllResources")
+	@ModifyVariable(method = "getAllResources(Lnet/minecraft/util/Identifier;)Ljava/util/List;", at = @At("HEAD"))
 	private Identifier redirectGetAllResourcesId(Identifier id) {
 		return redirect(id);
 	}
 
-//	// TODO: what if redirect doesn't actually exist?
-//	@Inject(at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Sets;newHashSet()Ljava/util/HashSet;", shift = At.Shift.BY, by = 2), method = "findResources", locals = LocalCapture.CAPTURE_FAILHARD)
+	// TODO: what if redirect doesn't actually exist?
+//	@Inject(method = "findResources(Ljava/lang/String;Ljava/util/function/Predicate;)Ljava/util/Collection;", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Sets;newHashSet()Ljava/util/HashSet;", shift = At.Shift.BY, by = 2), locals = LocalCapture.CAPTURE_FAILHARD)
 //	private void onFindResources(String startingPath, Predicate<String> pathPredicate, CallbackInfoReturnable<Collection<Identifier>> cir, Set<Identifier> set) {
 //		for (Identifier id : redirects.keySet()) {
 //			String path = id.getPath();
@@ -65,7 +65,7 @@ public class ReloadableResourceManagerImplMixin implements ReloadableResourceMan
 //		}
 //	}
 
-	@Inject(at = @At("HEAD"), method = "reload(Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;Ljava/util/List;)Lnet/minecraft/resource/ResourceReload;")
+	@Inject(method = "reload(Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;Ljava/util/List;)Lnet/minecraft/resource/ResourceReload;", at = @At("HEAD"))
 	private void onHeadReload(Executor prepareExecutor, Executor applyExecutor, CompletableFuture<Unit> initialStage, List<ResourcePack> packs, CallbackInfoReturnable<ResourceReload> cir) {
 		redirects.clear();
 	}

@@ -35,7 +35,7 @@ public class ContinuityConfig {
 
 	protected final File file;
 	protected final Object2ObjectLinkedOpenHashMap<String, Option<?>> optionMap = new Object2ObjectLinkedOpenHashMap<>();
-	protected final Map<String, Option<?>> unmodifiableOptionMap = Collections.unmodifiableMap(optionMap);
+	protected final Map<String, Option<?>> optionMapView = Collections.unmodifiableMap(optionMap);
 
 	public final Option.BooleanOption disableCTM = addOption(new Option.BooleanOption("disable_ctm", false));
 	public final Option.BooleanOption useManualCulling = addOption(new Option.BooleanOption("use_manual_culling", true));
@@ -75,7 +75,11 @@ public class ContinuityConfig {
 				Object2ObjectMap.Entry<String, Option<?>> entry = iterator.next();
 				JsonElement element = object.get(entry.getKey());
 				if (element != null) {
-					entry.getValue().fromJson(element);
+					try {
+						entry.getValue().fromJson(element);
+					} catch (JsonParseException e) {
+						LOGGER.error("Could not read option '" + entry.getKey() + "'", e);
+					}
 				}
 			}
 		} else {
@@ -83,7 +87,7 @@ public class ContinuityConfig {
 		}
 	}
 
-	protected JsonElement toJson() throws JsonParseException {
+	protected JsonElement toJson() {
 		JsonObject object = new JsonObject();
 		ObjectBidirectionalIterator<Object2ObjectMap.Entry<String, Option<?>>> iterator = optionMap.object2ObjectEntrySet().fastIterator();
 		while (iterator.hasNext()) {
@@ -106,7 +110,7 @@ public class ContinuityConfig {
 		return optionMap.get(key);
 	}
 
-	public Map<String, Option<?>> getUnmodifiableOptionMap() {
-		return unmodifiableOptionMap;
+	public Map<String, Option<?>> getOptionMapView() {
+		return optionMapView;
 	}
 }

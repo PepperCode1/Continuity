@@ -11,7 +11,7 @@ public interface Option<T> {
 
 	void set(T value);
 
-	JsonElement toJson() throws JsonParseException;
+	JsonElement toJson();
 
 	void fromJson(JsonElement json) throws JsonParseException;
 
@@ -51,8 +51,12 @@ public interface Option<T> {
 		}
 
 		@Override
-		public void fromJson(JsonElement json) {
-			set(json.getAsBoolean());
+		public void fromJson(JsonElement json) throws JsonParseException {
+			if (json.isJsonPrimitive()) {
+				set(json.getAsBoolean());
+			} else {
+				throw new JsonParseException("Json must be a primitive");
+			}
 		}
 	}
 }

@@ -9,9 +9,9 @@
     "Pepper_Bell"
   ],
   "contact": {
-    "homepage": "",
-    "issues": "",
-    "sources": ""
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/continuity",
+    "issues": "https://github.com/PepperCode1/Continuity/issues",
+    "sources": "https://github.com/PepperCode1/Continuity"
   },
 
   "license": "LGPL-3.0-only",

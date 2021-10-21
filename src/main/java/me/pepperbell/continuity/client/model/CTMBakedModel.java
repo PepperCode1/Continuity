@@ -85,7 +85,7 @@ public class CTMBakedModel extends ForwardingBakedModel {
 	}
 
 	protected static class CTMQuadTransform implements RenderContext.QuadTransform {
-		protected final ManualCullingCache cullingCache = new ManualCullingCache();
+		protected final CullingCache cullingCache = new CullingCache();
 		protected final ProcessingContextImpl processingContext = new ProcessingContextImpl();
 
 		protected List<QuadProcessor> processors;
@@ -103,7 +103,7 @@ public class CTMBakedModel extends ForwardingBakedModel {
 			if (useManualCulling) {
 				Direction cullFace = quad.cullFace();
 				if (cullFace != null) {
-					if (cullingCache.shouldCull(state, blockView, pos, cullFace)) {
+					if (cullingCache.shouldCull(blockView, pos, state, cullFace)) {
 						return false;
 					}
 				}
@@ -156,6 +156,8 @@ public class CTMBakedModel extends ForwardingBakedModel {
 			this.randomSupplier = randomSupplier;
 			this.useManualCulling = useManualCulling;
 			spriteFinder = RenderUtil.getSpriteFinder();
+
+			cullingCache.prepare();
 		}
 
 		public void reset() {
@@ -168,29 +170,33 @@ public class CTMBakedModel extends ForwardingBakedModel {
 			useManualCulling = false;
 			spriteFinder = null;
 
-			cullingCache.reset();
 			processingContext.reset();
 		}
 	}
 
-	protected static class ManualCullingCache {
-		protected static final Boolean[] EMPTY_CULL_CACHE = new Boolean[Direction.values().length];
+	protected static class CullingCache {
+		protected int completionFlags;
+		protected int resultFlags;
 
-		protected Boolean[] cullCache = new Boolean[Direction.values().length];
 		protected BlockPos.Mutable mutablePos = new BlockPos.Mutable();
 
-		public boolean shouldCull(BlockState state, BlockRenderView blockView, BlockPos pos, Direction cullFace) {
-			int ordinal = cullFace.ordinal();
-			Boolean cull = cullCache[ordinal];
-			if (cull == null) {
-				cull = !Block.shouldDrawSide(state, blockView, pos, cullFace, mutablePos.set(pos, cullFace));
-				cullCache[ordinal] = cull;
+		public boolean shouldCull(BlockRenderView blockView, BlockPos pos, BlockState state, Direction cullFace) {
+			int mask = 1 << cullFace.ordinal();
+			if ((completionFlags & mask) == 0) {
+				completionFlags |= mask;
+				if (Block.shouldDrawSide(state, blockView, pos, cullFace, mutablePos.set(pos, cullFace))) {
+					return false;
+				} else {
+					resultFlags |= mask;
+					return true;
+				}
+			} else {
+				return (resultFlags & mask) == 1;
 			}
-			return cull;
 		}
 
-		public void reset() {
-			System.arraycopy(EMPTY_CULL_CACHE, 0, cullCache, 0, EMPTY_CULL_CACHE.length);
+		public void prepare() {
+			completionFlags = 0;
 		}
 	}
 
