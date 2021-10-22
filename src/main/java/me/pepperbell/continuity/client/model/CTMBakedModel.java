@@ -185,18 +185,19 @@ public class CTMBakedModel extends ForwardingBakedModel {
 			if ((completionFlags & mask) == 0) {
 				completionFlags |= mask;
 				if (Block.shouldDrawSide(state, blockView, pos, cullFace, mutablePos.set(pos, cullFace))) {
+					resultFlags |= mask;
 					return false;
 				} else {
-					resultFlags |= mask;
 					return true;
 				}
 			} else {
-				return (resultFlags & mask) == 1;
+				return (resultFlags & mask) == 0;
 			}
 		}
 
 		public void prepare() {
 			completionFlags = 0;
+			resultFlags = 0;
 		}
 	}
 
