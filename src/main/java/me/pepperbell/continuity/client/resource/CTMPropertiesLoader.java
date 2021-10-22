@@ -8,7 +8,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import org.apache.http.annotation.NotThreadSafe;
+import org.apache.http.annotation.Contract;
+import org.apache.http.annotation.ThreadingBehavior;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,7 +31,7 @@ import net.minecraft.resource.ResourcePack;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
 
-@NotThreadSafe
+@Contract(threading = ThreadingBehavior.UNSAFE)
 public final class CTMPropertiesLoader {
 	private static final List<CTMLoadingContainer<?>> ALL = new ObjectArrayList<>();
 	private static final List<CTMLoadingContainer<?>> AFFECTS_BLOCK = new ObjectArrayList<>();
