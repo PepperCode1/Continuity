@@ -1,0 +1,7 @@
+{
+  "options.continuity.title": "Continuity Konfiguration",
+  "options.continuity.disable_ctm": "Deaktiviere CTM",
+  "options.continuity.disable_ctm.tooltip": "Deaktiviert verbundene Texturen vollständig.",
+  "options.continuity.use_manual_culling": "Manuelles Culling verwenden",
+  "options.continuity.use_manual_culling.tooltip": "Verbessert die Leistung erheblich, indem CTM nur auf sichtbare Texturen angewendet wird, kann aber bei einigen Mods zu fehlerhaftem Verhalten führen."
+}
