@@ -44,10 +44,8 @@ dependencies {
 		exclude group: 'net.fabricmc.fabric-api'
 	}
 
-	modCompileOnly 'maven.modrinth:sodium:mc1.17.1-0.3.2'
-	modCompileOnly('io.vram:canvas-fabric-mc117-1.17:1.0.2124') {
-		exclude group: '*', module: '*'
-	}
+	modCompileOnly 'maven.modrinth:sodium:mc1.17.1-0.3.3'
+	modCompileOnly 'io.vram:canvas-fabric-mc117-1.17:1.0.2195'
 }
 
 String getExtraBuildMetadata() {
@@ -59,10 +57,10 @@ String getExtraBuildMetadata() {
 }
 
 processResources {
-	inputs.property "version", project.version
+	inputs.property 'version', project.version
 
-	filesMatching("fabric.mod.json") {
-		expand "version": project.version
+	filesMatching('fabric.mod.json') {
+		expand 'version': project.version
 	}
 }
 

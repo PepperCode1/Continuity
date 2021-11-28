@@ -5,6 +5,9 @@ import java.util.Set;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
+import org.jetbrains.annotations.Nullable;
+
+import me.pepperbell.continuity.api.client.ProcessingDataProvider;
 import me.pepperbell.continuity.client.properties.BaseCTMProperties;
 import me.pepperbell.continuity.client.util.biome.BiomeRetriever;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadView;
@@ -35,7 +38,7 @@ public class BaseProcessingPredicate implements ProcessingPredicate {
 	}
 
 	@Override
-	public boolean shouldProcessQuad(QuadView quad, Sprite sprite, BlockRenderView blockView, BlockState state, BlockPos pos) {
+	public boolean shouldProcessQuad(QuadView quad, Sprite sprite, BlockRenderView blockView, BlockState state, BlockPos pos, ProcessingDataProvider dataProvider) {
 		if (matchTilesSet != null) {
 			if (!matchTilesSet.contains(sprite.getId())) {
 				return false;
@@ -61,26 +64,14 @@ public class BaseProcessingPredicate implements ProcessingPredicate {
 			}
 		}
 		if (biomePredicate != null) {
-			Biome biome = BiomeRetriever.getBiome(blockView, pos);
-			if (biome != null) {
-				if (!biomePredicate.test(biome)) {
-					return false;
-				}
-			} else {
+			Biome biome = dataProvider.getData(ProcessingDataKeys.BIOME_CACHE_KEY).get(blockView, pos);
+			if (biome == null || !biomePredicate.test(biome)) {
 				return false;
 			}
 		}
 		if (blockEntityNamePredicate != null) {
-			BlockEntity blockEntity = blockView.getBlockEntity(pos);
-			if (blockEntity instanceof Nameable nameable) {
-				if (nameable.hasCustomName()) {
-					if (!blockEntityNamePredicate.test(nameable.getCustomName().asString())) {
-						return false;
-					}
-				} else {
-					return false;
-				}
-			} else {
+			String blockEntityName = dataProvider.getData(ProcessingDataKeys.BLOCK_ENTITY_NAME_CACHE_KEY).get(blockView, pos);
+			if (blockEntityName == null || !blockEntityNamePredicate.test(blockEntityName)) {
 				return false;
 			}
 		}
@@ -89,5 +80,50 @@ public class BaseProcessingPredicate implements ProcessingPredicate {
 
 	public static BaseProcessingPredicate fromProperties(BaseCTMProperties properties) {
 		return new BaseProcessingPredicate(properties.getMatchTilesSet(), properties.getFaces(), properties.getBiomePredicate(), properties.getHeightPredicate(), properties.getBlockEntityNamePredicate());
+	}
+
+	public static class BiomeCache {
+		protected Biome biome;
+		protected boolean invalid = true;
+
+		@Nullable
+		public Biome get(BlockRenderView blockView, BlockPos pos) {
+			if (invalid) {
+				biome = BiomeRetriever.getBiome(blockView, pos);
+				invalid = false;
+			}
+			return biome;
+		}
+
+		public void reset() {
+			invalid = true;
+		}
+	}
+
+	public static class BlockEntityNameCache {
+		protected String blockEntityName;
+		protected boolean invalid = true;
+
+		@Nullable
+		public String get(BlockRenderView blockView, BlockPos pos) {
+			if (invalid) {
+				BlockEntity blockEntity = blockView.getBlockEntity(pos);
+				if (blockEntity instanceof Nameable nameable) {
+					if (nameable.hasCustomName()) {
+						blockEntityName = nameable.getCustomName().asString();
+					} else {
+						blockEntityName = null;
+					}
+				} else {
+					blockEntityName = null;
+				}
+				invalid = false;
+			}
+			return blockEntityName;
+		}
+
+		public void reset() {
+			invalid = true;
+		}
 	}
 }
