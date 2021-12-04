@@ -109,7 +109,7 @@ public class BaseCTMProperties implements CTMProperties {
 	@Override
 	public Set<SpriteIdentifier> getTextureDependencies() {
 		if (textureDependencies == null) {
-			processTiles();
+			resolveTiles();
 		}
 		return textureDependencies;
 	}
@@ -551,32 +551,30 @@ public class BaseCTMProperties implements CTMProperties {
 		return valid;
 	}
 
-	protected void processTiles() {
+	protected void resolveTiles() {
 		textureDependencies = new ObjectOpenHashSet<>();
 		spriteIds = new ObjectArrayList<>();
 		ResourceManager resourceManager = MinecraftClient.getInstance().getResourceManager();
 		for (Identifier tile : tiles) {
-			SpriteIdentifier spriteId = null;
+			SpriteIdentifier spriteId;
 			if (tile.equals(SPECIAL_SKIP_ID)) {
 				spriteId = SPECIAL_SKIP_SPRITE_ID;
 			} else if (tile.equals(SPECIAL_DEFAULT_ID)) {
 				spriteId = SPECIAL_DEFAULT_SPRITE_ID;
-			}
-			if (spriteId == null) {
-				Identifier newTile;
-				if (tile.getPath().startsWith("textures/")) {
-					String newPath = tile.getPath().substring(9);
-					if (newPath.endsWith(".png")) {
-						newPath = newPath.substring(0, newPath.length() - 4);
+			} else {
+				String namespace = tile.getNamespace();
+				String path = tile.getPath();
+				if (path.startsWith("textures/")) {
+					path = path.substring(9);
+					if (path.endsWith(".png")) {
+						path = path.substring(0, path.length() - 4);
 					}
-					newTile = new Identifier(tile.getNamespace(), newPath);
 				} else {
-					String newPath = getRedirectPath(tile.getPath());
-					Identifier newId = new Identifier(tile.getNamespace(), "textures/" + newPath + ".png");
-					ResourceRedirectHelper.addRedirect(resourceManager, newId, tile);
-					newTile = new Identifier(tile.getNamespace(), newPath);
+					path = getRedirectPath(path);
+					Identifier redirectId = new Identifier(namespace, "textures/" + path + ".png");
+					ResourceRedirectHelper.addRedirect(resourceManager, redirectId, tile);
 				}
-				spriteId = TextureUtil.toSpriteId(newTile);
+				spriteId = TextureUtil.toSpriteId(new Identifier(namespace, path));
 				textureDependencies.add(spriteId);
 			}
 			spriteIds.add(spriteId);
@@ -629,7 +627,7 @@ public class BaseCTMProperties implements CTMProperties {
 
 	public List<SpriteIdentifier> getSpriteIds() {
 		if (spriteIds == null) {
-			processTiles();
+			resolveTiles();
 		}
 		return spriteIds;
 	}

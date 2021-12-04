@@ -51,7 +51,7 @@ public final class CTMPropertiesLoader {
 			packPriority++;
 		}
 		InvalidIdentifierHandler.disableInvalidPaths();
-		calculateMultipassDependents();
+		resolveMultipassDependents();
 	}
 
 	private static void loadAll(ResourcePack pack, int packPriority) {
@@ -96,7 +96,7 @@ public final class CTMPropertiesLoader {
 		}
 	}
 
-	private static void calculateMultipassDependents() {
+	private static void resolveMultipassDependents() {
 		Object2ObjectOpenHashMap<Identifier, CTMLoadingContainer<?>> texture2ContainerMap = new Object2ObjectOpenHashMap<>();
 		Object2ObjectOpenHashMap<Identifier, List<CTMLoadingContainer<?>>> texture2ContainerListMap = new Object2ObjectOpenHashMap<>();
 
@@ -159,7 +159,7 @@ public final class CTMPropertiesLoader {
 		Set<CTMLoadingContainer<?>> traversedContainers = new ObjectOpenHashSet<>();
 		for (int i = 0; i < amount; i++) {
 			CTMLoadingContainer<?> container = ALL.get(i);
-			container.calculateRecursiveMultipassDependents(traversedContainers);
+			container.resolveRecursiveMultipassDependents(traversedContainers);
 		}
 	}
 

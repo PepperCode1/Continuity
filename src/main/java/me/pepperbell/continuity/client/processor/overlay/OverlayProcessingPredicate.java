@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
+import me.pepperbell.continuity.api.client.ProcessingDataProvider;
 import me.pepperbell.continuity.client.processor.BaseProcessingPredicate;
 import me.pepperbell.continuity.client.properties.BaseCTMProperties;
 import me.pepperbell.continuity.client.util.QuadUtil;
@@ -23,8 +24,8 @@ public class OverlayProcessingPredicate extends BaseProcessingPredicate {
 	}
 
 	@Override
-	public boolean shouldProcessQuad(QuadView quad, Sprite sprite, BlockRenderView blockView, BlockState state, BlockPos pos) {
-		if (!super.shouldProcessQuad(quad, sprite, blockView, state, pos)) {
+	public boolean shouldProcessQuad(QuadView quad, Sprite sprite, BlockRenderView blockView, BlockState state, BlockPos pos, ProcessingDataProvider dataProvider) {
+		if (!super.shouldProcessQuad(quad, sprite, blockView, state, pos, dataProvider)) {
 			return false;
 		}
 		return QuadUtil.isQuadUnitSquare(quad);

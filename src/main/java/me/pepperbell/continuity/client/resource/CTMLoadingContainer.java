@@ -42,7 +42,7 @@ public class CTMLoadingContainer<T extends CTMProperties> implements Comparable<
 		multipassDependents.add(dependent);
 	}
 
-	public void calculateRecursiveMultipassDependents(Set<CTMLoadingContainer<?>> traversedContainers) {
+	public void resolveRecursiveMultipassDependents(Set<CTMLoadingContainer<?>> traversedContainers) {
 		if (multipassDependents != null) {
 			recursiveMultipassDependents = new ObjectOpenHashSet<>();
 			addDependentsRecursively(this, traversedContainers);
