@@ -9,11 +9,11 @@ jobs:
       - uses: actions/checkout@v2
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@v1
-      - name: Set up JDK 16
+      - name: Set up JDK 17
         uses: actions/setup-java@v2
         with:
-          distribution: adopt
-          java-version: 16
+          distribution: temurin
+          java-version: 17
           check-latest: true
       - name: Build artifacts
         run: ./gradlew build --stacktrace
