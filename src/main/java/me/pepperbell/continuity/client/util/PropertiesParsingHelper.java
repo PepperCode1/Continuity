@@ -62,7 +62,7 @@ public final class PropertiesParsingHelper {
 							}
 							if (path.startsWith("textures/")) {
 								path = path.substring(9);
-							} else {
+							} else if (path.startsWith("optifine/")) {
 								path = BaseCTMProperties.getRedirectPath(path + ".png");
 							}
 							try {
