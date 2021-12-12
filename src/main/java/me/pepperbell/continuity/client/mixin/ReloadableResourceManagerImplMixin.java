@@ -23,7 +23,7 @@ import net.minecraft.util.Unit;
 @Mixin(ReloadableResourceManagerImpl.class)
 public class ReloadableResourceManagerImplMixin implements ReloadableResourceManagerImplExtension {
 	@Unique
-	private final Map<Identifier, Identifier> redirects = new Object2ObjectOpenHashMap<>();
+	private static final Map<Identifier, Identifier> redirects = new Object2ObjectOpenHashMap<>();
 
 	@Override
 	public void addRedirect(Identifier from, Identifier to) {
