@@ -13,6 +13,15 @@ Nowadays, there are two main CTM (Connected Texture Mapping) formats:
 
 Continuity only supports the Optifine/MCPatcher format. If support for the Chisel format is required, consider using the [ConnectedTexturesMod for Fabric](https://www.curseforge.com/minecraft/mc-mods/ctm-fabric) instead. Note that using Continuity and CTMF at the same time is an unsupported configuration, at least for the time being.
 
+## Setup
+
+1. Make sure you are using the latest version.
+2. If you are using Sodium, you must install Indium for the mod to work correctly. It can be downloaded here: https://modrinth.com/mod/indium.
+3. Enable the default packs (continuity/default, continuity/glass_pane_culling_fix) in the resource pack menu.
+4. Check if you have incompatible mods installed from the list below. Do not remove them yet, but instead update them to their latest version and see if your issue is resolved. If not, then remove them.
+    - MoreMCMeta
+    - Essential
+
 ## Forge Version
 
 I do not see myself working on a Forge version of Continuity for two main reasons:
