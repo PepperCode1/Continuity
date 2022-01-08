@@ -22,11 +22,13 @@ import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
+import net.fabricmc.fabric.api.renderer.v1.mesh.QuadView;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.BlockRenderView;
 
 public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
@@ -83,234 +85,352 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 
 		//
 
-		MeshBuilder meshBuilder = context.getData(ProcessingDataKeys.MESH_BUILDER_KEY);
-		QuadEmitter quadEmitter = meshBuilder.getEmitter();
+		// UVs normalized to the sprite dimensions and centered at the middle of the sprite
+		float un0 = MathUtil.getLerpProgress(quad.spriteU(0, 0), sprite.getMinU(), sprite.getMaxU()) - 0.5f;
+		float vn0 = MathUtil.getLerpProgress(quad.spriteV(0, 0), sprite.getMinV(), sprite.getMaxV()) - 0.5f;
+		float un1 = MathUtil.getLerpProgress(quad.spriteU(1, 0), sprite.getMinU(), sprite.getMaxU()) - 0.5f;
+		float vn1 = MathUtil.getLerpProgress(quad.spriteV(1, 0), sprite.getMinV(), sprite.getMaxV()) - 0.5f;
+		float un2 = MathUtil.getLerpProgress(quad.spriteU(2, 0), sprite.getMinU(), sprite.getMaxU()) - 0.5f;
+		float vn2 = MathUtil.getLerpProgress(quad.spriteV(2, 0), sprite.getMinV(), sprite.getMaxV()) - 0.5f;
+		float un3 = MathUtil.getLerpProgress(quad.spriteU(3, 0), sprite.getMinU(), sprite.getMaxU()) - 0.5f;
+		float vn3 = MathUtil.getLerpProgress(quad.spriteV(3, 0), sprite.getMinV(), sprite.getMaxV()) - 0.5f;
+
+		// Signums representing which side of the splitting line the U or V coordinate lies on
+		int uSignum0 = (int) Math.signum(un0);
+		int vSignum0 = (int) Math.signum(vn0);
+		int uSignum1 = (int) Math.signum(un1);
+		int vSignum1 = (int) Math.signum(vn1);
+		int uSignum2 = (int) Math.signum(un2);
+		int vSignum2 = (int) Math.signum(vn2);
+		int uSignum3 = (int) Math.signum(un3);
+		int vSignum3 = (int) Math.signum(vn3);
+
+		boolean uSplit01 = shouldSplitUV(uSignum0, uSignum1);
+		boolean vSplit01 = shouldSplitUV(vSignum0, vSignum1);
+		boolean uSplit12 = shouldSplitUV(uSignum1, uSignum2);
+		boolean vSplit12 = shouldSplitUV(vSignum1, vSignum2);
+		boolean uSplit23 = shouldSplitUV(uSignum2, uSignum3);
+		boolean vSplit23 = shouldSplitUV(vSignum2, vSignum3);
+		boolean uSplit30 = shouldSplitUV(uSignum3, uSignum0);
+		boolean vSplit30 = shouldSplitUV(vSignum3, vSignum0);
+
+		// Cannot split across U and V at the same time
+		if (uSplit01 & vSplit01 || uSplit12 & vSplit12 || uSplit23 & vSplit23 || uSplit30 & vSplit30) {
+			return ProcessingResult.CONTINUE;
+		}
+
+		// Cannot split across U twice in a row
+		if (uSplit01 & uSplit12 || uSplit12 & uSplit23 || uSplit23 & uSplit30 || uSplit30 & uSplit01) {
+			return ProcessingResult.CONTINUE;
+		}
+
+		// Cannot split across V twice in a row
+		if (vSplit01 & vSplit12 || vSplit12 & vSplit23 || vSplit23 & vSplit30 || vSplit30 & vSplit01) {
+			return ProcessingResult.CONTINUE;
+		}
+
+		//
+
+		boolean uSplit = ((uSplit01 ? 1 : 0) + (uSplit12 ? 1 : 0) + (uSplit23 ? 1 : 0) + (uSplit30 ? 1 : 0)) == 2;
+		boolean vSplit = ((vSplit01 ? 1 : 0) + (vSplit12 ? 1 : 0) + (vSplit23 ? 1 : 0) + (vSplit30 ? 1 : 0)) == 2;
+
+		if (!uSplit && !vSplit) {
+			return ProcessingResult.ABORT_AND_RENDER_QUAD;
+		}
 
 		int[] quadIndices = QUAD_INDEX_MAP[orientation];
 
-		//
+		if (uSplit && vSplit) {
+			int spriteIndex0 = getSpriteIndex(quadIndices[0], connections);
+			int spriteIndex1 = getSpriteIndex(quadIndices[1], connections);
+			int spriteIndex2 = getSpriteIndex(quadIndices[2], connections);
+			int spriteIndex3 = getSpriteIndex(quadIndices[3], connections);
 
-		Direction cullFace = quad.cullFace();
-		RenderMaterial material = quad.material();
+			boolean split01 = spriteIndex0 != spriteIndex1;
+			boolean split12 = spriteIndex1 != spriteIndex2;
+			boolean split23 = spriteIndex2 != spriteIndex3;
+			boolean split30 = spriteIndex3 != spriteIndex0;
 
-		boolean n0 = quad.hasNormal(0);
-		boolean n1 = quad.hasNormal(1);
-		boolean n2 = quad.hasNormal(2);
-		boolean n3 = quad.hasNormal(3);
-		boolean n01 = n0 && n1;
-		boolean n12 = n1 && n2;
-		boolean n23 = n2 && n3;
-		boolean n30 = n3 && n0;
-		boolean n4 = n0 && n2;
+			if (!(split01 | split12 | split23 | split30)) {
+				tryInterpolate(quad, sprite, spriteIndex0);
+				return ProcessingResult.ABORT_AND_RENDER_QUAD;
+			}
 
-		float x01 = MathUtil.average(quad.x(0), quad.x(1));
-		float y01 = MathUtil.average(quad.y(0), quad.y(1));
-		float z01 = MathUtil.average(quad.z(0), quad.z(1));
-		int c01 = MathUtil.averageColor(quad.spriteColor(0, 0), quad.spriteColor(1, 0));
-		int l01 = MathUtil.averageLight(quad.lightmap(0), quad.lightmap(1));
-		float u01 = MathUtil.average(quad.spriteU(0, 0), quad.spriteU(1, 0));
-		float v01 = MathUtil.average(quad.spriteV(0, 0), quad.spriteV(1, 0));
-		float nx01 = 0;
-		float ny01 = 0;
-		float nz01 = 0;
-		if (n01) {
-			nx01 = MathUtil.average(quad.normalX(0), quad.normalX(1));
-			ny01 = MathUtil.average(quad.normalY(0), quad.normalY(1));
-			nz01 = MathUtil.average(quad.normalZ(0), quad.normalZ(1));
-			float scale = 1 / (float) Math.sqrt(nx01 * nx01 + ny01 * ny01 + nz01 * nz01);
-			nx01 *= scale;
-			ny01 *= scale;
-			nz01 *= scale;
+			VertexContainer vertexContainer = context.getData(ProcessingDataKeys.VERTEX_CONTAINER_KEY);
+			vertexContainer.fillBaseVertices(quad);
+
+			MeshBuilder meshBuilder = context.getData(ProcessingDataKeys.MESH_BUILDER_KEY);
+			QuadEmitter quadEmitter = meshBuilder.getEmitter();
+
+			RenderMaterial material = quad.material();
+			Direction cullFace = quad.cullFace();
+
+			if (split01 & split12 & split23 & split30) {
+				float delta01;
+				float delta23;
+				float delta12;
+				float delta30;
+				float delta4;
+				if (uSplit01) {
+					delta01 = MathUtil.getLerpProgress(0, un0, un1);
+					delta23 = MathUtil.getLerpProgress(0, un2, un3);
+					delta12 = MathUtil.getLerpProgress(0, vn1, vn2);
+					delta30 = MathUtil.getLerpProgress(0, vn3, vn0);
+					delta4 = MathUtil.getLerpProgress(0, MathHelper.lerp(delta01, vn0, vn1), MathHelper.lerp(delta23, vn2, vn3));
+				} else {
+					delta01 = MathUtil.getLerpProgress(0, vn0, vn1);
+					delta23 = MathUtil.getLerpProgress(0, vn2, vn3);
+					delta12 = MathUtil.getLerpProgress(0, un1, un2);
+					delta30 = MathUtil.getLerpProgress(0, un3, un0);
+					delta4 = MathUtil.getLerpProgress(0, MathHelper.lerp(delta01, un0, un1), MathHelper.lerp(delta23, un2, un3));
+				}
+
+				vertexContainer.vertex01.setLerped(delta01, vertexContainer.vertex0, vertexContainer.vertex1);
+				vertexContainer.vertex12.setLerped(delta12, vertexContainer.vertex1, vertexContainer.vertex2);
+				vertexContainer.vertex23.setLerped(delta23, vertexContainer.vertex2, vertexContainer.vertex3);
+				vertexContainer.vertex30.setLerped(delta30, vertexContainer.vertex3, vertexContainer.vertex0);
+				vertexContainer.vertex4.setLerped(delta4, vertexContainer.vertex01, vertexContainer.vertex23);
+
+				splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 0, quadEmitter, spriteIndex0);
+				splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 1, quadEmitter, spriteIndex1);
+				splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 2, quadEmitter, spriteIndex2);
+				splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 3, quadEmitter, spriteIndex3);
+			} else {
+				if (!(split01 | split12)) {
+					split12 = true;
+				} else if (!(split12 | split23)) {
+					split23 = true;
+				} else if (!(split23 | split30)) {
+					split30 = true;
+				} else if (!(split30 | split01)) {
+					split01 = true;
+				}
+
+				int splits = (split01 ? 1 : 0) + (split12 ? 1 : 0) + (split23 ? 1 : 0) + (split30 ? 1 : 0);
+				if (splits == 2) {
+					if (split01) {
+						float delta01;
+						float delta23;
+						if (uSplit01) {
+							delta01 = MathUtil.getLerpProgress(0, un0, un1);
+							delta23 = MathUtil.getLerpProgress(0, un2, un3);
+						} else {
+							delta01 = MathUtil.getLerpProgress(0, vn0, vn1);
+							delta23 = MathUtil.getLerpProgress(0, vn2, vn3);
+						}
+
+						vertexContainer.vertex01.setLerped(delta01, vertexContainer.vertex0, vertexContainer.vertex1);
+						vertexContainer.vertex23.setLerped(delta23, vertexContainer.vertex2, vertexContainer.vertex3);
+
+						splitHalf(quad, sprite, material, cullFace, vertexContainer, 1, quadEmitter, spriteIndex1);
+						splitHalf(quad, sprite, material, cullFace, vertexContainer, 3, quadEmitter, spriteIndex3);
+					} else {
+						float delta12;
+						float delta30;
+						if (uSplit01) {
+							delta12 = MathUtil.getLerpProgress(0, vn1, vn2);
+							delta30 = MathUtil.getLerpProgress(0, vn3, vn0);
+						} else {
+							delta12 = MathUtil.getLerpProgress(0, un1, un2);
+							delta30 = MathUtil.getLerpProgress(0, un3, un0);
+						}
+
+						vertexContainer.vertex12.setLerped(delta12, vertexContainer.vertex1, vertexContainer.vertex2);
+						vertexContainer.vertex30.setLerped(delta30, vertexContainer.vertex3, vertexContainer.vertex0);
+
+						splitHalf(quad, sprite, material, cullFace, vertexContainer, 0, quadEmitter, spriteIndex0);
+						splitHalf(quad, sprite, material, cullFace, vertexContainer, 2, quadEmitter, spriteIndex2);
+					}
+				} else { // 3
+					if (!split01) {
+						float delta23;
+						float delta12;
+						float delta30;
+						float delta4;
+						if (uSplit01) {
+							delta23 = MathUtil.getLerpProgress(0, un2, un3);
+							delta12 = MathUtil.getLerpProgress(0, vn1, vn2);
+							delta30 = MathUtil.getLerpProgress(0, vn3, vn0);
+							delta4 = MathUtil.getLerpProgress(0, MathHelper.lerp(delta12, un1, un2), MathHelper.lerp(delta30, un3, un0));
+						} else {
+							delta23 = MathUtil.getLerpProgress(0, vn2, vn3);
+							delta12 = MathUtil.getLerpProgress(0, un1, un2);
+							delta30 = MathUtil.getLerpProgress(0, un3, un0);
+							delta4 = MathUtil.getLerpProgress(0, MathHelper.lerp(delta12, vn1, vn2), MathHelper.lerp(delta30, vn3, vn0));
+						}
+
+						vertexContainer.vertex23.setLerped(delta23, vertexContainer.vertex2, vertexContainer.vertex3);
+						vertexContainer.vertex12.setLerped(delta12, vertexContainer.vertex1, vertexContainer.vertex2);
+						vertexContainer.vertex30.setLerped(delta30, vertexContainer.vertex3, vertexContainer.vertex0);
+						vertexContainer.vertex4.setLerped(delta4, vertexContainer.vertex12, vertexContainer.vertex30);
+
+						splitHalf(quad, sprite, material, cullFace, vertexContainer, 0, quadEmitter, spriteIndex0);
+						splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 2, quadEmitter, spriteIndex2);
+						splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 3, quadEmitter, spriteIndex3);
+					} else if (!split12) {
+						float delta01;
+						float delta23;
+						float delta30;
+						float delta4;
+						if (uSplit01) {
+							delta01 = MathUtil.getLerpProgress(0, un0, un1);
+							delta23 = MathUtil.getLerpProgress(0, un2, un3);
+							delta30 = MathUtil.getLerpProgress(0, vn3, vn0);
+							delta4 = MathUtil.getLerpProgress(0, MathHelper.lerp(delta01, vn0, vn1), MathHelper.lerp(delta23, vn2, vn3));
+						} else {
+							delta01 = MathUtil.getLerpProgress(0, vn0, vn1);
+							delta23 = MathUtil.getLerpProgress(0, vn2, vn3);
+							delta30 = MathUtil.getLerpProgress(0, un3, un0);
+							delta4 = MathUtil.getLerpProgress(0, MathHelper.lerp(delta01, un0, un1), MathHelper.lerp(delta23, un2, un3));
+						}
+
+						vertexContainer.vertex01.setLerped(delta01, vertexContainer.vertex0, vertexContainer.vertex1);
+						vertexContainer.vertex23.setLerped(delta23, vertexContainer.vertex2, vertexContainer.vertex3);
+						vertexContainer.vertex30.setLerped(delta30, vertexContainer.vertex3, vertexContainer.vertex0);
+						vertexContainer.vertex4.setLerped(delta4, vertexContainer.vertex01, vertexContainer.vertex23);
+
+						splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 0, quadEmitter, spriteIndex0);
+						splitHalf(quad, sprite, material, cullFace, vertexContainer, 1, quadEmitter, spriteIndex1);
+						splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 3, quadEmitter, spriteIndex3);
+					} else if (!split23) {
+						float delta01;
+						float delta12;
+						float delta30;
+						float delta4;
+						if (uSplit01) {
+							delta01 = MathUtil.getLerpProgress(0, un0, un1);
+							delta12 = MathUtil.getLerpProgress(0, vn1, vn2);
+							delta30 = MathUtil.getLerpProgress(0, vn3, vn0);
+							delta4 = MathUtil.getLerpProgress(0, MathHelper.lerp(delta12, un1, un2), MathHelper.lerp(delta30, un3, un0));
+						} else {
+							delta01 = MathUtil.getLerpProgress(0, vn0, vn1);
+							delta12 = MathUtil.getLerpProgress(0, un1, un2);
+							delta30 = MathUtil.getLerpProgress(0, un3, un0);
+							delta4 = MathUtil.getLerpProgress(0, MathHelper.lerp(delta12, vn1, vn2), MathHelper.lerp(delta30, vn3, vn0));
+						}
+
+						vertexContainer.vertex01.setLerped(delta01, vertexContainer.vertex0, vertexContainer.vertex1);
+						vertexContainer.vertex12.setLerped(delta12, vertexContainer.vertex1, vertexContainer.vertex2);
+						vertexContainer.vertex30.setLerped(delta30, vertexContainer.vertex3, vertexContainer.vertex0);
+						vertexContainer.vertex4.setLerped(delta4, vertexContainer.vertex12, vertexContainer.vertex30);
+
+						splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 0, quadEmitter, spriteIndex0);
+						splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 1, quadEmitter, spriteIndex1);
+						splitHalf(quad, sprite, material, cullFace, vertexContainer, 2, quadEmitter, spriteIndex2);
+					} else {
+						float delta01;
+						float delta23;
+						float delta12;
+						float delta4;
+						if (uSplit01) {
+							delta01 = MathUtil.getLerpProgress(0, un0, un1);
+							delta23 = MathUtil.getLerpProgress(0, un2, un3);
+							delta12 = MathUtil.getLerpProgress(0, vn1, vn2);
+							delta4 = MathUtil.getLerpProgress(0, MathHelper.lerp(delta01, vn0, vn1), MathHelper.lerp(delta23, vn2, vn3));
+						} else {
+							delta01 = MathUtil.getLerpProgress(0, vn0, vn1);
+							delta23 = MathUtil.getLerpProgress(0, vn2, vn3);
+							delta12 = MathUtil.getLerpProgress(0, un1, un2);
+							delta4 = MathUtil.getLerpProgress(0, MathHelper.lerp(delta01, un0, un1), MathHelper.lerp(delta23, un2, un3));
+						}
+
+						vertexContainer.vertex01.setLerped(delta01, vertexContainer.vertex0, vertexContainer.vertex1);
+						vertexContainer.vertex12.setLerped(delta12, vertexContainer.vertex1, vertexContainer.vertex2);
+						vertexContainer.vertex23.setLerped(delta23, vertexContainer.vertex2, vertexContainer.vertex3);
+						vertexContainer.vertex4.setLerped(delta4, vertexContainer.vertex01, vertexContainer.vertex23);
+
+						splitHalf(quad, sprite, material, cullFace, vertexContainer, 3, quadEmitter, spriteIndex3);
+						splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 1, quadEmitter, spriteIndex1);
+						splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 2, quadEmitter, spriteIndex2);
+					}
+				}
+			}
+
+			context.addMesh(meshBuilder.build());
+			return ProcessingResult.ABORT_AND_CANCEL_QUAD;
+		} else {
+			boolean firstSplit;
+			boolean firstHalf;
+			if (uSplit) {
+				firstSplit = uSplit01;
+				firstHalf = (vSignum0 + vSignum1 + vSignum2 + vSignum3) <= 0;
+				if (orientation == 2 || orientation == 3 || orientation == 5 || orientation == 6) {
+					firstHalf = !firstHalf;
+				}
+			} else {
+				firstSplit = vSplit01;
+				firstHalf = (uSignum0 + uSignum1 + uSignum2 + uSignum3) <= 0;
+				if (orientation == 1 || orientation == 2 || orientation == 6 || orientation == 7) {
+					firstHalf = !firstHalf;
+				}
+			}
+
+			int spriteIndexA;
+			int spriteIndexB;
+			if (firstHalf) {
+				spriteIndexA = getSpriteIndex(quadIndices[0], connections);
+				spriteIndexB = getSpriteIndex(quadIndices[firstSplit ? 1 : 3], connections);
+			} else {
+				spriteIndexA = getSpriteIndex(quadIndices[firstSplit ? 3 : 1], connections);
+				spriteIndexB = getSpriteIndex(quadIndices[2], connections);
+			}
+
+			if (spriteIndexA == spriteIndexB) {
+				tryInterpolate(quad, sprite, spriteIndexA);
+				return ProcessingResult.ABORT_AND_RENDER_QUAD;
+			}
+
+			VertexContainer vertexContainer = context.getData(ProcessingDataKeys.VERTEX_CONTAINER_KEY);
+			vertexContainer.fillBaseVertices(quad);
+
+			MeshBuilder meshBuilder = context.getData(ProcessingDataKeys.MESH_BUILDER_KEY);
+			QuadEmitter quadEmitter = meshBuilder.getEmitter();
+
+			RenderMaterial material = quad.material();
+			Direction cullFace = quad.cullFace();
+
+			if (firstSplit) {
+				float delta01;
+				float delta23;
+				if (uSplit) {
+					delta01 = MathUtil.getLerpProgress(0, un0, un1);
+					delta23 = MathUtil.getLerpProgress(0, un2, un3);
+				} else {
+					delta01 = MathUtil.getLerpProgress(0, vn0, vn1);
+					delta23 = MathUtil.getLerpProgress(0, vn2, vn3);
+				}
+
+				vertexContainer.vertex01.setLerped(delta01, vertexContainer.vertex0, vertexContainer.vertex1);
+				vertexContainer.vertex23.setLerped(delta23, vertexContainer.vertex2, vertexContainer.vertex3);
+
+				splitHalf(quad, sprite, material, cullFace, vertexContainer, 3, quadEmitter, spriteIndexA);
+				splitHalf(quad, sprite, material, cullFace, vertexContainer, 1, quadEmitter, spriteIndexB);
+			} else {
+				float delta12;
+				float delta30;
+				if (uSplit) {
+					delta12 = MathUtil.getLerpProgress(0, un1, un2);
+					delta30 = MathUtil.getLerpProgress(0, un3, un0);
+				} else {
+					delta12 = MathUtil.getLerpProgress(0, vn1, vn2);
+					delta30 = MathUtil.getLerpProgress(0, vn3, vn0);
+				}
+
+				vertexContainer.vertex12.setLerped(delta12, vertexContainer.vertex1, vertexContainer.vertex2);
+				vertexContainer.vertex30.setLerped(delta30, vertexContainer.vertex3, vertexContainer.vertex0);
+
+				splitHalf(quad, sprite, material, cullFace, vertexContainer, 0, quadEmitter, spriteIndexA);
+				splitHalf(quad, sprite, material, cullFace, vertexContainer, 2, quadEmitter, spriteIndexB);
+			}
+
+			context.addMesh(meshBuilder.build());
+			return ProcessingResult.ABORT_AND_CANCEL_QUAD;
 		}
+	}
 
-		float x12 = MathUtil.average(quad.x(1), quad.x(2));
-		float y12 = MathUtil.average(quad.y(1), quad.y(2));
-		float z12 = MathUtil.average(quad.z(1), quad.z(2));
-		int c12 = MathUtil.averageColor(quad.spriteColor(1, 0), quad.spriteColor(2, 0));
-		int l12 = MathUtil.averageLight(quad.lightmap(1), quad.lightmap(2));
-		float u12 = MathUtil.average(quad.spriteU(1, 0), quad.spriteU(2, 0));
-		float v12 = MathUtil.average(quad.spriteV(1, 0), quad.spriteV(2, 0));
-		float nx12 = 0;
-		float ny12 = 0;
-		float nz12 = 0;
-		if (n12) {
-			nx12 = MathUtil.average(quad.normalX(1), quad.normalX(2));
-			ny12 = MathUtil.average(quad.normalY(1), quad.normalY(2));
-			nz12 = MathUtil.average(quad.normalZ(1), quad.normalZ(2));
-			float scale = 1 / (float) Math.sqrt(nx12 * nx12 + ny12 * ny12 + nz12 * nz12);
-			nx12 *= scale;
-			ny12 *= scale;
-			nz12 *= scale;
-		}
-
-		float x23 = MathUtil.average(quad.x(2), quad.x(3));
-		float y23 = MathUtil.average(quad.y(2), quad.y(3));
-		float z23 = MathUtil.average(quad.z(2), quad.z(3));
-		int c23 = MathUtil.averageColor(quad.spriteColor(2, 0), quad.spriteColor(3, 0));
-		int l23 = MathUtil.averageLight(quad.lightmap(2), quad.lightmap(3));
-		float u23 = MathUtil.average(quad.spriteU(2, 0), quad.spriteU(3, 0));
-		float v23 = MathUtil.average(quad.spriteV(2, 0), quad.spriteV(3, 0));
-		float nx23 = 0;
-		float ny23 = 0;
-		float nz23 = 0;
-		if (n23) {
-			nx23 = MathUtil.average(quad.normalX(2), quad.normalX(3));
-			ny23 = MathUtil.average(quad.normalY(2), quad.normalY(3));
-			nz23 = MathUtil.average(quad.normalZ(2), quad.normalZ(3));
-			float scale = 1 / (float) Math.sqrt(nx23 * nx23 + ny23 * ny23 + nz23 * nz23);
-			nx23 *= scale;
-			ny23 *= scale;
-			nz23 *= scale;
-		}
-
-		float x30 = MathUtil.average(quad.x(3), quad.x(0));
-		float y30 = MathUtil.average(quad.y(3), quad.y(0));
-		float z30 = MathUtil.average(quad.z(3), quad.z(0));
-		int c30 = MathUtil.averageColor(quad.spriteColor(3, 0), quad.spriteColor(0, 0));
-		int l30 = MathUtil.averageLight(quad.lightmap(3), quad.lightmap(0));
-		float u30 = MathUtil.average(quad.spriteU(3, 0), quad.spriteU(0, 0));
-		float v30 = MathUtil.average(quad.spriteV(3, 0), quad.spriteV(0, 0));
-		float nx30 = 0;
-		float ny30 = 0;
-		float nz30 = 0;
-		if (n30) {
-			nx30 = MathUtil.average(quad.normalX(3), quad.normalX(0));
-			ny30 = MathUtil.average(quad.normalY(3), quad.normalY(0));
-			nz30 = MathUtil.average(quad.normalZ(3), quad.normalZ(0));
-			float scale = 1 / (float) Math.sqrt(nx30 * nx30 + ny30 * ny30 + nz30 * nz30);
-			nx30 *= scale;
-			ny30 *= scale;
-			nz30 *= scale;
-		}
-
-		float x4 = MathUtil.average(quad.x(0), quad.x(2));
-		float y4 = MathUtil.average(quad.y(0), quad.y(2));
-		float z4 = MathUtil.average(quad.z(0), quad.z(2));
-		int c4 = MathUtil.averageColor(quad.spriteColor(0, 0), quad.spriteColor(2, 0));
-		int l4 = MathUtil.averageLight(quad.lightmap(0), quad.lightmap(2));
-		float u4 = MathUtil.average(quad.spriteU(0, 0), quad.spriteU(2, 0));
-		float v4 = MathUtil.average(quad.spriteV(0, 0), quad.spriteV(2, 0));
-		float nx4 = 0;
-		float ny4 = 0;
-		float nz4 = 0;
-		if (n4) {
-			nx4 = MathUtil.average(quad.normalX(0), quad.normalX(2));
-			ny4 = MathUtil.average(quad.normalY(0), quad.normalY(2));
-			nz4 = MathUtil.average(quad.normalZ(0), quad.normalZ(2));
-			float scale = 1 / (float) Math.sqrt(nx4 * nx4 + ny4 * ny4 + nz4 * nz4);
-			nx4 *= scale;
-			ny4 *= scale;
-			nz4 *= scale;
-		}
-
-		//
-
-		Sprite newSprite;
-
-		// Quad 0
-		quad.copyTo(quadEmitter);
-		quadEmitter.cullFace(cullFace);
-		quadEmitter.material(material);
-		quadEmitter.pos(1, x01, y01, z01);
-		quadEmitter.pos(2, x4, y4, z4);
-		quadEmitter.pos(3, x30, y30, z30);
-		quadEmitter.spriteColor(1, 0, c01);
-		quadEmitter.spriteColor(2, 0, c4);
-		quadEmitter.spriteColor(3, 0, c30);
-		quadEmitter.lightmap(1, l01);
-		quadEmitter.lightmap(2, l4);
-		quadEmitter.lightmap(3, l30);
-		quadEmitter.sprite(1, 0, u01, v01);
-		quadEmitter.sprite(2, 0, u4, v4);
-		quadEmitter.sprite(3, 0, u30, v30);
-		if (n01) quadEmitter.normal(1, nx01, ny01, nz01);
-		if (n4) quadEmitter.normal(2, nx4, ny4, nz4);
-		if (n30) quadEmitter.normal(3, nx30, ny30, nz30);
-		newSprite = sprites[getSpriteIndex(quadIndices[0], connections)];
-		if (!TextureUtil.isMissingSprite(newSprite)) {
-			QuadUtil.interpolate(quadEmitter, sprite, newSprite);
-		}
-		quadEmitter.emit();
-
-		// Quad 1
-		quad.copyTo(quadEmitter);
-		quadEmitter.cullFace(cullFace);
-		quadEmitter.material(material);
-		quadEmitter.pos(0, x01, y01, z01);
-		quadEmitter.pos(2, x12, y12, z12);
-		quadEmitter.pos(3, x4, y4, z4);
-		quadEmitter.spriteColor(0, 0, c01);
-		quadEmitter.spriteColor(2, 0, c12);
-		quadEmitter.spriteColor(3, 0, c4);
-		quadEmitter.lightmap(0, l01);
-		quadEmitter.lightmap(2, l12);
-		quadEmitter.lightmap(3, l4);
-		quadEmitter.sprite(0, 0, u01, v01);
-		quadEmitter.sprite(2, 0, u12, v12);
-		quadEmitter.sprite(3, 0, u4, v4);
-		if (n01) quadEmitter.normal(0, nx01, ny01, nz01);
-		if (n12) quadEmitter.normal(2, nx12, ny12, nz12);
-		if (n4) quadEmitter.normal(3, nx4, ny4, nz4);
-		newSprite = sprites[getSpriteIndex(quadIndices[1], connections)];
-		if (!TextureUtil.isMissingSprite(newSprite)) {
-			QuadUtil.interpolate(quadEmitter, sprite, newSprite);
-		}
-		quadEmitter.emit();
-
-		// Quad 2
-		quad.copyTo(quadEmitter);
-		quadEmitter.cullFace(cullFace);
-		quadEmitter.material(material);
-		quadEmitter.pos(0, x4, y4, z4);
-		quadEmitter.pos(1, x12, y12, z12);
-		quadEmitter.pos(3, x23, y23, z23);
-		quadEmitter.spriteColor(0, 0, c4);
-		quadEmitter.spriteColor(1, 0, c12);
-		quadEmitter.spriteColor(3, 0, c23);
-		quadEmitter.lightmap(0, l4);
-		quadEmitter.lightmap(1, l12);
-		quadEmitter.lightmap(3, l23);
-		quadEmitter.sprite(0, 0, u4, v4);
-		quadEmitter.sprite(1, 0, u12, v12);
-		quadEmitter.sprite(3, 0, u23, v23);
-		if (n4) quadEmitter.normal(0, nx4, ny4, nz4);
-		if (n12) quadEmitter.normal(1, nx12, ny12, nz12);
-		if (n23) quadEmitter.normal(3, nx23, ny23, nz23);
-		newSprite = sprites[getSpriteIndex(quadIndices[2], connections)];
-		if (!TextureUtil.isMissingSprite(newSprite)) {
-			QuadUtil.interpolate(quadEmitter, sprite, newSprite);
-		}
-		quadEmitter.emit();
-
-		// Quad 3
-		quad.copyTo(quadEmitter);
-		quadEmitter.cullFace(cullFace);
-		quadEmitter.material(material);
-		quadEmitter.pos(0, x30, y30, z30);
-		quadEmitter.pos(1, x4, y4, z4);
-		quadEmitter.pos(2, x23, y23, z23);
-		quadEmitter.spriteColor(0, 0, c30);
-		quadEmitter.spriteColor(1, 0, c4);
-		quadEmitter.spriteColor(2, 0, c23);
-		quadEmitter.lightmap(0, l30);
-		quadEmitter.lightmap(1, l4);
-		quadEmitter.lightmap(2, l23);
-		quadEmitter.sprite(0, 0, u30, v30);
-		quadEmitter.sprite(1, 0, u4, v4);
-		quadEmitter.sprite(2, 0, u23, v23);
-		if (n30) quadEmitter.normal(0, nx30, ny30, nz30);
-		if (n4) quadEmitter.normal(1, nx4, ny4, nz4);
-		if (n23) quadEmitter.normal(2, nx23, ny23, nz23);
-		newSprite = sprites[getSpriteIndex(quadIndices[3], connections)];
-		if (!TextureUtil.isMissingSprite(newSprite)) {
-			QuadUtil.interpolate(quadEmitter, sprite, newSprite);
-		}
-		quadEmitter.emit();
-
-		//
-
-		context.addMesh(meshBuilder.build());
-		return ProcessingResult.ABORT_AND_CANCEL_QUAD;
+	// True only if one argument is 1 and the other is -1
+	protected static boolean shouldSplitUV(int signumA, int signumB) {
+		return (signumA ^ signumB) == -2;
 	}
 
 	/*
@@ -331,14 +451,141 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 			}
 			return 4;
 		}
-		int swap = quadIndex % 2;
 		if (connected1) { // 0 - h, 1 - v, 2 - h, 3 - v
-			return 3 - swap;
+			return 3 - quadIndex % 2;
 		}
 		if (connected2) { // 0 - v, 1 - h, 2 - v, 3 - h
-			return 2 + swap;
+			return 2 + quadIndex % 2;
 		}
 		return 0;
+	}
+
+	protected void tryInterpolate(MutableQuadView quad, Sprite oldSprite, int spriteIndex) {
+		Sprite newSprite = sprites[spriteIndex];
+		if (!TextureUtil.isMissingSprite(newSprite)) {
+			QuadUtil.interpolate(quad, oldSprite, newSprite);
+		}
+	}
+
+	protected void splitHalf(QuadView quad, Sprite sprite, RenderMaterial material, Direction cullFace, VertexContainer vertexContainer, int id, QuadEmitter quadEmitter, int spriteIndex) {
+		quad.copyTo(quadEmitter);
+		quadEmitter.material(material);
+		quadEmitter.cullFace(cullFace);
+		vertexContainer.lerpedVertices[(id + 1) % 4].writeToQuad(quadEmitter, (id + 2) % 4);
+		int id3 = (id + 3) % 4;
+		vertexContainer.lerpedVertices[id3].writeToQuad(quadEmitter, id3);
+		tryInterpolate(quadEmitter, sprite, spriteIndex);
+		quadEmitter.emit();
+	}
+
+	protected void splitQuadrant(QuadView quad, Sprite sprite, RenderMaterial material, Direction cullFace, VertexContainer vertexContainer, int id, QuadEmitter quadEmitter, int spriteIndex) {
+		quad.copyTo(quadEmitter);
+		quadEmitter.material(material);
+		quadEmitter.cullFace(cullFace);
+		vertexContainer.lerpedVertices[id].writeToQuad(quadEmitter, (id + 1) % 4);
+		vertexContainer.vertex4.writeToQuad(quadEmitter, (id + 2) % 4);
+		int id3 = (id + 3) % 4;
+		vertexContainer.lerpedVertices[id3].writeToQuad(quadEmitter, id3);
+		tryInterpolate(quadEmitter, sprite, spriteIndex);
+		quadEmitter.emit();
+	}
+
+	public static class Vertex {
+		public float x;
+		public float y;
+		public float z;
+		public int color;
+		public int light;
+		public float u;
+		public float v;
+		public boolean hasNormal;
+		public float normalX;
+		public float normalY;
+		public float normalZ;
+
+		public void readFromQuad(QuadView quad, int vertexIndex) {
+			x = quad.x(vertexIndex);
+			y = quad.y(vertexIndex);
+			z = quad.z(vertexIndex);
+			color = quad.spriteColor(vertexIndex, 0);
+			light = quad.lightmap(vertexIndex);
+			u = quad.spriteU(vertexIndex, 0);
+			v = quad.spriteV(vertexIndex, 0);
+			hasNormal = quad.hasNormal(vertexIndex);
+			if (hasNormal) {
+				normalX = quad.normalX(vertexIndex);
+				normalY = quad.normalY(vertexIndex);
+				normalZ = quad.normalZ(vertexIndex);
+			}
+		}
+
+		public void writeToQuad(MutableQuadView quad, int vertexIndex) {
+			quad.pos(vertexIndex, x, y, z);
+			quad.spriteColor(vertexIndex, 0, color);
+			quad.lightmap(vertexIndex, light);
+			quad.sprite(vertexIndex, 0, u, v);
+			if (hasNormal) {
+				quad.normal(vertexIndex, normalX, normalY, normalZ);
+			}
+		}
+
+		public void set(Vertex other) {
+			x = other.x;
+			y = other.y;
+			z = other.z;
+			color = other.color;
+			light = other.light;
+			u = other.u;
+			v = other.v;
+			hasNormal = other.hasNormal;
+			if (hasNormal) {
+				normalX = other.normalX;
+				normalY = other.normalY;
+				normalZ = other.normalZ;
+			}
+		}
+
+		public void setLerped(float delta, Vertex vertexA, Vertex vertexB) {
+			x = MathHelper.lerp(delta, vertexA.x, vertexB.x);
+			y = MathHelper.lerp(delta, vertexA.y, vertexB.y);
+			z = MathHelper.lerp(delta, vertexA.z, vertexB.z);
+			color = MathUtil.lerpColor(delta, vertexA.color, vertexB.color);
+			light = MathUtil.lerpLight(delta, vertexA.light, vertexB.light);
+			u = MathHelper.lerp(delta, vertexA.u, vertexB.u);
+			v = MathHelper.lerp(delta, vertexA.v, vertexB.v);
+			if (vertexA.hasNormal && vertexB.hasNormal) {
+				normalX = MathHelper.lerp(delta, vertexA.normalX, vertexB.normalX);
+				normalY = MathHelper.lerp(delta, vertexA.normalY, vertexB.normalY);
+				normalZ = MathHelper.lerp(delta, vertexA.normalZ, vertexB.normalZ);
+				float scale = 1 / (float) Math.sqrt(normalX * normalX + normalY * normalY + normalZ * normalZ);
+				normalX *= scale;
+				normalY *= scale;
+				normalZ *= scale;
+			}
+		}
+	}
+
+	public static class VertexContainer {
+		public final Vertex vertex0 = new Vertex();
+		public final Vertex vertex1 = new Vertex();
+		public final Vertex vertex2 = new Vertex();
+		public final Vertex vertex3 = new Vertex();
+		public final Vertex vertex01 = new Vertex();
+		public final Vertex vertex12 = new Vertex();
+		public final Vertex vertex23 = new Vertex();
+		public final Vertex vertex30 = new Vertex();
+		public final Vertex vertex4 = new Vertex();
+
+		public final Vertex[] lerpedVertices = new Vertex[] {
+				vertex01, vertex12, vertex23, vertex30
+		};
+
+		public void fillBaseVertices(QuadView quad) {
+			vertex0.readFromQuad(quad, 0);
+			vertex1.readFromQuad(quad, 1);
+			vertex2.readFromQuad(quad, 2);
+			vertex3.readFromQuad(quad, 3);
+		}
 	}
 
 	// TODO
