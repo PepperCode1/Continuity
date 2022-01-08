@@ -42,16 +42,18 @@ public class CTMSpriteProvider implements SpriteProvider {
 	protected Sprite[] sprites;
 	protected ConnectionPredicate connectionPredicate;
 	protected boolean innerSeams;
+	protected boolean useTextureOrientation;
 
-	public CTMSpriteProvider(Sprite[] sprites, ConnectionPredicate connectionPredicate, boolean innerSeams) {
+	public CTMSpriteProvider(Sprite[] sprites, ConnectionPredicate connectionPredicate, boolean innerSeams, boolean useTextureOrientation) {
 		this.sprites = sprites;
 		this.connectionPredicate = connectionPredicate;
 		this.innerSeams = innerSeams;
+		this.useTextureOrientation = useTextureOrientation;
 	}
 
 	@Override
 	public Sprite getSprite(QuadView quad, Sprite sprite, BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, ProcessingDataProvider dataProvider) {
-		Direction[] directions = DirectionMaps.getDirections(quad);
+		Direction[] directions = useTextureOrientation ? DirectionMaps.getDirections(quad) : DirectionMaps.getMap(quad.lightFace())[0];
 		BlockPos.Mutable mutablePos = dataProvider.getData(ProcessingDataKeys.MUTABLE_POS_KEY);
 		int connections = getConnections(connectionPredicate, innerSeams, directions, mutablePos, blockView, state, pos, quad.lightFace(), sprite);
 		return sprites[SPRITE_INDEX_MAP[connections]];
@@ -96,9 +98,15 @@ public class CTMSpriteProvider implements SpriteProvider {
 	}
 
 	public static class Factory implements SpriteProvider.Factory<StandardConnectingCTMProperties> {
+		protected boolean useTextureOrientation;
+
+		public Factory(boolean useTextureOrientation) {
+			this.useTextureOrientation = useTextureOrientation;
+		}
+
 		@Override
 		public SpriteProvider createSpriteProvider(Sprite[] sprites, StandardConnectingCTMProperties properties) {
-			return new CTMSpriteProvider(sprites, properties.getConnectionPredicate(), properties.getInnerSeams());
+			return new CTMSpriteProvider(sprites, properties.getConnectionPredicate(), properties.getInnerSeams(), useTextureOrientation);
 		}
 
 		@Override
