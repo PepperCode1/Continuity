@@ -98,7 +98,7 @@ public class ContinuityClient implements ClientModInitializer {
 
 		loader = CTMLoader.of(
 				wrapFactory(StandardConnectingCTMProperties::new, new TileAmountValidator.AtLeast<>(47)),
-				new SimpleQuadProcessor.Factory<>(new CTMSpriteProvider.Factory())
+				new SimpleQuadProcessor.Factory<>(new CTMSpriteProvider.Factory(true))
 		);
 		CTMLoaderRegistry.INSTANCE.registerLoader("ctm", loader);
 		CTMLoaderRegistry.INSTANCE.registerLoader("glass", loader);
@@ -178,7 +178,7 @@ public class ContinuityClient implements ClientModInitializer {
 
 		loader = CTMLoader.of(
 				wrapFactory(StandardConnectingOverlayCTMProperties::new, new TileAmountValidator.AtLeast<>(47)),
-				new SimpleOverlayQuadProcessor.Factory<>(new CTMSpriteProvider.Factory())
+				new SimpleOverlayQuadProcessor.Factory<>(new CTMSpriteProvider.Factory(false))
 		);
 		CTMLoaderRegistry.INSTANCE.registerLoader("overlay_ctm", loader);
 
