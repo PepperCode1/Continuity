@@ -8,7 +8,6 @@
     "ChunkRendererRegionMixin",
     "FallingBlockEntityRendererMixin",
     "IdentifierMixin",
-    "InputRegionMixin",
     "ModelLoaderMixin",
     "NamespaceResourceManagerMixin",
     "ReloadableResourceManagerImplMixin",

@@ -44,8 +44,8 @@ dependencies {
 		exclude group: 'net.fabricmc.fabric-api'
 	}
 
-	modCompileOnly 'maven.modrinth:sodium:mc1.17.1-0.3.3'
-	modCompileOnly 'io.vram:canvas-fabric-mc117:1.0.2219'
+	modCompileOnly 'maven.modrinth:sodium:mc1.17.1-0.3.4'
+	modCompileOnly 'io.vram:canvas-fabric-mc117:1.0.2230'
 }
 
 String getExtraBuildMetadata() {
