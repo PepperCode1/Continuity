@@ -40,12 +40,12 @@ dependencies {
 	// Fabric API
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	modImplementation('com.terraformersmc:modmenu:3.0.0') {
+	modImplementation('com.terraformersmc:modmenu:3.0.1') {
 		exclude group: 'net.fabricmc.fabric-api'
 	}
 
-	modCompileOnly 'maven.modrinth:sodium:mc1.17.1-0.3.3'
-	modCompileOnly 'io.vram:canvas-fabric-mc117:1.0.2219'
+	modCompileOnly 'maven.modrinth:sodium:mc1.18.1-0.4.0-alpha6'
+	modCompileOnly 'io.vram:canvas-fabric-mc118:1.0.2291'
 }
 
 String getExtraBuildMetadata() {

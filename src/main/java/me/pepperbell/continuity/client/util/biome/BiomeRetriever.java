@@ -4,6 +4,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import grondag.canvas.terrain.region.input.InputRegion;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.render.chunk.ChunkRendererRegion;
@@ -17,12 +18,11 @@ public final class BiomeRetriever {
 
 	private static Provider getProvider() {
 		ClassLoader classLoader = BiomeRetriever.class.getClassLoader();
-		Class<BiomeView> biomeViewClass = BiomeView.class;
 
 		if (FabricLoader.getInstance().isModLoaded("sodium")) {
 			try {
 				Class<?> worldSliceClass = Class.forName("me.jellysquid.mods.sodium.client.world.WorldSlice", false, classLoader);
-				worldSliceClass.getMethod("getBiome", int.class, int.class, int.class);
+				worldSliceClass.getMethod("getBiomeAccess");
 				return BiomeRetriever::getBiomeByWorldSlice;
 			} catch (ClassNotFoundException | NoSuchMethodException e) {
 				//
@@ -33,16 +33,15 @@ public final class BiomeRetriever {
 		if (FabricLoader.getInstance().isModLoaded("canvas")) {
 			try {
 				Class<?> inputRegionClass = Class.forName("grondag.canvas.terrain.region.input.InputRegion", false, classLoader);
-				if (ArrayUtils.contains(inputRegionClass.getInterfaces(), biomeViewClass)) {
-					return BiomeRetriever::getBiomeByExtension;
-				}
-			} catch (ClassNotFoundException e) {
+				inputRegionClass.getMethod("getBiome", BlockPos.class);
+				return BiomeRetriever::getBiomeByInputRegion;
+			} catch (ClassNotFoundException | NoSuchMethodException e) {
 				//
 			}
 			return BiomeRetriever::getBiomeByWorldView;
 		}
 
-		if (ArrayUtils.contains(ChunkRendererRegion.class.getInterfaces(), biomeViewClass)) {
+		if (ArrayUtils.contains(ChunkRendererRegion.class.getInterfaces(), BiomeView.class)) {
 			return BiomeRetriever::getBiomeByExtension;
 		}
 		return BiomeRetriever::getBiomeByWorldView;
@@ -74,7 +73,15 @@ public final class BiomeRetriever {
 	// Sodium
 	private static Biome getBiomeByWorldSlice(BlockRenderView blockView, BlockPos pos) {
 		if (blockView instanceof WorldSlice worldSlice) {
-			return worldSlice.getBiome(pos.getX(), pos.getY(), pos.getZ());
+			return worldSlice.getBiomeAccess().getBiome(pos);
+		}
+		return getBiomeByWorldView(blockView, pos);
+	}
+
+	// Canvas
+	private static Biome getBiomeByInputRegion(BlockRenderView blockView, BlockPos pos) {
+		if (blockView instanceof InputRegion inputRegion) {
+			return inputRegion.getBiome(pos);
 		}
 		return getBiomeByWorldView(blockView, pos);
 	}
