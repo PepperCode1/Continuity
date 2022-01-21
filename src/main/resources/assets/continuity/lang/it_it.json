@@ -3,5 +3,5 @@
   "options.continuity.disable_ctm": "Disattiva CTM",
   "options.continuity.disable_ctm.tooltip": "Disattiva completamente le texture connesse.",
   "options.continuity.use_manual_culling": "Usa Culling Manuale",
-  "options.continuity.use_manual_culling.tooltip": "Migliora esponenzialmente le performance applicando solo CTM ai quad visibili, ma potrebbe causare cause problemi con alcune mod."
+  "options.continuity.use_manual_culling.tooltip": "Migliora esponenzialmente le performance applicando solo CTM ai quad visibili, ma potrebbe causare problemi con alcune mod."
 }
