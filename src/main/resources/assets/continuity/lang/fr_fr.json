@@ -1,6 +1,6 @@
 {
   "options.continuity.title": "Paramètres de Continuity",
-  "options.continuity.disable_ctm": "Désactive CTM",
+  "options.continuity.disable_ctm": "Désactiver le CTM",
   "options.continuity.disable_ctm.tooltip": "Désactive entièrement les textures connectées.",
   "options.continuity.use_manual_culling": "Utiliser le culling",
   "options.continuity.use_manual_culling.tooltip": "Améliore grandement les performances en applicant seulement le CTM aux quadrants visible, mais peut causer des problèmes avec d'autres mods."
