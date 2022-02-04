@@ -18,10 +18,12 @@ public abstract class AbstractQuadProcessorFactory<T extends BaseCTMProperties> 
 		List<SpriteIdentifier> spriteIds = properties.getSpriteIds();
 		int provided = spriteIds.size();
 		int max = provided;
+
 		if (provided > textureAmount) {
 			ContinuityClient.LOGGER.warn("Method '" + properties.getMethod() + "' requires " + textureAmount + " tiles but " + provided + " were provided in file '" + properties.getId() + "' in pack '" + properties.getPackName() + "'");
 			max = textureAmount;
 		}
+
 		Sprite[] sprites = new Sprite[textureAmount];
 		Sprite missingSprite = textureGetter.apply(TextureUtil.MISSING_SPRITE_ID);
 		boolean supportsNullSprites = supportsNullSprites(properties);
@@ -37,12 +39,14 @@ public abstract class AbstractQuadProcessorFactory<T extends BaseCTMProperties> 
 			}
 			sprites[i] = sprite;
 		}
+
 		if (provided < textureAmount) {
 			ContinuityClient.LOGGER.error("Method '" + properties.getMethod() + "' requires " + textureAmount + " tiles but only " + provided + " were provided in file '" + properties.getId() + "' in pack '" + properties.getPackName() + "'");
 			for (int i = provided; i < textureAmount; i++) {
 				sprites[i] = missingSprite;
 			}
 		}
+
 		return createProcessor(properties, sprites);
 	}
 

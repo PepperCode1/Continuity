@@ -156,10 +156,9 @@ public final class CTMPropertiesLoader {
 			}
 		}
 
-		Set<CTMLoadingContainer<?>> traversedContainers = new ObjectOpenHashSet<>();
 		for (int i = 0; i < amount; i++) {
 			CTMLoadingContainer<?> container = ALL.get(i);
-			container.resolveRecursiveMultipassDependents(traversedContainers);
+			container.resolveRecursiveMultipassDependents();
 		}
 	}
 
