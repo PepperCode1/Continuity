@@ -8,6 +8,8 @@ import java.util.function.Supplier;
 import org.apache.commons.lang3.ArrayUtils;
 
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
+import it.unimi.dsi.fastutil.objects.ObjectSet;
 import me.pepperbell.continuity.api.client.QuadProcessor;
 import me.pepperbell.continuity.api.client.QuadProcessorFactory;
 import me.pepperbell.continuity.client.ContinuityClient;
@@ -596,30 +598,42 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 			List<SpriteIdentifier> spriteIds = properties.getSpriteIds();
 			int provided = spriteIds.size();
 			int max = provided;
+
 			Sprite[] replacementSprites = null;
-			if (provided > textureAmount) {
-				Int2IntMap replacementMap = properties.getTileReplacementMap();
-				if (replacementMap != null) {
-					int replacementTextureAmount = getReplacementTextureAmount(properties);
-					replacementSprites = new Sprite[replacementTextureAmount];
-					for (Int2IntMap.Entry entry : replacementMap.int2IntEntrySet()) {
-						int key = entry.getIntKey();
-						if (key < replacementTextureAmount) {
-							int value = entry.getIntValue();
-							if (value < provided) {
-								replacementSprites[key] = textureGetter.apply(spriteIds.get(value));
-							} else {
-								ContinuityClient.LOGGER.warn("Cannot replace tile " + key + " with tile " + value + " as only " + provided + " tiles were provided in file '" + properties.getId() + "' in pack '" + properties.getPackName() + "'");
-							}
-						} else {
-							ContinuityClient.LOGGER.warn("Cannot replace tile " + key + " as method '" + properties.getMethod() + "' only supports " + replacementTextureAmount + " replacement tiles in file '" + properties.getId() + "' in pack '" + properties.getPackName() + "'");
-						}
-					}
+			Int2IntMap replacementMap = properties.getTileReplacementMap();
+			if (replacementMap != null) {
+				int replacementTextureAmount = getReplacementTextureAmount(properties);
+				replacementSprites = new Sprite[replacementTextureAmount];
+				ObjectSet<Int2IntMap.Entry> entrySet = replacementMap.int2IntEntrySet();
+				ObjectIterator<Int2IntMap.Entry> entryIterator;
+				if (entrySet instanceof Int2IntMap.FastEntrySet fastEntrySet) {
+					entryIterator = fastEntrySet.fastIterator();
 				} else {
+					entryIterator = entrySet.iterator();
+				}
+				while (entryIterator.hasNext()) {
+					Int2IntMap.Entry entry = entryIterator.next();
+					int key = entry.getIntKey();
+					if (key < replacementTextureAmount) {
+						int value = entry.getIntValue();
+						if (value < provided) {
+							replacementSprites[key] = textureGetter.apply(spriteIds.get(value));
+						} else {
+							ContinuityClient.LOGGER.warn("Cannot replace tile " + key + " with tile " + value + " as only " + provided + " tiles were provided in file '" + properties.getId() + "' in pack '" + properties.getPackName() + "'");
+						}
+					} else {
+						ContinuityClient.LOGGER.warn("Cannot replace tile " + key + " as method '" + properties.getMethod() + "' only supports " + replacementTextureAmount + " replacement tiles in file '" + properties.getId() + "' in pack '" + properties.getPackName() + "'");
+					}
+				}
+			}
+
+			if (provided > textureAmount) {
+				if (replacementSprites == null) {
 					ContinuityClient.LOGGER.warn("Method '" + properties.getMethod() + "' requires " + textureAmount + " tiles but " + provided + " were provided in file '" + properties.getId() + "' in pack '" + properties.getPackName() + "'");
 				}
 				max = textureAmount;
 			}
+
 			Sprite[] sprites = new Sprite[textureAmount];
 			Sprite missingSprite = textureGetter.apply(TextureUtil.MISSING_SPRITE_ID);
 			boolean supportsNullSprites = supportsNullSprites(properties);
@@ -635,12 +649,14 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 				}
 				sprites[i] = sprite;
 			}
+
 			if (provided < textureAmount) {
 				ContinuityClient.LOGGER.error("Method '" + properties.getMethod() + "' requires at least " + textureAmount + " tiles but only " + provided + " were provided in file '" + properties.getId() + "' in pack '" + properties.getPackName() + "'");
 				for (int i = provided; i < textureAmount; i++) {
 					sprites[i] = missingSprite;
 				}
 			}
+
 			return createProcessor(properties, sprites, replacementSprites);
 		}
 
