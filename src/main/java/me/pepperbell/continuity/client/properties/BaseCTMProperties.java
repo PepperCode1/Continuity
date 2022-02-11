@@ -248,7 +248,7 @@ public class BaseCTMProperties implements CTMProperties {
 									namespace = parts[0];
 									path = parts[1];
 								} else {
-									namespace = null;
+									namespace = id.getNamespace();
 									path = parts[0];
 								}
 								if (!path.endsWith(".png")) {
