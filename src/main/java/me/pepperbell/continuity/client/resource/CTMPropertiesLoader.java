@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import org.apache.http.annotation.NotThreadSafe;
@@ -16,7 +15,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
-import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import me.pepperbell.continuity.api.client.CTMLoader;
 import me.pepperbell.continuity.api.client.CTMLoaderRegistry;
 import me.pepperbell.continuity.api.client.CTMProperties;

@@ -45,7 +45,7 @@ public final class PropertiesParsingHelper {
 								namespace = parts[0];
 								path = parts[1];
 							} else {
-								namespace = null;
+								namespace = fileLocation.getNamespace();
 								path = parts[0];
 							}
 							if (path.endsWith(".png")) {
@@ -58,6 +58,7 @@ public final class PropertiesParsingHelper {
 							} else if (path.startsWith("/")) {
 								path = "optifine/" + path.substring(1);
 							} else if (!path.contains("/")) {
+								namespace = null;
 								path = "textures/block/" + path;
 							}
 							if (path.startsWith("textures/")) {
