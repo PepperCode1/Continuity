@@ -1,0 +1,7 @@
+{
+  "options.continuity.title": "纹理链接配置",
+  "options.continuity.disable_ctm": "禁用CTM",
+  "options.continuity.disable_ctm.tooltip": "完全禁用纹理连接",
+  "options.continuity.use_manual_culling": "使用手动剔除",
+  "options.continuity.use_manual_culling.tooltip": "通过仅对可见四边形应用CTM，可以显著提高性能，但可能会导致某些MOD出现错误行为"
+}
