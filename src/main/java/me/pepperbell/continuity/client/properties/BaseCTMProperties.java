@@ -522,7 +522,7 @@ public class BaseCTMProperties implements CTMProperties {
 								packStr = null;
 							}
 							Predicate<ResourcePack> predicate;
-							if (packStr == null || packStr.equals("vanilla")) {
+							if (packStr == null || packStr.equals("default")) {
 								predicate = pack -> pack == defaultPack;
 							} else if (packStr.equals("programmer_art")) {
 								predicate = pack -> pack.getName().equals("Programmer Art");
