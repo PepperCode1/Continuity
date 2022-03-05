@@ -3,8 +3,8 @@ package me.pepperbell.continuity.client;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import me.pepperbell.continuity.api.client.CTMLoader;
@@ -58,7 +58,7 @@ import net.minecraft.util.Identifier;
 public class ContinuityClient implements ClientModInitializer {
 	public static final String ID = "continuity";
 	public static final String NAME = "Continuity";
-	public static final Logger LOGGER = LogManager.getLogger(NAME);
+	public static final Logger LOGGER = LoggerFactory.getLogger(NAME);
 
 	@Override
 	public void onInitializeClient() {

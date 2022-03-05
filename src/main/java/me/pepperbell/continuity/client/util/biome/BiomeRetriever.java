@@ -58,14 +58,14 @@ public final class BiomeRetriever {
 
 	private static Biome getBiomeByWorldView(BlockRenderView blockView, BlockPos pos) {
 		if (blockView instanceof WorldView worldView) {
-			return worldView.getBiome(pos);
+			return worldView.getBiome(pos).value();
 		}
 		return null;
 	}
 
 	private static Biome getBiomeByExtension(BlockRenderView blockView, BlockPos pos) {
 		if (blockView instanceof BiomeView biomeView) {
-			return biomeView.getBiome(pos);
+			return biomeView.getBiome(pos).value();
 		}
 		return getBiomeByWorldView(blockView, pos);
 	}
@@ -73,7 +73,7 @@ public final class BiomeRetriever {
 	// Sodium
 	private static Biome getBiomeByWorldSlice(BlockRenderView blockView, BlockPos pos) {
 		if (blockView instanceof WorldSlice worldSlice) {
-			return worldSlice.getBiomeAccess().getBiome(pos);
+			return worldSlice.getBiomeAccess().getBiome(pos).value();
 		}
 		return getBiomeByWorldView(blockView, pos);
 	}

@@ -23,7 +23,7 @@ public class ContinuityConfigScreen extends Screen {
 		addDrawableChild(createBooleanOptionButton(width / 2 - 75 - 90, height / 2 - 10, 150, 20, config.disableCTM));
 		addDrawableChild(createBooleanOptionButton(width / 2 - 75 + 90, height / 2 - 10, 150, 20, config.useManualCulling));
 
-		addDrawableChild(new ButtonWidget(width / 2 - 100, height - 40, 200, 20, ScreenTexts.DONE, button -> onClose()));
+		addDrawableChild(new ButtonWidget(width / 2 - 100, height - 40, 200, 20, ScreenTexts.DONE, button -> close()));
 	}
 
 	@Override
@@ -34,7 +34,7 @@ public class ContinuityConfigScreen extends Screen {
 	}
 
 	@Override
-	public void onClose() {
+	public void close() {
 		client.setScreen(parent);
 	}
 

@@ -1,27 +1,19 @@
 package me.pepperbell.continuity.client.mixin;
 
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import me.pepperbell.continuity.client.mixinterface.ReloadableResourceManagerImplExtension;
-import net.minecraft.resource.ReloadableResourceManagerImpl;
-import net.minecraft.resource.ResourcePack;
-import net.minecraft.resource.ResourceReload;
+import me.pepperbell.continuity.client.mixinterface.LifecycledResourceManagerImplExtension;
+import net.minecraft.resource.LifecycledResourceManagerImpl;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Unit;
 
-@Mixin(ReloadableResourceManagerImpl.class)
-public class ReloadableResourceManagerImplMixin implements ReloadableResourceManagerImplExtension {
+@Mixin(LifecycledResourceManagerImpl.class)
+public class LifecycledResourceManagerImplMixin implements LifecycledResourceManagerImplExtension {
 	@Unique
 	private final Map<Identifier, Identifier> redirects = new Object2ObjectOpenHashMap<>();
 
@@ -64,9 +56,4 @@ public class ReloadableResourceManagerImplMixin implements ReloadableResourceMan
 //			}
 //		}
 //	}
-
-	@Inject(method = "reload(Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;Ljava/util/List;)Lnet/minecraft/resource/ResourceReload;", at = @At("HEAD"))
-	private void onHeadReload(Executor prepareExecutor, Executor applyExecutor, CompletableFuture<Unit> initialStage, List<ResourcePack> packs, CallbackInfoReturnable<ResourceReload> cir) {
-		redirects.clear();
-	}
 }
