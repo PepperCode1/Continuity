@@ -1,0 +1,7 @@
+{
+  "options.continuity.title": "Ρυθμίσεις του Continuity",
+  "options.continuity.disable_ctm": "Κλείσιμο των CTM",
+  "options.continuity.disable_ctm.tooltip": "Απενεργοποιηεί εντελώς τα ενωμένα είδη.",
+  "options.continuity.use_manual_culling": "Χρήση χειροκίνητης σφυροκόπησης",
+  "options.continuity.use_manual_culling.tooltip": "Βελτιώνει σημαντικά την απόδοση εφαρμόζοτας τα ενωμένα είδη μόνο στους εμφανείς κύβους, αλλά μπορεί να προκαλέσει λάθος συμπεριφορά με μερικές τροποποιήσεις."
+}
