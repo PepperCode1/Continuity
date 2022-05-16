@@ -2,6 +2,6 @@
   "options.continuity.title": "Konfiguracja Continuity",
   "options.continuity.disable_ctm": "Wyłącz CTM",
   "options.continuity.disable_ctm.tooltip": "Całkowicie wyłącza połączone tekstury.",
-  "options.continuity.use_manual_culling": "Użyj Use ręcznego ubijania",
+  "options.continuity.use_manual_culling": "Użyj ręcznego ubijania",
   "options.continuity.use_manual_culling.tooltip": "Znacznie zwiększa wydajność przez stosowanie CTM tylko dla widocznych tekstur, ale może spowodować nieprawidłowe zachowanie z niektórymi modami."
 }
