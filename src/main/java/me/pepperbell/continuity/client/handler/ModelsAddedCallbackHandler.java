@@ -38,15 +38,16 @@ public class ModelsAddedCallbackHandler implements ModelsAddedCallback {
 		this.modelId2ContainersMap = modelId2ContainersMap;
 	}
 
+	private static class NotLoadedModelException extends RuntimeException {}
+
 	@Override
 	public void onModelsAdded(ModelLoader modelLoader, ResourceManager resourceManager, Profiler profiler, Map<Identifier, UnbakedModel> unbakedModels, Map<Identifier, UnbakedModel> modelsToBake) {
 		Object2ObjectOpenHashMap<Identifier, UnbakedModel> wrappedModels = new Object2ObjectOpenHashMap<>();
 
-		UnbakedModel missingModel = unbakedModels.get(ModelLoader.MISSING_ID);
 		Function<Identifier, UnbakedModel> unbakedModelGetter = id -> {
 			UnbakedModel model = unbakedModels.get(id);
 			if (model == null) {
-				return missingModel;
+				throw new NotLoadedModelException();
 			}
 			return model;
 		};
@@ -59,7 +60,14 @@ public class ModelsAddedCallbackHandler implements ModelsAddedCallback {
 				// Only wrap final block state models
 				if (isBlockStateModelId(id)) {
 					UnbakedModel model = entry.getValue();
-					Collection<SpriteIdentifier> dependencies = model.getTextureDependencies(unbakedModelGetter, voidSet);
+					Collection<SpriteIdentifier> dependencies;
+
+					try{
+						dependencies = model.getTextureDependencies(unbakedModelGetter, voidSet);
+					} catch(NotLoadedModelException exception){
+						continue;
+					}
+
 					List<CTMLoadingContainer<?>> containerList = modelId2ContainersMap.get(id);
 					if (containerList == null) {
 						containerList = CTMPropertiesLoader.getAllAffecting(dependencies);
