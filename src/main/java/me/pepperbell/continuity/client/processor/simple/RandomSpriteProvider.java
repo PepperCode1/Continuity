@@ -16,6 +16,7 @@ import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.random.AbstractRandom;
 import net.minecraft.world.BlockRenderView;
 
 public class RandomSpriteProvider implements SpriteProvider {
@@ -34,7 +35,7 @@ public class RandomSpriteProvider implements SpriteProvider {
 	}
 
 	@Override
-	public Sprite getSprite(QuadView quad, Sprite sprite, BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, ProcessingDataProvider dataProvider) {
+	public Sprite getSprite(QuadView quad, Sprite sprite, BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<AbstractRandom> randomSupplier, ProcessingDataProvider dataProvider) {
 		Sprite newSprite;
 		if (sprites.length == 1) {
 			newSprite = sprites[0];

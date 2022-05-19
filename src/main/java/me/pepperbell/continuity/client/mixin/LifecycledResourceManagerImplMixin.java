@@ -31,12 +31,12 @@ public class LifecycledResourceManagerImplMixin implements LifecycledResourceMan
 		return id;
 	}
 
-	@ModifyVariable(method = "getResource(Lnet/minecraft/util/Identifier;)Lnet/minecraft/resource/Resource;", at = @At("HEAD"))
+	@ModifyVariable(method = "getResource", at = @At("HEAD"))
 	private Identifier redirectGetResourceId(Identifier id) {
 		return redirect(id);
 	}
 
-	@ModifyVariable(method = "containsResource(Lnet/minecraft/util/Identifier;)Z", at = @At("HEAD"))
+	//@ModifyVariable(method = "", at = @At("HEAD"))
 	private Identifier redirectContainsResourceId(Identifier id) {
 		return redirect(id);
 	}

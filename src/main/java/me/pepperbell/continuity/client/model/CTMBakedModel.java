@@ -5,6 +5,7 @@ import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import net.minecraft.util.math.random.AbstractRandom;
 import org.jetbrains.annotations.Nullable;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -44,7 +45,7 @@ public class CTMBakedModel extends ForwardingBakedModel {
 	}
 
 	@Override
-	public void emitBlockQuads(BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, RenderContext context) {
+	public void emitBlockQuads(BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<AbstractRandom> randomSupplier, RenderContext context) {
 		if (ContinuityConfig.INSTANCE.disableCTM.get()) {
 			super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
 			return;
@@ -93,7 +94,7 @@ public class CTMBakedModel extends ForwardingBakedModel {
 		protected BlockState state;
 		protected BlockRenderView blockView;
 		protected BlockPos pos;
-		protected Supplier<Random> randomSupplier;
+		protected Supplier<AbstractRandom> randomSupplier;
 
 		protected boolean useManualCulling;
 		protected SpriteFinder spriteFinder;
@@ -147,7 +148,7 @@ public class CTMBakedModel extends ForwardingBakedModel {
 			return true;
 		}
 
-		public void prepare(List<QuadProcessor> processors, List<QuadProcessor> multipassProcessors, BlockState state, BlockRenderView blockView, BlockPos pos, Supplier<Random> randomSupplier, boolean useManualCulling) {
+		public void prepare(List<QuadProcessor> processors, List<QuadProcessor> multipassProcessors, BlockState state, BlockRenderView blockView, BlockPos pos, Supplier<AbstractRandom> randomSupplier, boolean useManualCulling) {
 			this.processors = processors;
 			this.multipassProcessors = multipassProcessors;
 			this.state = state;

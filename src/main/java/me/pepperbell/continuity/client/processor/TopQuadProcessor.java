@@ -12,6 +12,7 @@ import net.minecraft.client.texture.Sprite;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.AbstractRandom;
 import net.minecraft.world.BlockRenderView;
 
 public class TopQuadProcessor extends ConnectingQuadProcessor {
@@ -20,7 +21,7 @@ public class TopQuadProcessor extends ConnectingQuadProcessor {
 	}
 
 	@Override
-	public ProcessingResult processQuadInner(MutableQuadView quad, Sprite sprite, BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, int pass, int processorIndex, ProcessingContext context) {
+	public ProcessingResult processQuadInner(MutableQuadView quad, Sprite sprite, BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<AbstractRandom> randomSupplier, int pass, int processorIndex, ProcessingContext context) {
 		Direction lightFace = quad.lightFace();
 		Direction.Axis axis = Direction.Axis.Y;
 		if (state.contains(Properties.AXIS)) {

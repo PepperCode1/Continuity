@@ -12,6 +12,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.AbstractRandom;
 import net.minecraft.world.BlockRenderView;
 
 public class HorizontalQuadProcessor extends ConnectingQuadProcessor {
@@ -26,7 +27,7 @@ public class HorizontalQuadProcessor extends ConnectingQuadProcessor {
 	}
 
 	@Override
-	public ProcessingResult processQuadInner(MutableQuadView quad, Sprite sprite, BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, int pass, int processorIndex, ProcessingContext context) {
+	public ProcessingResult processQuadInner(MutableQuadView quad, Sprite sprite, BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<AbstractRandom> randomSupplier, int pass, int processorIndex, ProcessingContext context) {
 		Direction[] directions = DirectionMaps.getDirections(quad);
 		BlockPos.Mutable mutablePos = context.getData(ProcessingDataKeys.MUTABLE_POS_KEY);
 		int connections = getConnections(directions, mutablePos, blockView, state, pos, quad.lightFace(), sprite);

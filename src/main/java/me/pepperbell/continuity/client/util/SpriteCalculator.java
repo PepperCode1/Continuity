@@ -7,6 +7,7 @@ import java.util.Random;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
 
+import net.minecraft.util.math.random.AbstractRandom;
 import org.jetbrains.annotations.ApiStatus;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -20,11 +21,11 @@ import net.minecraft.util.math.Direction;
 
 public final class SpriteCalculator {
 	private static final BlockModels MODELS = MinecraftClient.getInstance().getBakedModelManager().getBlockModels();
-	private static final Supplier<Random> RANDOM_SUPPLIER = new Supplier<>() {
-		private final Random random = new Random();
+	private static final Supplier<AbstractRandom> RANDOM_SUPPLIER = new Supplier<>() {
+		private final AbstractRandom random = AbstractRandom.createAtomic(42L);
 
 		@Override
-		public Random get() {
+		public AbstractRandom get() {
 			// Use item rendering seed for consistency
 			random.setSeed(42L);
 			return random;
@@ -60,7 +61,7 @@ public final class SpriteCalculator {
 		return sprite;
 	}
 
-	public static Sprite calculateSprite(BlockState state, Direction face, Supplier<Random> randomSupplier) {
+	public static Sprite calculateSprite(BlockState state, Direction face, Supplier<AbstractRandom> randomSupplier) {
 		BakedModel model = MODELS.getModel(state);
 		try {
 			List<BakedQuad> quads = model.getQuads(state, face, randomSupplier.get());

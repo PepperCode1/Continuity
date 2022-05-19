@@ -6,14 +6,13 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 
 public class ContinuityConfigScreen extends Screen {
 	private final Screen parent;
 	private final ContinuityConfig config;
 
 	public ContinuityConfigScreen(Screen parent, ContinuityConfig config) {
-		super(new TranslatableText(getTranslationKey("title")));
+		super(Text.translatable(getTranslationKey("title")));
 		this.parent = parent;
 		this.config = config;
 	}
@@ -60,8 +59,8 @@ public class ContinuityConfigScreen extends Screen {
 
 	private ButtonWidget createBooleanOptionButton(int x, int y, int width, int height, Option<Boolean> option) {
 		String translationKey = getTranslationKey(option.getKey());
-		Text text = new TranslatableText(translationKey);
-		Text tooltipText = new TranslatableText(getTooltipKey(translationKey));
+		Text text = Text.translatable(translationKey);
+		Text tooltipText = Text.translatable(getTooltipKey(translationKey));
 		return new ButtonWidget(x, y, width, height, ScreenTexts.composeToggleText(text, option.get()),
 				button -> {
 					boolean newValue = !option.get();

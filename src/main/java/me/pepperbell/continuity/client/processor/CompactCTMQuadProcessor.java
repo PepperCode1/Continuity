@@ -5,6 +5,7 @@ import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import net.minecraft.util.math.random.AbstractRandom;
 import org.apache.commons.lang3.ArrayUtils;
 
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
@@ -31,6 +32,7 @@ import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.random.AbstractRandom;
 import net.minecraft.world.BlockRenderView;
 
 public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
@@ -66,7 +68,7 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 	}
 
 	@Override
-	public ProcessingResult processQuadInner(MutableQuadView quad, Sprite sprite, BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, int pass, int processorIndex, ProcessingContext context) {
+	public ProcessingResult processQuadInner(MutableQuadView quad, Sprite sprite, BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<AbstractRandom> randomSupplier, int pass, int processorIndex, ProcessingContext context) {
 		int orientation = QuadUtil.getTextureOrientation(quad);
 		Direction[] directions = DirectionMaps.getMap(quad.lightFace())[orientation];
 		BlockPos.Mutable mutablePos = context.getData(ProcessingDataKeys.MUTABLE_POS_KEY);
