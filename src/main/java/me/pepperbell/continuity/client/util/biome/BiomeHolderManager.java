@@ -7,6 +7,7 @@ import org.apache.http.annotation.ThreadingBehavior;
 import org.jetbrains.annotations.ApiStatus;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.DynamicRegistryManager;
 import net.minecraft.util.registry.Registry;
@@ -27,9 +28,11 @@ public final class BiomeHolderManager {
 	}
 
 	@ApiStatus.Internal
-	public static void setup(DynamicRegistryManager registryManager) {
-		BiomeHolderManager.registryManager = registryManager;
-		refreshHolders();
+	public static void init() {
+		ClientPlayConnectionEvents.JOIN.register(((handler, sender, client) -> {
+			registryManager = handler.getRegistryManager();
+			refreshHolders();
+		}));
 	}
 
 	public static void refreshHolders() {

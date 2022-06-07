@@ -1,4 +1,4 @@
-package me.pepperbell.continuity.client.properties.section;
+package me.pepperbell.continuity.client.properties.overlay;
 
 import java.util.Locale;
 import java.util.Properties;

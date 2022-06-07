@@ -5,8 +5,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import me.pepperbell.continuity.client.properties.ConnectingCTMProperties;
-import me.pepperbell.continuity.client.properties.section.OverlayPropertiesSection;
-import me.pepperbell.continuity.client.util.PropertiesParsingHelper;
+import me.pepperbell.continuity.client.properties.PropertiesParsingHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.Identifier;
 
@@ -34,11 +33,11 @@ public class StandardOverlayCTMProperties extends ConnectingCTMProperties implem
 	}
 
 	protected void parseConnectTiles() {
-		connectTilesSet = PropertiesParsingHelper.parseMatchTiles(properties, "connectTiles", id, packName);
+		connectTilesSet = PropertiesParsingHelper.parseMatchTiles(properties, "connectTiles", id, packName, false);
 	}
 
 	protected void parseConnectBlocks() {
-		connectBlocksPredicate = PropertiesParsingHelper.parseBlockStates(properties, "connectBlocks", id, packName);
+		connectBlocksPredicate = PropertiesParsingHelper.parseBlockStates(properties, "connectBlocks", id, packName, false);
 	}
 
 	public Set<Identifier> getConnectTilesSet() {

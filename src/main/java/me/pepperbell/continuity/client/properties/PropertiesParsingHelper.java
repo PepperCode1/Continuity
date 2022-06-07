@@ -1,4 +1,4 @@
-package me.pepperbell.continuity.client.util;
+package me.pepperbell.continuity.client.properties;
 
 import java.util.Locale;
 import java.util.Map;
@@ -15,7 +15,7 @@ import com.google.common.collect.ImmutableSet;
 
 import me.pepperbell.continuity.client.ContinuityClient;
 import me.pepperbell.continuity.client.processor.Symmetry;
-import me.pepperbell.continuity.client.properties.BaseCTMProperties;
+import me.pepperbell.continuity.client.resource.ResourceRedirectHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -26,13 +26,14 @@ import net.minecraft.util.registry.Registry;
 
 public final class PropertiesParsingHelper {
 	@Nullable
-	public static ImmutableSet<Identifier> parseMatchTiles(Properties properties, String propertyKey, Identifier fileLocation, String packName) {
+	public static ImmutableSet<Identifier> parseMatchTiles(Properties properties, String propertyKey, Identifier fileLocation, String packName, boolean nullIfEmpty) {
 		String matchTilesStr = properties.getProperty(propertyKey);
 		if (matchTilesStr != null) {
 			matchTilesStr = matchTilesStr.trim();
 			String[] matchTileStrs = matchTilesStr.split(" ");
 			if (matchTileStrs.length != 0) {
 				String basePath = FilenameUtils.getPath(fileLocation.getPath());
+				ResourceRedirectHandler redirectHandler = ResourceRedirectHandler.get();
 				ImmutableSet.Builder<Identifier> setBuilder = ImmutableSet.builder();
 				for (int i = 0; i < matchTileStrs.length; i++) {
 					String matchTileStr = matchTileStrs[i];
@@ -64,7 +65,10 @@ public final class PropertiesParsingHelper {
 							if (path.startsWith("textures/")) {
 								path = path.substring(9);
 							} else if (path.startsWith("optifine/")) {
-								path = BaseCTMProperties.getRedirectPath(path + ".png");
+								if (redirectHandler == null) {
+									continue;
+								}
+								path = redirectHandler.getSourceSpritePath(path + ".png");
 							}
 							try {
 								setBuilder.add(new Identifier(namespace, path));
@@ -75,7 +79,7 @@ public final class PropertiesParsingHelper {
 					}
 				}
 				ImmutableSet<Identifier> set = setBuilder.build();
-				if (!set.isEmpty()) {
+				if (!set.isEmpty() || !nullIfEmpty) {
 					return set;
 				}
 			}
@@ -84,7 +88,7 @@ public final class PropertiesParsingHelper {
 	}
 
 	@Nullable
-	public static Predicate<BlockState> parseBlockStates(Properties properties, String propertyKey, Identifier fileLocation, String packName) {
+	public static Predicate<BlockState> parseBlockStates(Properties properties, String propertyKey, Identifier fileLocation, String packName, boolean nullIfEmpty) {
 		String blockStatesStr = properties.getProperty(propertyKey);
 		if (blockStatesStr != null) {
 			blockStatesStr = blockStatesStr.trim();
@@ -188,6 +192,8 @@ public final class PropertiesParsingHelper {
 						}
 						return false;
 					};
+				} else if (!nullIfEmpty) {
+					return state -> false;
 				}
 			}
 		}

@@ -1,6 +1,5 @@
 package me.pepperbell.continuity.client.model;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -21,21 +20,15 @@ import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.util.Identifier;
 
-public class CTMUnbakedModel implements UnbakedModel {
-	private final UnbakedModel wrapped;
+public class CTMUnbakedModel extends WrappingUnbakedModel {
 	private final List<CTMLoadingContainer<?>> containerList;
 	@Nullable
 	private final List<CTMLoadingContainer<?>> multipassContainerList;
 
 	public CTMUnbakedModel(UnbakedModel wrapped, List<CTMLoadingContainer<?>> containerList, @Nullable List<CTMLoadingContainer<?>> multipassContainerList) {
-		this.wrapped = wrapped;
+		super(wrapped);
 		this.containerList = containerList;
 		this.multipassContainerList = multipassContainerList;
-	}
-
-	@Override
-	public Collection<Identifier> getModelDependencies() {
-		return wrapped.getModelDependencies();
 	}
 
 	@Override
@@ -54,10 +47,9 @@ public class CTMUnbakedModel implements UnbakedModel {
 
 	@Nullable
 	@Override
-	public BakedModel bake(ModelLoader loader, Function<SpriteIdentifier, Sprite> textureGetter, ModelBakeSettings rotationContainer, Identifier modelId) {
-		BakedModel bakedWrapped = wrapped.bake(loader, textureGetter, rotationContainer, modelId);
-		if (bakedWrapped == null) {
-			return null;
+	public BakedModel wrapBaked(@Nullable BakedModel bakedWrapped, ModelLoader loader, Function<SpriteIdentifier, Sprite> textureGetter, ModelBakeSettings rotationContainer, Identifier modelId) {
+		if (bakedWrapped == null || bakedWrapped.isBuiltin()) {
+			return bakedWrapped;
 		}
 		return new CTMBakedModel(bakedWrapped, toProcessorList(containerList, textureGetter), multipassContainerList == null ? null : toProcessorList(multipassContainerList, textureGetter));
 	}

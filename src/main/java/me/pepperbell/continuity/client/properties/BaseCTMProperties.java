@@ -1,6 +1,5 @@
 package me.pepperbell.continuity.client.properties;
 
-import java.nio.charset.StandardCharsets;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
@@ -11,36 +10,32 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
-import com.google.common.hash.Hashing;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import me.pepperbell.continuity.api.client.CTMProperties;
 import me.pepperbell.continuity.api.client.CTMPropertiesFactory;
 import me.pepperbell.continuity.client.ContinuityClient;
-import me.pepperbell.continuity.client.util.InvalidIdentifierHandler;
+import me.pepperbell.continuity.client.resource.InvalidIdentifierStateHolder;
+import me.pepperbell.continuity.client.resource.ResourcePackUtil;
+import me.pepperbell.continuity.client.resource.ResourceRedirectHandler;
+import me.pepperbell.continuity.client.util.BooleanState;
 import me.pepperbell.continuity.client.util.MathUtil;
-import me.pepperbell.continuity.client.util.PropertiesParsingHelper;
-import me.pepperbell.continuity.client.util.ResourceRedirectHelper;
 import me.pepperbell.continuity.client.util.TextureUtil;
 import me.pepperbell.continuity.client.util.biome.BiomeHolder;
 import me.pepperbell.continuity.client.util.biome.BiomeHolderManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.resource.DefaultResourcePack;
-import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourcePack;
-import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
 import net.minecraft.util.math.Direction;
@@ -159,20 +154,19 @@ public class BaseCTMProperties implements CTMProperties {
 	}
 
 	protected void parseMatchTiles() {
-		matchTilesSet = PropertiesParsingHelper.parseMatchTiles(properties, "matchTiles", id, packName);
+		matchTilesSet = PropertiesParsingHelper.parseMatchTiles(properties, "matchTiles", id, packName, true);
 	}
 
 	protected void parseMatchBlocks() {
-		matchBlocksPredicate = PropertiesParsingHelper.parseBlockStates(properties, "matchBlocks", id, packName);
+		matchBlocksPredicate = PropertiesParsingHelper.parseBlockStates(properties, "matchBlocks", id, packName, true);
 	}
 
 	protected void detectMatches() {
 		String baseName = FilenameUtils.getBaseName(id.getPath());
 		if (matchBlocksPredicate == null) {
-			String prefix = "block_";
-			if (baseName.startsWith(prefix)) {
+			if (baseName.startsWith("block_")) {
 				try {
-					Identifier id = new Identifier(baseName.substring(prefix.length()));
+					Identifier id = new Identifier(baseName.substring(6));
 					Block block = Registry.BLOCK.get(id);
 					if (block != Blocks.AIR) {
 						matchBlocksPredicate = state -> state.getBlock() == block;
@@ -211,7 +205,8 @@ public class BaseCTMProperties implements CTMProperties {
 			if (tileStrs.length != 0) {
 				String basePath = FilenameUtils.getPath(id.getPath());
 				ImmutableList.Builder<Identifier> listBuilder = ImmutableList.builder();
-				InvalidIdentifierHandler.enableInvalidPaths();
+				BooleanState invalidIdentifierState = InvalidIdentifierStateHolder.get();
+				invalidIdentifierState.enable();
 				for (int i = 0; i < tileStrs.length; i++) {
 					String tileStr = tileStrs[i];
 					if (!tileStr.isEmpty()) {
@@ -268,7 +263,7 @@ public class BaseCTMProperties implements CTMProperties {
 						}
 					}
 				}
-				InvalidIdentifierHandler.disableInvalidPaths();
+				invalidIdentifierState.disable();
 				ImmutableList<Identifier> list = listBuilder.build();
 				if (!list.isEmpty()) {
 					tiles = list;
@@ -377,27 +372,54 @@ public class BaseCTMProperties implements CTMProperties {
 				for (int i = 0; i < heightStrs.length; i++) {
 					String heightStr = heightStrs[i];
 					if (!heightStr.isEmpty()) {
-						String[] parts = heightStr.split("-");
-						int length = parts.length;
-						try {
-							if (length == 2) {
-								int min = Integer.parseInt(parts[0]);
-								int max = Integer.parseInt(parts[1]);
-								if (min < max) {
-									predicateListBuilder.add(y -> y >= min && y <= max);
-								} else if (min > max) {
-									predicateListBuilder.add(y -> y >= max && y <= min);
+						String[] parts = heightStr.split("\\.\\.", 2);
+						if (parts.length > 1) {
+							try {
+								if (parts[1].isEmpty()) {
+									int min = Integer.parseInt(parts[0]);
+									predicateListBuilder.add(y -> y >= min);
+								} else if (parts[0].isEmpty()) {
+									int max = Integer.parseInt(parts[1]);
+									predicateListBuilder.add(y -> y <= max);
 								} else {
-									predicateListBuilder.add(y -> y == min);
+									int min = Integer.parseInt(parts[0]);
+									int max = Integer.parseInt(parts[1]);
+									if (min < max) {
+										predicateListBuilder.add(y -> y >= min && y <= max);
+									} else if (min > max) {
+										predicateListBuilder.add(y -> y >= max && y <= min);
+									} else {
+										predicateListBuilder.add(y -> y == min);
+									}
 								}
 								continue;
-							} else if (length == 1) {
-								int height = Integer.parseInt(parts[0]);
-								predicateListBuilder.add(y -> y == height);
-								continue;
+							} catch (NumberFormatException e) {
+								//
 							}
-						} catch (NumberFormatException e) {
-							//
+						} else {
+							String heightStr1 = heightStr.replaceAll("[()]", "");
+							if (!heightStr1.isEmpty()) {
+								int separatorIndex = heightStr1.indexOf('-', heightStr1.charAt(0) == '-' ? 1 : 0);
+								try {
+									if (separatorIndex == -1) {
+										int height = Integer.parseInt(heightStr1);
+										predicateListBuilder.add(y -> y == height);
+									} else {
+										int min = Integer.parseInt(heightStr1.substring(0, separatorIndex));
+										int max = Integer.parseInt(heightStr1.substring(separatorIndex + 1));
+										if (min < max) {
+											predicateListBuilder.add(y -> y >= min && y <= max);
+										} else if (min > max) {
+											predicateListBuilder.add(y -> y >= max && y <= min);
+										} else {
+											predicateListBuilder.add(y -> y == min);
+										}
+									}
+									continue;
+								} catch (NumberFormatException e) {
+									//
+								}
+							}
 						}
 						ContinuityClient.LOGGER.warn("Invalid 'heights' element '" + heightStr + "' at index " + i + " in file '" + id + "' in pack '" + packName + "'");
 					}
@@ -407,11 +429,11 @@ public class BaseCTMProperties implements CTMProperties {
 					int amount = predicateList.size();
 					heightPredicate = y -> {
 						for (int i = 0; i < amount; i++) {
-							if (!predicateList.get(i).test(y)) {
-								return false;
+							if (predicateList.get(i).test(y)) {
+								return true;
 							}
 						}
-						return true;
+						return false;
 					};
 				}
 			}
@@ -504,11 +526,9 @@ public class BaseCTMProperties implements CTMProperties {
 			conditionsStr = conditionsStr.trim();
 			String[] conditionStrs = conditionsStr.split("\\|");
 			if (conditionStrs.length != 0) {
-				ResourcePack[] packs = MinecraftClient.getInstance().getResourceManager().streamResourcePacks().toArray(ResourcePack[]::new);
-				ArrayUtils.reverse(packs);
-				DefaultResourcePack defaultPack = MinecraftClient.getInstance().getResourcePackProvider().getPack();
-				InvalidIdentifierHandler.enableInvalidPaths();
-				Outer:
+				DefaultResourcePack defaultPack = ResourcePackUtil.getDefaultResourcePack();
+				BooleanState invalidIdentifierState = InvalidIdentifierStateHolder.get();
+				invalidIdentifierState.enable();
 				for (int i = 0; i < conditionStrs.length; i++) {
 					String conditionStr = conditionStrs[i];
 					if (!conditionStr.isEmpty()) {
@@ -521,28 +541,26 @@ public class BaseCTMProperties implements CTMProperties {
 							} else {
 								packStr = null;
 							}
-							Predicate<ResourcePack> predicate;
+
 							if (packStr == null || packStr.equals("default")) {
-								predicate = pack -> pack == defaultPack;
-							} else if (packStr.equals("programmer_art")) {
-								predicate = pack -> pack.getName().equals("Programmer Art");
-							} else {
-								ContinuityClient.LOGGER.warn("Invalid pack '" + packStr + "' in 'resourceCondition' element '" + conditionStr + "' at index " + i + " in file '" + id + "' in pack '" + packName + "'");
-								continue;
-							}
-							for (ResourcePack pack : packs) {
-								if (pack.contains(ResourceType.CLIENT_RESOURCES, resourceId)) {
-									if (!predicate.test(pack)) {
-										valid = false;
-										break Outer;
-									}
+								ResourcePack pack = ResourcePackUtil.getProvidingResourcePack(resourceId);
+								if (pack != null && pack != defaultPack) {
+									valid = false;
 									break;
 								}
+							} else if (packStr.equals("programmer_art")) {
+								ResourcePack pack = ResourcePackUtil.getProvidingResourcePack(resourceId);
+								if (pack != null && !pack.getName().equals("Programmer Art")) {
+									valid = false;
+									break;
+								}
+							} else {
+								ContinuityClient.LOGGER.warn("Invalid pack '" + packStr + "' in 'resourceCondition' element '" + conditionStr + "' at index " + i + " in file '" + id + "' in pack '" + packName + "'");
 							}
 						}
 					}
 				}
-				InvalidIdentifierHandler.disableInvalidPaths();
+				invalidIdentifierState.disable();
 			}
 		}
 	}
@@ -554,7 +572,7 @@ public class BaseCTMProperties implements CTMProperties {
 	protected void resolveTiles() {
 		textureDependencies = new ObjectOpenHashSet<>();
 		spriteIds = new ObjectArrayList<>();
-		ResourceManager resourceManager = MinecraftClient.getInstance().getResourceManager();
+		ResourceRedirectHandler redirectHandler = ResourceRedirectHandler.get();
 		for (Identifier tile : tiles) {
 			SpriteIdentifier spriteId;
 			if (tile.equals(SPECIAL_SKIP_ID)) {
@@ -569,20 +587,20 @@ public class BaseCTMProperties implements CTMProperties {
 					if (path.endsWith(".png")) {
 						path = path.substring(0, path.length() - 4);
 					}
+
+					spriteId = TextureUtil.toSpriteId(new Identifier(namespace, path));
+					textureDependencies.add(spriteId);
+				} else if (redirectHandler != null) {
+					path = redirectHandler.getSourceSpritePath(path);
+
+					spriteId = TextureUtil.toSpriteId(new Identifier(namespace, path));
+					textureDependencies.add(spriteId);
 				} else {
-					path = getRedirectPath(path);
-					Identifier redirectId = new Identifier(namespace, "textures/" + path + ".png");
-					ResourceRedirectHelper.addRedirect(resourceManager, redirectId, tile);
+					spriteId = TextureUtil.MISSING_SPRITE_ID;
 				}
-				spriteId = TextureUtil.toSpriteId(new Identifier(namespace, path));
-				textureDependencies.add(spriteId);
 			}
 			spriteIds.add(spriteId);
 		}
-	}
-
-	public static String getRedirectPath(String path) {
-		return "continuity_reserved/" + Hashing.md5().hashString(path, StandardCharsets.UTF_8).toString().toLowerCase(Locale.ROOT);
 	}
 
 	public Identifier getId() {

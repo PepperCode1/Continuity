@@ -5,9 +5,9 @@ import java.util.function.Supplier;
 
 import me.pepperbell.continuity.api.client.ProcessingDataProvider;
 import me.pepperbell.continuity.client.processor.ConnectionPredicate;
+import me.pepperbell.continuity.client.processor.DirectionMaps;
 import me.pepperbell.continuity.client.processor.ProcessingDataKeys;
 import me.pepperbell.continuity.client.properties.StandardConnectingCTMProperties;
-import me.pepperbell.continuity.client.util.DirectionMaps;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadView;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.texture.Sprite;

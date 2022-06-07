@@ -14,9 +14,9 @@ import net.minecraft.world.WorldView;
 import net.minecraft.world.biome.Biome;
 
 public final class BiomeRetriever {
-	private static final Provider PROVIDER = getProvider();
+	private static final Provider PROVIDER = createProvider();
 
-	private static Provider getProvider() {
+	private static Provider createProvider() {
 		ClassLoader classLoader = BiomeRetriever.class.getClassLoader();
 
 		if (FabricLoader.getInstance().isModLoaded("sodium")) {
