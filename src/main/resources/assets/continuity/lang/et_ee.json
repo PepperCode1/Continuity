@@ -1,7 +1,9 @@
 {
   "options.continuity.title": "Continuity seadistus",
-  "options.continuity.disable_ctm": "CTM'i keelamine",
-  "options.continuity.disable_ctm.tooltip": "Keelab ühendatud tekstuurid täielikult.",
-  "options.continuity.use_manual_culling": "Nähtavuse kontroll",
-  "options.continuity.use_manual_culling.tooltip": "Suurendab jõudlust märgatavalt, rakendades CTM'i vaid nähtavatel külgedel, kuid võib teatud modidega ebakorrektselt käituda."
+  "options.continuity.connected_textures": "Ühendatud tekstuurid",
+  "options.continuity.connected_textures.tooltip": "Luba või keela plokkide ühendatud tekstuurid.",
+  "options.continuity.emissive_textures": "Hõõguvad tekstuurid",
+  "options.continuity.emissive_textures.tooltip": "Luba või keela ploki- ja esememudelite hõõguvad tekstuurid.",
+  "options.continuity.custom_block_layers": "Kohandatud plokikihid",
+  "options.continuity.custom_block_layers.tooltip": "Luba või keela kohandatud plokikihid."
 }
