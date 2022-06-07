@@ -6,6 +6,4 @@
   "options.continuity.emissive_textures.tooltip": "Включить/отключить светящиеся текстуры блоков и моделей предметов.",
   "options.continuity.custom_block_layers": "Пользов. слои отрисовки",
   "options.continuity.custom_block_layers.tooltip": "Включить/отключить возможность изменения типа отрисовки для блоков.",
-  "options.continuity.use_manual_culling": "Отбраковка граней",
-  "options.continuity.use_manual_culling.tooltip": "Значительно повышает производительность, применяя соединённые/светящиеся текстуры только к видимым граням, но может привести к неправильной работе с некоторыми модами."
 }
