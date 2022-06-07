@@ -1,7 +1,9 @@
 {
   "options.continuity.title": "Настройки Continuity",
-  "options.continuity.disable_ctm": "Отключить CTM",
-  "options.continuity.disable_ctm.tooltip": "Полностью отключает соединённые текстуры.",
-  "options.continuity.use_manual_culling": "Включить отбраковку",
-  "options.continuity.use_manual_culling.tooltip": "Значительно повышает производительность, применяя CTM только к видимым граням, но может привести к неправильному поведению с некоторыми модами."
+  "options.continuity.connected_textures": "Соединённые текстуры",
+  "options.continuity.connected_textures.tooltip": "Включить/отключить соединённые текстуры блоков.",
+  "options.continuity.emissive_textures": "Светящиеся текстуры",
+  "options.continuity.emissive_textures.tooltip": "Включить/отключить светящиеся текстуры блоков и моделей предметов.",
+  "options.continuity.custom_block_layers": "Пользов. слои отрисовки",
+  "options.continuity.custom_block_layers.tooltip": "Включить/отключить возможность изменения типа отрисовки для блоков.",
 }
