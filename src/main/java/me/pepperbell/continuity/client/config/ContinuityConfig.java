@@ -36,7 +36,9 @@ public class ContinuityConfig {
 	protected final Object2ObjectLinkedOpenHashMap<String, Option<?>> optionMap = new Object2ObjectLinkedOpenHashMap<>();
 	protected final Map<String, Option<?>> optionMapView = Collections.unmodifiableMap(optionMap);
 
-	public final Option.BooleanOption disableCTM = addOption(new Option.BooleanOption("disable_ctm", false));
+	public final Option.BooleanOption connectedTextures = addOption(new Option.BooleanOption("connected_textures", true));
+	public final Option.BooleanOption emissiveTextures = addOption(new Option.BooleanOption("emissive_textures", true));
+	public final Option.BooleanOption customBlockLayers = addOption(new Option.BooleanOption("custom_block_layers", true));
 	public final Option.BooleanOption useManualCulling = addOption(new Option.BooleanOption("use_manual_culling", true));
 
 	public ContinuityConfig(File file) {

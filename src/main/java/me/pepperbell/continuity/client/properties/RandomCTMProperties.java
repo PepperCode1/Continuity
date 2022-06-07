@@ -6,7 +6,6 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.pepperbell.continuity.client.ContinuityClient;
 import me.pepperbell.continuity.client.processor.Symmetry;
-import me.pepperbell.continuity.client.util.PropertiesParsingHelper;
 import me.pepperbell.continuity.client.util.RandomIndexProvider;
 import net.minecraft.util.Identifier;
 

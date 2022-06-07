@@ -4,7 +4,6 @@ import java.util.Properties;
 
 import me.pepperbell.continuity.client.ContinuityClient;
 import me.pepperbell.continuity.client.processor.Symmetry;
-import me.pepperbell.continuity.client.util.PropertiesParsingHelper;
 import net.minecraft.util.Identifier;
 
 public class RepeatCTMProperties extends BaseCTMProperties {
@@ -77,5 +76,17 @@ public class RepeatCTMProperties extends BaseCTMProperties {
 
 	public Symmetry getSymmetry() {
 		return symmetry;
+	}
+
+	public static class Validator<T extends RepeatCTMProperties> implements TileAmountValidator<T> {
+		@Override
+		public boolean validateTileAmount(int amount, T properties) {
+			int targetAmount = properties.getWidth() * properties.getHeight();
+			if (amount == targetAmount) {
+				return true;
+			}
+			ContinuityClient.LOGGER.error("Method '" + properties.getMethod() + "' requires exactly " + targetAmount + " tiles but " + amount + " were provided in file '" + properties.getId() + "' in pack '" + properties.getPackName() + "'");
+			return false;
+		}
 	}
 }

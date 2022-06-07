@@ -20,8 +20,9 @@ public class ContinuityConfigScreen extends Screen {
 
 	@Override
 	protected void init() {
-		addDrawableChild(createBooleanOptionButton(width / 2 - 75 - 90, height / 2 - 10, 150, 20, config.disableCTM));
-		addDrawableChild(createBooleanOptionButton(width / 2 - 75 + 90, height / 2 - 10, 150, 20, config.useManualCulling));
+		addDrawableChild(createBooleanOptionButton(width / 2 - 100 - 110, height / 2 - 10 - 12, 200, 20, config.connectedTextures));
+		addDrawableChild(createBooleanOptionButton(width / 2 - 100 + 110, height / 2 - 10 - 12, 200, 20, config.emissiveTextures));
+		addDrawableChild(createBooleanOptionButton(width / 2 - 100 - 110, height / 2 - 10 + 12, 200, 20, config.customBlockLayers));
 
 		addDrawableChild(new ButtonWidget(width / 2 - 100, height - 40, 200, 20, ScreenTexts.DONE, button -> close()));
 	}

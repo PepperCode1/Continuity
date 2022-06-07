@@ -20,7 +20,7 @@ import me.pepperbell.continuity.api.client.CTMLoader;
 import me.pepperbell.continuity.api.client.CTMLoaderRegistry;
 import me.pepperbell.continuity.api.client.CTMProperties;
 import me.pepperbell.continuity.client.ContinuityClient;
-import me.pepperbell.continuity.client.util.InvalidIdentifierHandler;
+import me.pepperbell.continuity.client.util.BooleanState;
 import me.pepperbell.continuity.client.util.OptionalListCreator;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.util.SpriteIdentifier;
@@ -42,13 +42,14 @@ public final class CTMPropertiesLoader {
 	public static void loadAll(ResourceManager resourceManager) {
 		int packPriority = 0;
 		Iterator<ResourcePack> iterator = resourceManager.streamResourcePacks().iterator();
-		InvalidIdentifierHandler.enableInvalidPaths();
+		BooleanState invalidIdentifierState = InvalidIdentifierStateHolder.get();
+		invalidIdentifierState.enable();
 		while (iterator.hasNext()) {
 			ResourcePack pack = iterator.next();
 			loadAll(pack, packPriority);
 			packPriority++;
 		}
-		InvalidIdentifierHandler.disableInvalidPaths();
+		invalidIdentifierState.disable();
 		resolveMultipassDependents();
 	}
 
@@ -70,7 +71,7 @@ public final class CTMPropertiesLoader {
 
 	private static void load(Properties properties, Identifier id, String packName, int packPriority) {
 		String method = properties.getProperty("method", "ctm").trim();
-		CTMLoader<?> loader = CTMLoaderRegistry.INSTANCE.getLoader(method);
+		CTMLoader<?> loader = CTMLoaderRegistry.get().getLoader(method);
 		if (loader != null) {
 			load(loader, properties, id, packName, packPriority, method);
 		} else {
@@ -95,6 +96,10 @@ public final class CTMPropertiesLoader {
 	}
 
 	private static void resolveMultipassDependents() {
+		if (isEmpty()) {
+			return;
+		}
+
 		Object2ObjectOpenHashMap<Identifier, CTMLoadingContainer<?>> texture2ContainerMap = new Object2ObjectOpenHashMap<>();
 		Object2ObjectOpenHashMap<Identifier, List<CTMLoadingContainer<?>>> texture2ContainerListMap = new Object2ObjectOpenHashMap<>();
 
@@ -160,14 +165,6 @@ public final class CTMPropertiesLoader {
 		}
 	}
 
-	@ApiStatus.Internal
-	public static void clearAll() {
-		ALL.clear();
-		AFFECTS_BLOCK.clear();
-		IGNORES_BLOCK.clear();
-		VALID_FOR_MULTIPASS.clear();
-	}
-
 	public static void consumeAllAffecting(BlockState state, Consumer<CTMLoadingContainer<?>> consumer) {
 		int amount = AFFECTS_BLOCK.size();
 		for (int i = 0; i < amount; i++) {
@@ -200,5 +197,17 @@ public final class CTMPropertiesLoader {
 	public static List<CTMLoadingContainer<?>> getAllAffecting(Collection<SpriteIdentifier> spriteIds) {
 		consumeAllAffecting(spriteIds, LIST_CREATOR);
 		return LIST_CREATOR.get();
+	}
+
+	public static boolean isEmpty() {
+		return ALL.isEmpty();
+	}
+
+	@ApiStatus.Internal
+	public static void clearAll() {
+		ALL.clear();
+		AFFECTS_BLOCK.clear();
+		IGNORES_BLOCK.clear();
+		VALID_FOR_MULTIPASS.clear();
 	}
 }
