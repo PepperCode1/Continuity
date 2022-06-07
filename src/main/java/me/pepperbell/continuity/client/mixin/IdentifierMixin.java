@@ -5,14 +5,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import me.pepperbell.continuity.client.util.InvalidIdentifierHandler;
+import me.pepperbell.continuity.client.resource.InvalidIdentifierStateHolder;
 import net.minecraft.util.Identifier;
 
 @Mixin(Identifier.class)
 public class IdentifierMixin {
 	@Inject(method = "isPathValid(Ljava/lang/String;)Z", at = @At("HEAD"), cancellable = true)
 	private static void onIsPathValid(String path, CallbackInfoReturnable<Boolean> cir) {
-		if (InvalidIdentifierHandler.areInvalidPathsEnabled()) {
+		if (InvalidIdentifierStateHolder.get().isEnabled()) {
 			cir.setReturnValue(true);
 		}
 	}

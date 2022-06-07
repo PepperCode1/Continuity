@@ -12,7 +12,7 @@ import me.pepperbell.continuity.client.processor.ProcessingPredicate;
 import me.pepperbell.continuity.client.processor.simple.SimpleQuadProcessor;
 import me.pepperbell.continuity.client.processor.simple.SpriteProvider;
 import me.pepperbell.continuity.client.properties.BaseCTMProperties;
-import me.pepperbell.continuity.client.properties.section.OverlayPropertiesSection;
+import me.pepperbell.continuity.client.properties.overlay.OverlayPropertiesSection;
 import me.pepperbell.continuity.client.util.QuadUtil;
 import me.pepperbell.continuity.client.util.RenderUtil;
 import me.pepperbell.continuity.client.util.TextureUtil;

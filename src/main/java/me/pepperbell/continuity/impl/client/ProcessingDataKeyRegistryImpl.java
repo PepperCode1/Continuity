@@ -12,21 +12,23 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.pepperbell.continuity.api.client.ProcessingDataKey;
 import me.pepperbell.continuity.api.client.ProcessingDataKeyRegistry;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.minecraft.util.Identifier;
 
-public class ProcessingDataKeyRegistryImpl implements ProcessingDataKeyRegistry {
+public final class ProcessingDataKeyRegistryImpl implements ProcessingDataKeyRegistry {
 	public static final ProcessingDataKeyRegistryImpl INSTANCE = new ProcessingDataKeyRegistryImpl();
 
 	private final Map<Identifier, ProcessingDataKey<?>> keyMap = new Object2ObjectOpenHashMap<>();
-	private final List<ProcessingDataKey<?>> allResetable = new ObjectArrayList<>();
-	private final List<ProcessingDataKey<?>> allResetableView = Collections.unmodifiableList(allResetable);
+	private final List<ProcessingDataKey<?>> allResettable = new ObjectArrayList<>();
+	private final List<ProcessingDataKey<?>> allResettableView = Collections.unmodifiableList(allResettable);
+
 	private int registeredAmount = 0;
-	private boolean registrationLocked;
+	private boolean frozen;
 
 	@Override
 	public <T> ProcessingDataKey<T> registerKey(Identifier id, Supplier<T> valueSupplier, Consumer<T> valueResetAction) {
-		if (registrationLocked) {
-			throw new IllegalArgumentException("Cannot register processing data key for ID '" + id + "' as the client has already started");
+		if (frozen) {
+			throw new IllegalArgumentException("Cannot register processing data key for ID '" + id + "' to frozen registry");
 		}
 		ProcessingDataKey<?> oldKey = keyMap.get(id);
 		if (oldKey != null) {
@@ -35,7 +37,7 @@ public class ProcessingDataKeyRegistryImpl implements ProcessingDataKeyRegistry 
 		ProcessingDataKeyImpl<T> key = new ProcessingDataKeyImpl<>(id, registeredAmount, valueSupplier, valueResetAction);
 		keyMap.put(id, key);
 		if (valueResetAction != null) {
-			allResetable.add(key);
+			allResettable.add(key);
 		}
 		registeredAmount++;
 		return key;
@@ -52,11 +54,11 @@ public class ProcessingDataKeyRegistryImpl implements ProcessingDataKeyRegistry 
 		return registeredAmount;
 	}
 
-	public List<ProcessingDataKey<?>> getAllResetable() {
-		return allResetableView;
+	public void init() {
+		ClientLifecycleEvents.CLIENT_STARTED.register(client -> frozen = true);
 	}
 
-	public void lockRegistration() {
-		registrationLocked = true;
+	public List<ProcessingDataKey<?>> getAllResettable() {
+		return allResettableView;
 	}
 }

@@ -1,7 +1,10 @@
 package me.pepperbell.continuity.client.mixinterface;
 
-import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
+
+import me.pepperbell.continuity.client.resource.ResourceRedirectHandler;
 
 public interface LifecycledResourceManagerImplExtension {
-	void addRedirect(Identifier from, Identifier to);
+	@Nullable
+	ResourceRedirectHandler getRedirectHandler();
 }

@@ -19,6 +19,10 @@ public interface QuadProcessor {
 		void addEmitterConsumer(Consumer<QuadEmitter> consumer);
 
 		void addMesh(Mesh mesh);
+
+		QuadEmitter getExtraQuadEmitter();
+
+		void markHasExtraQuads();
 	}
 
 	enum ProcessingResult {

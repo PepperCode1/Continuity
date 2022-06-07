@@ -1,7 +1,8 @@
-package me.pepperbell.continuity.client.util;
+package me.pepperbell.continuity.client.processor;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import me.pepperbell.continuity.client.util.QuadUtil;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadView;
 import net.minecraft.util.math.Direction;
 
