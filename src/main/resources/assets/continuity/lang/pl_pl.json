@@ -1,0 +1,9 @@
+{
+  "options.continuity.title": "Konfiguracja Continuity",
+  "options.continuity.connected_textures": "Połączone tekstury",
+  "options.continuity.connected_textures.tooltip": "Włącz lub wyłącz połączone tekstury bloków.",
+  "options.continuity.emissive_textures": "Tekstury emisyjne",
+  "options.continuity.emissive_textures.tooltip": "Włącz lub wyłącz tekstury emisyjne dla bloków i modeli przedmiotów.",
+  "options.continuity.custom_block_layers": "Niestandardowe warstwy bloków",
+  "options.continuity.custom_block_layers.tooltip": "Włącz lub wyłącz niestandardowe warstwy bloków."
+}
