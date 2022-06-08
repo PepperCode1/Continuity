@@ -43,6 +43,7 @@ public final class CustomBlockLayers {
 
 	private static void reload(ResourceManager manager) {
 		System.arraycopy(EMPTY_LAYER_PREDICATES, 0, LAYER_PREDICATES, 0, EMPTY_LAYER_PREDICATES.length);
+
 		try (Resource resource = manager.getResource(LOCATION)) {
 			Properties properties = new Properties();
 			properties.load(resource.getInputStream());

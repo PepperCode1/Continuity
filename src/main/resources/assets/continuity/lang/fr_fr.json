@@ -5,5 +5,5 @@
   "options.continuity.emissive_textures": "Textures Émissives",
   "options.continuity.emissive_textures.tooltip": "Active ou désactive les textures émissives des modèles de blocs et d'objets.",
   "options.continuity.custom_block_layers": "Couches Personnalisées",
-  "options.continuity.custom_block_layers.tooltip": "Active ou désactive les couches de blocs personnalisées",
+  "options.continuity.custom_block_layers.tooltip": "Active ou désactive les couches de blocs personnalisées"
 }

@@ -22,7 +22,6 @@ import net.minecraft.world.BlockRenderView;
 public class CTMBakedModel extends ForwardingBakedModel {
 	public static final int MULTIPASS_LIMIT = 3;
 
-	// maybe TODO: convert to arrays
 	protected final List<QuadProcessor> processors;
 	@Nullable
 	protected final List<QuadProcessor> multipassProcessors;

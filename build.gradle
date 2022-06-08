@@ -26,9 +26,6 @@ repositories {
 		name 'Shedaniel'
 		url 'https://maven.shedaniel.me'
 	}
-	maven {
-		url 'https://server.bbkr.space/artifactory/libs-release'
-	}
 }
 
 dependencies {

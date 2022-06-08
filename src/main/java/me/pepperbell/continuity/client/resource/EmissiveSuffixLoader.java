@@ -24,6 +24,7 @@ public class EmissiveSuffixLoader {
 	@ApiStatus.Internal
 	public static void load(ResourceManager manager) {
 		emissiveSuffix = null;
+
 		try (Resource resource = manager.getResource(LOCATION)) {
 			Properties properties = new Properties();
 			properties.load(resource.getInputStream());
