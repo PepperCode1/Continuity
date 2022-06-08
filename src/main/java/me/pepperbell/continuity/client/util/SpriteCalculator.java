@@ -3,7 +3,6 @@ package me.pepperbell.continuity.client.util;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
 
@@ -17,11 +16,12 @@ import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.Random;
 
 public final class SpriteCalculator {
 	private static final BlockModels MODELS = MinecraftClient.getInstance().getBakedModelManager().getBlockModels();
 	private static final Supplier<Random> RANDOM_SUPPLIER = new Supplier<>() {
-		private final Random random = new Random();
+		private final Random random = Random.create();
 
 		@Override
 		public Random get() {

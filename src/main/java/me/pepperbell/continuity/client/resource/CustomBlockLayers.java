@@ -1,7 +1,9 @@
 package me.pepperbell.continuity.client.resource;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Predicate;
 
@@ -44,14 +46,16 @@ public final class CustomBlockLayers {
 	private static void reload(ResourceManager manager) {
 		System.arraycopy(EMPTY_LAYER_PREDICATES, 0, LAYER_PREDICATES, 0, EMPTY_LAYER_PREDICATES.length);
 
-		try (Resource resource = manager.getResource(LOCATION)) {
-			Properties properties = new Properties();
-			properties.load(resource.getInputStream());
-			reload(properties, resource.getId(), resource.getResourcePackName());
-		} catch (FileNotFoundException e) {
-			//
-		} catch (Exception e) {
-			ContinuityClient.LOGGER.error("Failed to load custom block layers from file '" + LOCATION + "'", e);
+		Optional<Resource> optionalResource = manager.getResource(LOCATION);
+		if (optionalResource.isPresent()) {
+			Resource resource = optionalResource.get();
+			try (InputStream inputStream = resource.getInputStream()) {
+				Properties properties = new Properties();
+				properties.load(inputStream);
+				reload(properties, LOCATION, resource.getResourcePackName());
+			} catch (IOException e) {
+				ContinuityClient.LOGGER.error("Failed to load custom block layers from file '" + LOCATION + "'", e);
+			}
 		}
 	}
 

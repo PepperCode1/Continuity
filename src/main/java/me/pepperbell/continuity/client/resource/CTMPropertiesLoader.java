@@ -56,7 +56,7 @@ public final class CTMPropertiesLoader {
 	private static void loadAll(ResourcePack pack, int packPriority) {
 		String packName = pack.getName();
 		for (String namespace : pack.getNamespaces(ResourceType.CLIENT_RESOURCES)) {
-			Collection<Identifier> ids = pack.findResources(ResourceType.CLIENT_RESOURCES, namespace, "optifine/ctm", Integer.MAX_VALUE, path -> path.endsWith(".properties"));
+			Collection<Identifier> ids = pack.findResources(ResourceType.CLIENT_RESOURCES, namespace, "optifine/ctm", id -> id.getPath().endsWith(".properties"));
 			for (Identifier id : ids) {
 				try (InputStream stream = pack.open(ResourceType.CLIENT_RESOURCES, id)) {
 					Properties properties = new Properties();

@@ -29,16 +29,8 @@ public class LifecycledResourceManagerImplMixin implements LifecycledResourceMan
 		}
 	}
 
-	@ModifyVariable(method = "getResource(Lnet/minecraft/util/Identifier;)Lnet/minecraft/resource/Resource;", at = @At("HEAD"))
+	@ModifyVariable(method = "getResource(Lnet/minecraft/util/Identifier;)Ljava/util/Optional;", at = @At("HEAD"))
 	private Identifier redirectGetResourceId(Identifier id) {
-		if (redirectHandler != null) {
-			return redirectHandler.redirect(id);
-		}
-		return id;
-	}
-
-	@ModifyVariable(method = "containsResource(Lnet/minecraft/util/Identifier;)Z", at = @At("HEAD"))
-	private Identifier redirectContainsResourceId(Identifier id) {
 		if (redirectHandler != null) {
 			return redirectHandler.redirect(id);
 		}
