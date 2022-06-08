@@ -1,7 +1,9 @@
 {
   "options.continuity.title": "Paramètres de Continuity",
-  "options.continuity.disable_ctm": "Désactiver le CTM",
-  "options.continuity.disable_ctm.tooltip": "Désactive entièrement les textures connectées.",
-  "options.continuity.use_manual_culling": "Utiliser le culling",
-  "options.continuity.use_manual_culling.tooltip": "Améliore grandement les performances en applicant seulement le CTM aux quadrants visible, mais peut causer des problèmes avec d'autres mods."
+  "options.continuity.connected_textures": "Textures Connectées",
+  "options.continuity.connected_textures.tooltip": "Active ou désactive les textures connectées des blocs.",
+  "options.continuity.emissive_textures": "Textures Émissives",
+  "options.continuity.emissive_textures.tooltip": "Active ou désactive les textures émissives des modèles de blocs et d'objets.",
+  "options.continuity.custom_block_layers": "Couches Personnalisées",
+  "options.continuity.custom_block_layers.tooltip": "Active ou désactive les couches de blocs personnalisées",
 }
