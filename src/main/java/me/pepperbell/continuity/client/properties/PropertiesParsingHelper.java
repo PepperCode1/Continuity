@@ -1,4 +1,4 @@
-package me.pepperbell.continuity.client.util;
+package me.pepperbell.continuity.client.properties;
 
 import java.util.Locale;
 import java.util.Map;
@@ -15,7 +15,7 @@ import com.google.common.collect.ImmutableSet;
 
 import me.pepperbell.continuity.client.ContinuityClient;
 import me.pepperbell.continuity.client.processor.Symmetry;
-import me.pepperbell.continuity.client.properties.BaseCTMProperties;
+import me.pepperbell.continuity.client.resource.ResourceRedirectHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -26,14 +26,16 @@ import net.minecraft.util.registry.Registry;
 
 public final class PropertiesParsingHelper {
 	@Nullable
-	public static ImmutableSet<Identifier> parseMatchTiles(Properties properties, String propertyKey, Identifier fileLocation, String packName) {
+	public static ImmutableSet<Identifier> parseMatchTiles(Properties properties, String propertyKey, Identifier fileLocation, String packName, boolean nullIfEmpty) {
 		String matchTilesStr = properties.getProperty(propertyKey);
 		if (matchTilesStr != null) {
 			matchTilesStr = matchTilesStr.trim();
 			String[] matchTileStrs = matchTilesStr.split(" ");
 			if (matchTileStrs.length != 0) {
 				String basePath = FilenameUtils.getPath(fileLocation.getPath());
+				ResourceRedirectHandler redirectHandler = ResourceRedirectHandler.get();
 				ImmutableSet.Builder<Identifier> setBuilder = ImmutableSet.builder();
+
 				for (int i = 0; i < matchTileStrs.length; i++) {
 					String matchTileStr = matchTileStrs[i];
 					if (!matchTileStr.isEmpty()) {
@@ -48,6 +50,7 @@ public final class PropertiesParsingHelper {
 								namespace = fileLocation.getNamespace();
 								path = parts[0];
 							}
+
 							if (path.endsWith(".png")) {
 								path = path.substring(0, path.length() - 4);
 							}
@@ -64,18 +67,25 @@ public final class PropertiesParsingHelper {
 							if (path.startsWith("textures/")) {
 								path = path.substring(9);
 							} else if (path.startsWith("optifine/")) {
-								path = BaseCTMProperties.getRedirectPath(path + ".png");
+								if (redirectHandler == null) {
+									continue;
+								}
+								path = redirectHandler.getSourceSpritePath(path + ".png");
 							}
+
 							try {
 								setBuilder.add(new Identifier(namespace, path));
+								continue;
 							} catch (InvalidIdentifierException e) {
-								ContinuityClient.LOGGER.warn("Invalid '" + propertyKey + "' element '" + matchTileStr + "' at index " + i + " in file '" + fileLocation + "' in pack '" + packName + "'", e);
+								//
 							}
 						}
+						ContinuityClient.LOGGER.warn("Invalid '" + propertyKey + "' element '" + matchTileStr + "' at index " + i + " in file '" + fileLocation + "' in pack '" + packName + "'");
 					}
 				}
+
 				ImmutableSet<Identifier> set = setBuilder.build();
-				if (!set.isEmpty()) {
+				if (!set.isEmpty() || !nullIfEmpty) {
 					return set;
 				}
 			}
@@ -84,18 +94,19 @@ public final class PropertiesParsingHelper {
 	}
 
 	@Nullable
-	public static Predicate<BlockState> parseBlockStates(Properties properties, String propertyKey, Identifier fileLocation, String packName) {
+	public static Predicate<BlockState> parseBlockStates(Properties properties, String propertyKey, Identifier fileLocation, String packName, boolean nullIfEmpty) {
 		String blockStatesStr = properties.getProperty(propertyKey);
 		if (blockStatesStr != null) {
 			blockStatesStr = blockStatesStr.trim();
 			String[] blockStateStrs = blockStatesStr.split(" ");
 			if (blockStateStrs.length != 0) {
 				ImmutableList.Builder<Predicate<BlockState>> predicateListBuilder = ImmutableList.builder();
+
 				Block:
 				for (int i = 0; i < blockStateStrs.length; i++) {
-					String blockStateStr = blockStateStrs[i];
+					String blockStateStr = blockStateStrs[i].trim();
 					if (!blockStateStr.isEmpty()) {
-						String[] parts = blockStateStr.split(":");
+						String[] parts = blockStateStr.split(":", 3);
 						if (parts.length != 0) {
 							Identifier blockId;
 							int startIndex;
@@ -111,13 +122,15 @@ public final class PropertiesParsingHelper {
 								ContinuityClient.LOGGER.warn("Invalid '" + propertyKey + "' element '" + blockStateStr + "' at index " + i + " in file '" + fileLocation + "' in pack '" + packName + "'", e);
 								continue;
 							}
+
 							Block block = Registry.BLOCK.get(blockId);
 							if (block != Blocks.AIR) {
 								if (parts.length > startIndex) {
 									ImmutableMap.Builder<Property<?>, ImmutableList<Comparable<?>>> propertyMapBuilder = ImmutableMap.builder();
+
 									for (int j = startIndex; j < parts.length; j++) {
 										String part = parts[j];
-										String[] propertyParts = part.split("=");
+										String[] propertyParts = part.split("=", 2);
 										if (propertyParts.length == 2) {
 											String propertyName = propertyParts[0];
 											Property<?> property = block.getStateManager().getProperty(propertyName);
@@ -126,6 +139,7 @@ public final class PropertiesParsingHelper {
 												String[] propertyValueStrs = propertyValuesStr.split(",");
 												if (propertyValueStrs.length != 0) {
 													ImmutableList.Builder<Comparable<?>> valuesListBuilder = ImmutableList.builder();
+
 													for (String propertyValueStr : propertyValueStrs) {
 														Optional<? extends Comparable<?>> optional = property.parse(propertyValueStr);
 														if (optional.isPresent()) {
@@ -135,13 +149,14 @@ public final class PropertiesParsingHelper {
 															continue Block;
 														}
 													}
+
 													ImmutableList<Comparable<?>> valuesList = valuesListBuilder.build();
 													if (!valuesList.isEmpty()) {
 														propertyMapBuilder.put(property, valuesList);
 													}
 												}
 											} else {
-												ContinuityClient.LOGGER.warn("Invalid block property '" + propertyName + "' for block '" + blockId + "' in '" + propertyKey + "' element '" + blockStateStr + "' at index " + i + " in file '" + fileLocation + "' in pack '" + packName + "'");
+												ContinuityClient.LOGGER.warn("Unknown block property '" + propertyName + "' for block '" + blockId + "' in '" + propertyKey + "' element '" + blockStateStr + "' at index " + i + " in file '" + fileLocation + "' in pack '" + packName + "'");
 												continue Block;
 											}
 										} else {
@@ -149,6 +164,7 @@ public final class PropertiesParsingHelper {
 											continue Block;
 										}
 									}
+
 									ImmutableMap<Property<?>, ImmutableList<Comparable<?>>> propertyMap = propertyMapBuilder.build();
 									if (!propertyMap.isEmpty()) {
 										predicateListBuilder.add(state -> {
@@ -172,11 +188,12 @@ public final class PropertiesParsingHelper {
 								}
 								predicateListBuilder.add(state -> state.getBlock() == block);
 							} else {
-								ContinuityClient.LOGGER.warn("Invalid block '" + blockId + "' in '" + propertyKey + "' element '" + blockStateStr + "' at index " + i + " in file '" + fileLocation + "' in pack '" + packName + "'");
+								ContinuityClient.LOGGER.warn("Unknown block '" + blockId + "' in '" + propertyKey + "' element '" + blockStateStr + "' at index " + i + " in file '" + fileLocation + "' in pack '" + packName + "'");
 							}
 						}
 					}
 				}
+
 				ImmutableList<Predicate<BlockState>> predicateList = predicateListBuilder.build();
 				if (!predicateList.isEmpty()) {
 					int amount = predicateList.size();
@@ -188,6 +205,8 @@ public final class PropertiesParsingHelper {
 						}
 						return false;
 					};
+				} else if (!nullIfEmpty) {
+					return state -> false;
 				}
 			}
 		}
@@ -198,11 +217,10 @@ public final class PropertiesParsingHelper {
 	public static Symmetry parseSymmetry(Properties properties, String propertyKey, Identifier fileLocation, String packName) {
 		String symmetryStr = properties.getProperty(propertyKey);
 		if (symmetryStr != null) {
-			symmetryStr = symmetryStr.trim();
 			try {
-				return Symmetry.valueOf(symmetryStr.toUpperCase(Locale.ROOT));
+				return Symmetry.valueOf(symmetryStr.trim().toUpperCase(Locale.ROOT));
 			} catch (IllegalArgumentException e) {
-				ContinuityClient.LOGGER.warn("Invalid '" + propertyKey + "' value '" + symmetryStr + "' in file '" + fileLocation + "' in pack '" + packName + "'");
+				ContinuityClient.LOGGER.warn("Unknown '" + propertyKey + "' value '" + symmetryStr + "' in file '" + fileLocation + "' in pack '" + packName + "'");
 			}
 		}
 		return null;

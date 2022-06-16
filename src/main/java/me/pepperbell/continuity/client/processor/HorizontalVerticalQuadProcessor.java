@@ -1,17 +1,16 @@
 package me.pepperbell.continuity.client.processor;
 
-import java.util.Random;
 import java.util.function.Supplier;
 
 import me.pepperbell.continuity.api.client.QuadProcessor;
 import me.pepperbell.continuity.client.processor.simple.SimpleQuadProcessor;
 import me.pepperbell.continuity.client.properties.ConnectingCTMProperties;
-import me.pepperbell.continuity.client.util.DirectionMaps;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
 
 public class HorizontalVerticalQuadProcessor extends HorizontalQuadProcessor {

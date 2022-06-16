@@ -26,9 +26,6 @@ repositories {
 		name 'Shedaniel'
 		url 'https://maven.shedaniel.me'
 	}
-	maven {
-		url 'https://server.bbkr.space/artifactory/libs-release'
-	}
 }
 
 dependencies {
@@ -40,12 +37,13 @@ dependencies {
 	// Fabric API
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	modImplementation('com.terraformersmc:modmenu:3.1.0') {
+	modImplementation('com.terraformersmc:modmenu:4.0.0') {
 		exclude group: 'net.fabricmc.fabric-api'
 	}
 
-	modCompileOnly 'maven.modrinth:sodium:mc1.18.2-0.4.1'
+	modCompileOnly 'maven.modrinth:sodium:mc1.19-0.4.2'
 	modCompileOnly 'io.vram:canvas-fabric-mc118:1.0.2308'
+	modCompileOnly 'maven.modrinth:indium:1.0.3+mc1.18.2'
 }
 
 String getExtraBuildMetadata() {

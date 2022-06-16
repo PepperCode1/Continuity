@@ -6,7 +6,6 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.pepperbell.continuity.client.ContinuityClient;
 import me.pepperbell.continuity.client.processor.Symmetry;
-import me.pepperbell.continuity.client.util.PropertiesParsingHelper;
 import me.pepperbell.continuity.client.util.RandomIndexProvider;
 import net.minecraft.util.Identifier;
 
@@ -32,17 +31,16 @@ public class RandomCTMProperties extends BaseCTMProperties {
 	protected void parseWeights() {
 		String weightsStr = properties.getProperty("weights");
 		if (weightsStr != null) {
-			weightsStr = weightsStr.trim();
-			String[] weightStrs = weightsStr.split("[ ,]");
+			String[] weightStrs = weightsStr.trim().split("[ ,]");
 			if (weightStrs.length != 0) {
 				IntList weights = new IntArrayList();
+
 				for (int i = 0; i < weightStrs.length; i++) {
 					String weightStr = weightStrs[i];
 					if (!weightStr.isEmpty()) {
 						String[] parts = weightStr.split("-");
-						int length = parts.length;
 						try {
-							if (length == 2) {
+							if (parts.length == 2) {
 								int min = Integer.parseInt(parts[0]);
 								int max = Integer.parseInt(parts[1]);
 								if (max >= min) {
@@ -51,7 +49,7 @@ public class RandomCTMProperties extends BaseCTMProperties {
 									}
 									continue;
 								}
-							} else if (length == 1) {
+							} else if (parts.length == 1) {
 								int weight = Integer.parseInt(parts[0]);
 								if (weight > 0) {
 									weights.add(weight);
@@ -64,7 +62,8 @@ public class RandomCTMProperties extends BaseCTMProperties {
 						ContinuityClient.LOGGER.warn("Invalid 'weights' element '" + weightStr + "' at index '" + i + "' in file '" + id + "' in pack '" + packName + "'");
 					}
 				}
-				if (weights.size() > 1) {
+
+				if (!weights.isEmpty()) {
 					indexProviderFactory = new RandomIndexProvider.WeightedFactory(weights.toIntArray());
 				}
 			}
@@ -74,9 +73,8 @@ public class RandomCTMProperties extends BaseCTMProperties {
 	protected void parseRandomLoops() {
 		String randomLoopsStr = properties.getProperty("randomLoops");
 		if (randomLoopsStr != null) {
-			randomLoopsStr = randomLoopsStr.trim();
 			try {
-				int randomLoops = Integer.parseInt(randomLoopsStr);
+				int randomLoops = Integer.parseInt(randomLoopsStr.trim());
 				if (randomLoops >= 0 && randomLoops <= 9) {
 					this.randomLoops = randomLoops;
 					return;
@@ -98,8 +96,7 @@ public class RandomCTMProperties extends BaseCTMProperties {
 	protected void parseLinked() {
 		String linkedStr = properties.getProperty("linked");
 		if (linkedStr != null) {
-			linkedStr = linkedStr.trim();
-			linked = Boolean.parseBoolean(linkedStr);
+			linked = Boolean.parseBoolean(linkedStr.trim());
 		}
 	}
 

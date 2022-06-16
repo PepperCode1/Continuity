@@ -110,7 +110,7 @@ public class BaseProcessingPredicate implements ProcessingPredicate {
 				BlockEntity blockEntity = blockView.getBlockEntity(pos);
 				if (blockEntity instanceof Nameable nameable) {
 					if (nameable.hasCustomName()) {
-						blockEntityName = nameable.getCustomName().asString();
+						blockEntityName = nameable.getCustomName().getString();
 					} else {
 						blockEntityName = null;
 					}

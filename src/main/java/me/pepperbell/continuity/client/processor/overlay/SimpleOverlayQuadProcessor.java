@@ -1,7 +1,6 @@
 package me.pepperbell.continuity.client.processor.overlay;
 
 import java.util.List;
-import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -12,7 +11,7 @@ import me.pepperbell.continuity.client.processor.ProcessingPredicate;
 import me.pepperbell.continuity.client.processor.simple.SimpleQuadProcessor;
 import me.pepperbell.continuity.client.processor.simple.SpriteProvider;
 import me.pepperbell.continuity.client.properties.BaseCTMProperties;
-import me.pepperbell.continuity.client.properties.section.OverlayPropertiesSection;
+import me.pepperbell.continuity.client.properties.overlay.OverlayPropertiesSection;
 import me.pepperbell.continuity.client.util.QuadUtil;
 import me.pepperbell.continuity.client.util.RenderUtil;
 import me.pepperbell.continuity.client.util.TextureUtil;
@@ -24,6 +23,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
 
 public class SimpleOverlayQuadProcessor extends SimpleQuadProcessor {

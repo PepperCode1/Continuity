@@ -1,7 +1,9 @@
 package me.pepperbell.continuity.client.resource;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Predicate;
 
@@ -9,18 +11,15 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import me.pepperbell.continuity.client.ContinuityClient;
-import me.pepperbell.continuity.client.util.PropertiesParsingHelper;
-import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import me.pepperbell.continuity.client.properties.PropertiesParsingHelper;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceType;
-import net.minecraft.resource.SinglePreparationResourceReloader;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Unit;
-import net.minecraft.util.profiler.Profiler;
 
 public final class CustomBlockLayers {
 	public static final Identifier LOCATION = new Identifier("optifine/block.properties");
@@ -44,43 +43,41 @@ public final class CustomBlockLayers {
 		return null;
 	}
 
-	@ApiStatus.Internal
-	public static void init() {
-		ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(ReloadListener.INSTANCE);
-	}
-
 	private static void reload(ResourceManager manager) {
 		System.arraycopy(EMPTY_LAYER_PREDICATES, 0, LAYER_PREDICATES, 0, EMPTY_LAYER_PREDICATES.length);
-		try (Resource resource = manager.getResource(LOCATION)) {
-			Properties properties = new Properties();
-			properties.load(resource.getInputStream());
-			reload(properties, resource.getId(), resource.getResourcePackName());
-		} catch (FileNotFoundException e) {
-			//
-		} catch (Exception e) {
-			ContinuityClient.LOGGER.error("Failed to load custom block layers from file '" + LOCATION + "'", e);
+
+		Optional<Resource> optionalResource = manager.getResource(LOCATION);
+		if (optionalResource.isPresent()) {
+			Resource resource = optionalResource.get();
+			try (InputStream inputStream = resource.getInputStream()) {
+				Properties properties = new Properties();
+				properties.load(inputStream);
+				reload(properties, LOCATION, resource.getResourcePackName());
+			} catch (IOException e) {
+				ContinuityClient.LOGGER.error("Failed to load custom block layers from file '" + LOCATION + "'", e);
+			}
 		}
 	}
 
 	private static void reload(Properties properties, Identifier fileLocation, String packName) {
 		for (BlockLayer blockLayer : BlockLayer.VALUES) {
 			String propertyKey = "layer." + blockLayer.getKey();
-			Predicate<BlockState> predicate = PropertiesParsingHelper.parseBlockStates(properties, propertyKey, fileLocation, packName);
+			Predicate<BlockState> predicate = PropertiesParsingHelper.parseBlockStates(properties, propertyKey, fileLocation, packName, true);
 			LAYER_PREDICATES[blockLayer.ordinal()] = predicate;
 		}
 	}
 
-	public static class ReloadListener extends SinglePreparationResourceReloader<Unit> implements IdentifiableResourceReloadListener {
-		private static final ReloadListener INSTANCE = new ReloadListener();
+	public static class ReloadListener implements SimpleSynchronousResourceReloadListener {
 		public static final Identifier ID = ContinuityClient.asId("custom_block_layers");
+		private static final ReloadListener INSTANCE = new ReloadListener();
 
-		@Override
-		protected Unit prepare(ResourceManager manager, Profiler profiler) {
-			return Unit.INSTANCE;
+		@ApiStatus.Internal
+		public static void init() {
+			ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(INSTANCE);
 		}
 
 		@Override
-		protected void apply(Unit prepared, ResourceManager manager, Profiler profiler) {
+		public void reload(ResourceManager manager) {
 			CustomBlockLayers.reload(manager);
 		}
 

@@ -1,6 +1,5 @@
 package me.pepperbell.continuity.api.client;
 
-import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -10,6 +9,7 @@ import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
 
 public interface QuadProcessor {
@@ -19,6 +19,10 @@ public interface QuadProcessor {
 		void addEmitterConsumer(Consumer<QuadEmitter> consumer);
 
 		void addMesh(Mesh mesh);
+
+		QuadEmitter getExtraQuadEmitter();
+
+		void markHasExtraQuads();
 	}
 
 	enum ProcessingResult {

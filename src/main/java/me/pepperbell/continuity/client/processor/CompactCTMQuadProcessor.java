@@ -1,7 +1,6 @@
 package me.pepperbell.continuity.client.processor;
 
 import java.util.List;
-import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -16,12 +15,10 @@ import me.pepperbell.continuity.client.ContinuityClient;
 import me.pepperbell.continuity.client.processor.simple.CTMSpriteProvider;
 import me.pepperbell.continuity.client.properties.BaseCTMProperties;
 import me.pepperbell.continuity.client.properties.CompactConnectingCTMProperties;
-import me.pepperbell.continuity.client.util.DirectionMaps;
 import me.pepperbell.continuity.client.util.MathUtil;
 import me.pepperbell.continuity.client.util.QuadUtil;
 import me.pepperbell.continuity.client.util.TextureUtil;
 import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
-import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadView;
@@ -31,6 +28,7 @@ import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
 
 public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
@@ -161,11 +159,9 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 			VertexContainer vertexContainer = context.getData(ProcessingDataKeys.VERTEX_CONTAINER_KEY);
 			vertexContainer.fillBaseVertices(quad);
 
-			MeshBuilder meshBuilder = context.getData(ProcessingDataKeys.MESH_BUILDER_KEY);
-			QuadEmitter quadEmitter = meshBuilder.getEmitter();
+			QuadEmitter extraQuadEmitter = context.getExtraQuadEmitter();
 
 			RenderMaterial material = quad.material();
-			Direction cullFace = quad.cullFace();
 
 			if (split01 & split12 & split23 & split30) {
 				float delta01;
@@ -193,10 +189,10 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 				vertexContainer.vertex30.setLerped(delta30, vertexContainer.vertex3, vertexContainer.vertex0);
 				vertexContainer.vertex4.setLerped(delta4, vertexContainer.vertex01, vertexContainer.vertex23);
 
-				splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 0, quadEmitter, spriteIndex0);
-				splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 1, quadEmitter, spriteIndex1);
-				splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 2, quadEmitter, spriteIndex2);
-				splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 3, quadEmitter, spriteIndex3);
+				splitQuadrant(quad, sprite, material, vertexContainer, 0, extraQuadEmitter, spriteIndex0);
+				splitQuadrant(quad, sprite, material, vertexContainer, 1, extraQuadEmitter, spriteIndex1);
+				splitQuadrant(quad, sprite, material, vertexContainer, 2, extraQuadEmitter, spriteIndex2);
+				splitQuadrant(quad, sprite, material, vertexContainer, 3, extraQuadEmitter, spriteIndex3);
 			} else {
 				if (!(split01 | split12)) {
 					split12 = true;
@@ -224,8 +220,8 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 						vertexContainer.vertex01.setLerped(delta01, vertexContainer.vertex0, vertexContainer.vertex1);
 						vertexContainer.vertex23.setLerped(delta23, vertexContainer.vertex2, vertexContainer.vertex3);
 
-						splitHalf(quad, sprite, material, cullFace, vertexContainer, 1, quadEmitter, spriteIndex1);
-						splitHalf(quad, sprite, material, cullFace, vertexContainer, 3, quadEmitter, spriteIndex3);
+						splitHalf(quad, sprite, material, vertexContainer, 1, extraQuadEmitter, spriteIndex1);
+						splitHalf(quad, sprite, material, vertexContainer, 3, extraQuadEmitter, spriteIndex3);
 					} else {
 						float delta12;
 						float delta30;
@@ -240,8 +236,8 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 						vertexContainer.vertex12.setLerped(delta12, vertexContainer.vertex1, vertexContainer.vertex2);
 						vertexContainer.vertex30.setLerped(delta30, vertexContainer.vertex3, vertexContainer.vertex0);
 
-						splitHalf(quad, sprite, material, cullFace, vertexContainer, 0, quadEmitter, spriteIndex0);
-						splitHalf(quad, sprite, material, cullFace, vertexContainer, 2, quadEmitter, spriteIndex2);
+						splitHalf(quad, sprite, material, vertexContainer, 0, extraQuadEmitter, spriteIndex0);
+						splitHalf(quad, sprite, material, vertexContainer, 2, extraQuadEmitter, spriteIndex2);
 					}
 				} else { // 3
 					if (!split01) {
@@ -266,9 +262,9 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 						vertexContainer.vertex30.setLerped(delta30, vertexContainer.vertex3, vertexContainer.vertex0);
 						vertexContainer.vertex4.setLerped(delta4, vertexContainer.vertex12, vertexContainer.vertex30);
 
-						splitHalf(quad, sprite, material, cullFace, vertexContainer, 0, quadEmitter, spriteIndex0);
-						splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 2, quadEmitter, spriteIndex2);
-						splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 3, quadEmitter, spriteIndex3);
+						splitHalf(quad, sprite, material, vertexContainer, 0, extraQuadEmitter, spriteIndex0);
+						splitQuadrant(quad, sprite, material, vertexContainer, 2, extraQuadEmitter, spriteIndex2);
+						splitQuadrant(quad, sprite, material, vertexContainer, 3, extraQuadEmitter, spriteIndex3);
 					} else if (!split12) {
 						float delta01;
 						float delta23;
@@ -291,9 +287,9 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 						vertexContainer.vertex30.setLerped(delta30, vertexContainer.vertex3, vertexContainer.vertex0);
 						vertexContainer.vertex4.setLerped(delta4, vertexContainer.vertex01, vertexContainer.vertex23);
 
-						splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 0, quadEmitter, spriteIndex0);
-						splitHalf(quad, sprite, material, cullFace, vertexContainer, 1, quadEmitter, spriteIndex1);
-						splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 3, quadEmitter, spriteIndex3);
+						splitQuadrant(quad, sprite, material, vertexContainer, 0, extraQuadEmitter, spriteIndex0);
+						splitHalf(quad, sprite, material, vertexContainer, 1, extraQuadEmitter, spriteIndex1);
+						splitQuadrant(quad, sprite, material, vertexContainer, 3, extraQuadEmitter, spriteIndex3);
 					} else if (!split23) {
 						float delta01;
 						float delta12;
@@ -316,9 +312,9 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 						vertexContainer.vertex30.setLerped(delta30, vertexContainer.vertex3, vertexContainer.vertex0);
 						vertexContainer.vertex4.setLerped(delta4, vertexContainer.vertex12, vertexContainer.vertex30);
 
-						splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 0, quadEmitter, spriteIndex0);
-						splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 1, quadEmitter, spriteIndex1);
-						splitHalf(quad, sprite, material, cullFace, vertexContainer, 2, quadEmitter, spriteIndex2);
+						splitQuadrant(quad, sprite, material, vertexContainer, 0, extraQuadEmitter, spriteIndex0);
+						splitQuadrant(quad, sprite, material, vertexContainer, 1, extraQuadEmitter, spriteIndex1);
+						splitHalf(quad, sprite, material, vertexContainer, 2, extraQuadEmitter, spriteIndex2);
 					} else {
 						float delta01;
 						float delta23;
@@ -341,14 +337,14 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 						vertexContainer.vertex23.setLerped(delta23, vertexContainer.vertex2, vertexContainer.vertex3);
 						vertexContainer.vertex4.setLerped(delta4, vertexContainer.vertex01, vertexContainer.vertex23);
 
-						splitHalf(quad, sprite, material, cullFace, vertexContainer, 3, quadEmitter, spriteIndex3);
-						splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 1, quadEmitter, spriteIndex1);
-						splitQuadrant(quad, sprite, material, cullFace, vertexContainer, 2, quadEmitter, spriteIndex2);
+						splitHalf(quad, sprite, material, vertexContainer, 3, extraQuadEmitter, spriteIndex3);
+						splitQuadrant(quad, sprite, material, vertexContainer, 1, extraQuadEmitter, spriteIndex1);
+						splitQuadrant(quad, sprite, material, vertexContainer, 2, extraQuadEmitter, spriteIndex2);
 					}
 				}
 			}
 
-			context.addMesh(meshBuilder.build());
+			context.markHasExtraQuads();
 			return ProcessingResult.ABORT_AND_CANCEL_QUAD;
 		} else {
 			boolean firstSplit;
@@ -385,11 +381,9 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 			VertexContainer vertexContainer = context.getData(ProcessingDataKeys.VERTEX_CONTAINER_KEY);
 			vertexContainer.fillBaseVertices(quad);
 
-			MeshBuilder meshBuilder = context.getData(ProcessingDataKeys.MESH_BUILDER_KEY);
-			QuadEmitter quadEmitter = meshBuilder.getEmitter();
+			QuadEmitter extraQuadEmitter = context.getExtraQuadEmitter();
 
 			RenderMaterial material = quad.material();
-			Direction cullFace = quad.cullFace();
 
 			if (firstSplit) {
 				float delta01;
@@ -405,8 +399,8 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 				vertexContainer.vertex01.setLerped(delta01, vertexContainer.vertex0, vertexContainer.vertex1);
 				vertexContainer.vertex23.setLerped(delta23, vertexContainer.vertex2, vertexContainer.vertex3);
 
-				splitHalf(quad, sprite, material, cullFace, vertexContainer, 3, quadEmitter, spriteIndexA);
-				splitHalf(quad, sprite, material, cullFace, vertexContainer, 1, quadEmitter, spriteIndexB);
+				splitHalf(quad, sprite, material, vertexContainer, 3, extraQuadEmitter, spriteIndexA);
+				splitHalf(quad, sprite, material, vertexContainer, 1, extraQuadEmitter, spriteIndexB);
 			} else {
 				float delta12;
 				float delta30;
@@ -421,11 +415,11 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 				vertexContainer.vertex12.setLerped(delta12, vertexContainer.vertex1, vertexContainer.vertex2);
 				vertexContainer.vertex30.setLerped(delta30, vertexContainer.vertex3, vertexContainer.vertex0);
 
-				splitHalf(quad, sprite, material, cullFace, vertexContainer, 0, quadEmitter, spriteIndexA);
-				splitHalf(quad, sprite, material, cullFace, vertexContainer, 2, quadEmitter, spriteIndexB);
+				splitHalf(quad, sprite, material, vertexContainer, 0, extraQuadEmitter, spriteIndexA);
+				splitHalf(quad, sprite, material, vertexContainer, 2, extraQuadEmitter, spriteIndexB);
 			}
 
-			context.addMesh(meshBuilder.build());
+			context.markHasExtraQuads();
 			return ProcessingResult.ABORT_AND_CANCEL_QUAD;
 		}
 	}
@@ -469,10 +463,9 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 		}
 	}
 
-	protected void splitHalf(QuadView quad, Sprite sprite, RenderMaterial material, Direction cullFace, VertexContainer vertexContainer, int id, QuadEmitter quadEmitter, int spriteIndex) {
+	protected void splitHalf(QuadView quad, Sprite sprite, RenderMaterial material, VertexContainer vertexContainer, int id, QuadEmitter quadEmitter, int spriteIndex) {
 		quad.copyTo(quadEmitter);
 		quadEmitter.material(material);
-		quadEmitter.cullFace(cullFace);
 		vertexContainer.lerpedVertices[(id + 1) % 4].writeToQuad(quadEmitter, (id + 2) % 4);
 		int id3 = (id + 3) % 4;
 		vertexContainer.lerpedVertices[id3].writeToQuad(quadEmitter, id3);
@@ -480,10 +473,9 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 		quadEmitter.emit();
 	}
 
-	protected void splitQuadrant(QuadView quad, Sprite sprite, RenderMaterial material, Direction cullFace, VertexContainer vertexContainer, int id, QuadEmitter quadEmitter, int spriteIndex) {
+	protected void splitQuadrant(QuadView quad, Sprite sprite, RenderMaterial material, VertexContainer vertexContainer, int id, QuadEmitter quadEmitter, int spriteIndex) {
 		quad.copyTo(quadEmitter);
 		quadEmitter.material(material);
-		quadEmitter.cullFace(cullFace);
 		vertexContainer.lerpedVertices[id].writeToQuad(quadEmitter, (id + 1) % 4);
 		vertexContainer.vertex4.writeToQuad(quadEmitter, (id + 2) % 4);
 		int id3 = (id + 3) % 4;

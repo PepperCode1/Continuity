@@ -3,7 +3,6 @@ package me.pepperbell.continuity.client.properties.overlay;
 import java.util.Properties;
 
 import me.pepperbell.continuity.client.properties.RepeatCTMProperties;
-import me.pepperbell.continuity.client.properties.section.OverlayPropertiesSection;
 import net.minecraft.util.Identifier;
 
 public class RepeatOverlayCTMProperties extends RepeatCTMProperties implements OverlayPropertiesSection.Provider {

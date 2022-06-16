@@ -1,4 +1,4 @@
-package me.pepperbell.continuity.client.properties.section;
+package me.pepperbell.continuity.client.properties.overlay;
 
 import java.util.Locale;
 import java.util.Properties;
@@ -36,9 +36,8 @@ public class OverlayPropertiesSection {
 	protected void parseTintIndex() {
 		String tintIndexStr = properties.getProperty("tintIndex");
 		if (tintIndexStr != null) {
-			tintIndexStr = tintIndexStr.trim();
 			try {
-				int tintIndex = Integer.parseInt(tintIndexStr);
+				int tintIndex = Integer.parseInt(tintIndexStr.trim());
 				if (tintIndex >= 0) {
 					this.tintIndex = tintIndex;
 					return;
@@ -53,19 +52,12 @@ public class OverlayPropertiesSection {
 	protected void parseTintBlock() {
 		String tintBlockStr = properties.getProperty("tintBlock");
 		if (tintBlockStr != null) {
-			tintBlockStr = tintBlockStr.trim();
-			String[] parts = tintBlockStr.split(":", 3);
+			String[] parts = tintBlockStr.trim().split(":", 3);
 			if (parts.length != 0) {
 				Identifier blockId;
 				try {
-					if (parts.length == 1) {
+					if (parts.length == 1 || parts[1].contains("=")) {
 						blockId = new Identifier(parts[0]);
-					} else if (parts.length == 2) {
-						if (parts[1].contains("=")) {
-							blockId = new Identifier(parts[0]);
-						} else {
-							blockId = new Identifier(parts[0], parts[1]);
-						}
 					} else {
 						blockId = new Identifier(parts[0], parts[1]);
 					}
@@ -73,11 +65,12 @@ public class OverlayPropertiesSection {
 					ContinuityClient.LOGGER.warn("Invalid 'tintBlock' value '" + tintBlockStr + "' in file '" + id + "' in pack '" + packName + "'", e);
 					return;
 				}
+
 				Block block = Registry.BLOCK.get(blockId);
 				if (block != Blocks.AIR) {
 					tintBlock = block.getDefaultState();
 				} else {
-					ContinuityClient.LOGGER.warn("Invalid block '" + blockId + "' in 'tintBlock' value '" + tintBlockStr + "' in file '" + id + "' in pack '" + packName + "'");
+					ContinuityClient.LOGGER.warn("Unknown block '" + blockId + "' in 'tintBlock' value '" + tintBlockStr + "' in file '" + id + "' in pack '" + packName + "'");
 				}
 			}
 		}
@@ -87,14 +80,11 @@ public class OverlayPropertiesSection {
 		String layerStr = properties.getProperty("layer");
 		if (layerStr != null) {
 			layerStr = layerStr.trim().toLowerCase(Locale.ROOT);
-			if (layerStr.equals("cutout_mipped")) {
-				layer = BlendMode.CUTOUT_MIPPED;
-			} else if (layerStr.equals("cutout")) {
-				layer = BlendMode.CUTOUT;
-			} else if (layerStr.equals("translucent")) {
-				layer = BlendMode.TRANSLUCENT;
-			} else {
-				ContinuityClient.LOGGER.warn("Invalid 'layer' value '" + layerStr + " in file '" + id + "' in pack '" + packName + "'");
+			switch (layerStr) {
+				case "cutout_mipped" -> layer = BlendMode.CUTOUT_MIPPED;
+				case "cutout" -> layer = BlendMode.CUTOUT;
+				case "translucent" -> layer = BlendMode.TRANSLUCENT;
+				default -> ContinuityClient.LOGGER.warn("Unknown 'layer' value '" + layerStr + " in file '" + id + "' in pack '" + packName + "'");
 			}
 		}
 	}
