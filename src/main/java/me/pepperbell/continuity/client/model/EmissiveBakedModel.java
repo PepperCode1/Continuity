@@ -7,6 +7,7 @@ import me.pepperbell.continuity.client.config.ContinuityConfig;
 import me.pepperbell.continuity.client.util.QuadUtil;
 import me.pepperbell.continuity.client.util.RenderUtil;
 import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
+import net.fabricmc.fabric.api.renderer.v1.material.MaterialFinder;
 import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
@@ -24,8 +25,21 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
 
 public class EmissiveBakedModel extends ForwardingBakedModel {
-	protected static final RenderMaterial DEFAULT_EMISSIVE_MATERIAL = RenderUtil.getMaterialFinder().emissive(0, true).disableDiffuse(0, true).disableAo(0, true).find();
-	protected static final RenderMaterial CUTOUT_MIPPED_EMISSIVE_MATERIAL = RenderUtil.getMaterialFinder().emissive(0, true).disableDiffuse(0, true).disableAo(0, true).blendMode(0, BlendMode.CUTOUT_MIPPED).find();
+	protected static final RenderMaterial[] EMISSIVE_MATERIALS;
+	protected static final RenderMaterial DEFAULT_EMISSIVE_MATERIAL;
+	protected static final RenderMaterial CUTOUT_MIPPED_EMISSIVE_MATERIAL;
+
+	static {
+		BlendMode[] blendModes = BlendMode.values();
+		EMISSIVE_MATERIALS = new RenderMaterial[blendModes.length];
+		MaterialFinder finder = RenderUtil.getMaterialFinder();
+		for (BlendMode blendMode : blendModes) {
+			EMISSIVE_MATERIALS[blendMode.ordinal()] = finder.emissive(0, true).disableDiffuse(0, true).disableAo(0, true).blendMode(0, blendMode).find();
+		}
+
+		DEFAULT_EMISSIVE_MATERIAL = EMISSIVE_MATERIALS[BlendMode.DEFAULT.ordinal()];
+		CUTOUT_MIPPED_EMISSIVE_MATERIAL = EMISSIVE_MATERIALS[BlendMode.CUTOUT_MIPPED.ordinal()];
+	}
 
 	public EmissiveBakedModel(BakedModel wrapped) {
 		this.wrapped = wrapped;
@@ -111,7 +125,7 @@ public class EmissiveBakedModel extends ForwardingBakedModel {
 
 		protected boolean active;
 		protected boolean didEmit;
-		protected boolean wasDefaultLayerCalculated;
+		protected boolean calculateDefaultLayer;
 		protected boolean isDefaultLayerSolid;
 
 		@Override
@@ -126,17 +140,23 @@ public class EmissiveBakedModel extends ForwardingBakedModel {
 				quad.copyTo(emitter);
 
 				BlendMode blendMode = RenderUtil.getBlendMode(quad);
-				boolean isSolid = false;
+				RenderMaterial emissiveMaterial;
 				if (blendMode == BlendMode.DEFAULT) {
-					if (!wasDefaultLayerCalculated) {
-						wasDefaultLayerCalculated = true;
+					if (calculateDefaultLayer) {
 						isDefaultLayerSolid = RenderLayers.getBlockLayer(state) == RenderLayer.getSolid();
+						calculateDefaultLayer = false;
 					}
-					isSolid = isDefaultLayerSolid;
+
+					if (isDefaultLayerSolid) {
+						emissiveMaterial = CUTOUT_MIPPED_EMISSIVE_MATERIAL;
+					} else {
+						emissiveMaterial = DEFAULT_EMISSIVE_MATERIAL;
+					}
 				} else if (blendMode == BlendMode.SOLID) {
-					isSolid = true;
+					emissiveMaterial = CUTOUT_MIPPED_EMISSIVE_MATERIAL;
+				} else {
+					emissiveMaterial = EMISSIVE_MATERIALS[blendMode.ordinal()];
 				}
-				RenderMaterial emissiveMaterial = isSolid ? CUTOUT_MIPPED_EMISSIVE_MATERIAL : DEFAULT_EMISSIVE_MATERIAL;
 
 				emitter.material(emissiveMaterial);
 				QuadUtil.interpolate(emitter, sprite, emissiveSprite);
@@ -163,7 +183,7 @@ public class EmissiveBakedModel extends ForwardingBakedModel {
 
 			active = true;
 			didEmit = false;
-			wasDefaultLayerCalculated = false;
+			calculateDefaultLayer = true;
 			isDefaultLayerSolid = false;
 
 			cullingCache.prepare();
