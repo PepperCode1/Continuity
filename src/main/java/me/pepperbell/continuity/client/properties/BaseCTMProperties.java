@@ -22,10 +22,8 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import me.pepperbell.continuity.api.client.CTMProperties;
 import me.pepperbell.continuity.api.client.CTMPropertiesFactory;
 import me.pepperbell.continuity.client.ContinuityClient;
-import me.pepperbell.continuity.client.resource.InvalidIdentifierStateHolder;
 import me.pepperbell.continuity.client.resource.ResourcePackUtil;
 import me.pepperbell.continuity.client.resource.ResourceRedirectHandler;
-import me.pepperbell.continuity.client.util.BooleanState;
 import me.pepperbell.continuity.client.util.MathUtil;
 import me.pepperbell.continuity.client.util.TextureUtil;
 import me.pepperbell.continuity.client.util.biome.BiomeHolder;
@@ -149,6 +147,7 @@ public class BaseCTMProperties implements CTMProperties {
 		parseFaces();
 		parseBiomes();
 		parseHeights();
+		parseLegacyHeights();
 		parseName();
 		parseResourceCondition();
 	}
@@ -188,9 +187,8 @@ public class BaseCTMProperties implements CTMProperties {
 	protected void parseWeight() {
 		String weightStr = properties.getProperty("weight");
 		if (weightStr != null) {
-			weightStr = weightStr.trim();
 			try {
-				weight = Integer.parseInt(weightStr);
+				weight = Integer.parseInt(weightStr.trim());
 			} catch (NumberFormatException e) {
 				ContinuityClient.LOGGER.warn("Invalid 'weight' value '" + weightStr + "' in file '" + id + "' in pack '" + packName + "'");
 			}
@@ -200,13 +198,11 @@ public class BaseCTMProperties implements CTMProperties {
 	protected void parseTiles() {
 		String tilesStr = properties.getProperty("tiles");
 		if (tilesStr != null) {
-			tilesStr = tilesStr.trim();
-			String[] tileStrs = tilesStr.split("[ ,]");
+			String[] tileStrs = tilesStr.trim().split("[ ,]");
 			if (tileStrs.length != 0) {
 				String basePath = FilenameUtils.getPath(id.getPath());
 				ImmutableList.Builder<Identifier> listBuilder = ImmutableList.builder();
-				BooleanState invalidIdentifierState = InvalidIdentifierStateHolder.get();
-				invalidIdentifierState.enable();
+
 				for (int i = 0; i < tileStrs.length; i++) {
 					String tileStr = tileStrs[i];
 					if (!tileStr.isEmpty()) {
@@ -217,53 +213,63 @@ public class BaseCTMProperties implements CTMProperties {
 							listBuilder.add(SPECIAL_DEFAULT_ID);
 							continue;
 						}
-						if (tileStr.contains("-")) {
-							String[] tileStrRange = tileStr.split("-");
-							if (tileStrRange.length == 2) {
+
+						String[] rangeParts = tileStr.split("-");
+						if (rangeParts.length != 0) {
+							if (rangeParts.length == 2) {
 								try {
-									int min = Integer.parseInt(tileStrRange[0]);
-									int max = Integer.parseInt(tileStrRange[1]);
+									int min = Integer.parseInt(rangeParts[0]);
+									int max = Integer.parseInt(rangeParts[1]);
 									if (min <= max) {
-										for (int t = min; t <= max; t++) {
-											listBuilder.add(new Identifier(id.getNamespace(), basePath + t + ".png"));
+										for (int tile = min; tile <= max; tile++) {
+											listBuilder.add(new Identifier(id.getNamespace(), basePath + tile + ".png"));
 										}
 										continue;
 									}
-								} catch (NumberFormatException e) {
+								} catch (NumberFormatException | InvalidIdentifierException e) {
 									//
 								}
-								ContinuityClient.LOGGER.warn("Invalid 'tiles' element '" + tileStr + "' at index " + i + " in file '" + id + "' in pack '" + packName + "'");
-							}
-						} else {
-							String[] parts = tileStr.split(":", 2);
-							if (parts.length != 0) {
-								String namespace;
-								String path;
-								if (parts.length > 1) {
-									namespace = parts[0];
-									path = parts[1];
+							} else if (rangeParts.length == 1) {
+								String[] parts = tileStr.split(":", 2);
+								if (parts.length != 0) {
+									String namespace;
+									String path;
+									if (parts.length > 1) {
+										namespace = parts[0];
+										path = parts[1];
+									} else {
+										namespace = id.getNamespace();
+										path = parts[0];
+									}
+
+									if (!path.endsWith(".png")) {
+										path = path + ".png";
+									}
+									if (path.startsWith("./")) {
+										path = basePath + path.substring(2);
+									} else if (path.startsWith("~/")) {
+										path = "optifine/" + path.substring(2);
+									} else if (path.startsWith("/")) {
+										path = "optifine/" + path.substring(1);
+									} else if (!path.startsWith("textures/") && !path.startsWith("optifine/")) {
+										path = basePath + path;
+									}
+
+									try {
+										listBuilder.add(new Identifier(namespace, path));
+										continue;
+									} catch (InvalidIdentifierException e) {
+										//
+									}
 								} else {
-									namespace = id.getNamespace();
-									path = parts[0];
+									continue;
 								}
-								if (!path.endsWith(".png")) {
-									path = path + ".png";
-								}
-								if (path.startsWith("./")) {
-									path = basePath + path.substring(2);
-								} else if (path.startsWith("~/")) {
-									path = "optifine/" + path.substring(2);
-								} else if (path.startsWith("/")) {
-									path = "optifine/" + path.substring(1);
-								} else if (!path.startsWith("textures/") && !path.startsWith("optifine/")) {
-									path = basePath + path;
-								}
-								listBuilder.add(new Identifier(namespace, path));
 							}
+							ContinuityClient.LOGGER.warn("Invalid 'tiles' element '" + tileStr + "' at index " + i + " in file '" + id + "' in pack '" + packName + "'");
 						}
 					}
 				}
-				invalidIdentifierState.disable();
+
 				ImmutableList<Identifier> list = listBuilder.build();
 				if (!list.isEmpty()) {
 					tiles = list;
@@ -282,20 +288,20 @@ public class BaseCTMProperties implements CTMProperties {
 	protected void parseFaces() {
 		String facesStr = properties.getProperty("faces");
 		if (facesStr != null) {
-			facesStr = facesStr.trim();
-			String[] faceStrs = facesStr.split("[ ,]");
+			String[] faceStrs = facesStr.trim().split("[ ,]");
 			if (faceStrs.length != 0) {
 				for (int i = 0; i < faceStrs.length; i++) {
 					String faceStr = faceStrs[i];
 					if (!faceStr.isEmpty()) {
-						faceStr = faceStr.toUpperCase(Locale.ROOT);
-						if (faceStr.equals("BOTTOM")) {
-							faceStr = "DOWN";
-						} else if (faceStr.equals("TOP")) {
-							faceStr = "UP";
+						String faceStr1 = faceStr.toUpperCase(Locale.ROOT);
+
+						if (faceStr1.equals("BOTTOM")) {
+							faceStr1 = "DOWN";
+						} else if (faceStr1.equals("TOP")) {
+							faceStr1 = "UP";
 						}
 						try {
-							Direction direction = Direction.valueOf(faceStr);
+							Direction direction = Direction.valueOf(faceStr1);
 							if (faces == null) {
 								faces = EnumSet.noneOf(Direction.class);
 							}
@@ -304,16 +310,18 @@ public class BaseCTMProperties implements CTMProperties {
 						} catch (IllegalArgumentException e) {
 							//
 						}
-						if (faceStr.equals("SIDES")) {
+
+						if (faceStr1.equals("SIDES")) {
 							if (faces == null) {
 								faces = EnumSet.noneOf(Direction.class);
 							}
 							Iterators.addAll(faces, Direction.Type.HORIZONTAL.iterator());
 							continue;
-						} else if (faceStr.equals("ALL")) {
+						} else if (faceStr1.equals("ALL")) {
 							faces = null;
-							return;
+							break;
 						}
+
 						ContinuityClient.LOGGER.warn("Unknown 'faces' element '" + faceStr + "' at index " + i + " in file '" + id + "' in pack '" + packName + "'");
 					}
 				}
@@ -330,9 +338,11 @@ public class BaseCTMProperties implements CTMProperties {
 				negate = true;
 				biomesStr = biomesStr.substring(1);
 			}
+
 			String[] biomeStrs = biomesStr.split(" ");
 			if (biomeStrs.length != 0) {
 				ImmutableSet.Builder<BiomeHolder> setBuilder = ImmutableSet.builder();
+
 				for (int i = 0; i < biomeStrs.length; i++) {
 					String biomeStr = biomeStrs[i];
 					if (!biomeStr.isEmpty()) {
@@ -344,6 +354,7 @@ public class BaseCTMProperties implements CTMProperties {
 						}
 					}
 				}
+
 				ImmutableSet<BiomeHolder> set = setBuilder.build();
 				if (!set.isEmpty()) {
 					biomePredicate = biome -> {
@@ -365,48 +376,26 @@ public class BaseCTMProperties implements CTMProperties {
 	protected void parseHeights() {
 		String heightsStr = properties.getProperty("heights");
 		if (heightsStr != null) {
-			heightsStr = heightsStr.trim();
-			String[] heightStrs = heightsStr.split("[ ,]");
+			String[] heightStrs = heightsStr.trim().split("[ ,]");
 			if (heightStrs.length != 0) {
 				ImmutableList.Builder<IntPredicate> predicateListBuilder = ImmutableList.builder();
+
 				for (int i = 0; i < heightStrs.length; i++) {
 					String heightStr = heightStrs[i];
 					if (!heightStr.isEmpty()) {
 						String[] parts = heightStr.split("\\.\\.", 2);
-						if (parts.length > 1) {
-							try {
-								if (parts[1].isEmpty()) {
-									int min = Integer.parseInt(parts[0]);
-									predicateListBuilder.add(y -> y >= min);
-								} else if (parts[0].isEmpty()) {
-									int max = Integer.parseInt(parts[1]);
-									predicateListBuilder.add(y -> y <= max);
-								} else {
-									int min = Integer.parseInt(parts[0]);
-									int max = Integer.parseInt(parts[1]);
-									if (min < max) {
-										predicateListBuilder.add(y -> y >= min && y <= max);
-									} else if (min > max) {
-										predicateListBuilder.add(y -> y >= max && y <= min);
-									} else {
-										predicateListBuilder.add(y -> y == min);
-									}
-								}
-								continue;
-							} catch (NumberFormatException e) {
-								//
-							}
-						} else {
-							String heightStr1 = heightStr.replaceAll("[()]", "");
-							if (!heightStr1.isEmpty()) {
-								int separatorIndex = heightStr1.indexOf('-', heightStr1.charAt(0) == '-' ? 1 : 0);
+						if (parts.length != 0) {
+							if (parts.length == 2) {
 								try {
-									if (separatorIndex == -1) {
-										int height = Integer.parseInt(heightStr1);
-										predicateListBuilder.add(y -> y == height);
+									if (parts[1].isEmpty()) {
+										int min = Integer.parseInt(parts[0]);
+										predicateListBuilder.add(y -> y >= min);
+									} else if (parts[0].isEmpty()) {
+										int max = Integer.parseInt(parts[1]);
+										predicateListBuilder.add(y -> y <= max);
 									} else {
-										int min = Integer.parseInt(heightStr1.substring(0, separatorIndex));
-										int max = Integer.parseInt(heightStr1.substring(separatorIndex + 1));
+										int min = Integer.parseInt(parts[0]);
+										int max = Integer.parseInt(parts[1]);
 										if (min < max) {
 											predicateListBuilder.add(y -> y >= min && y <= max);
 										} else if (min > max) {
@@ -419,11 +408,36 @@ public class BaseCTMProperties implements CTMProperties {
 								} catch (NumberFormatException e) {
 									//
 								}
+							} else if (parts.length == 1) {
+								String heightStr1 = heightStr.replaceAll("[()]", "");
+								if (!heightStr1.isEmpty()) {
+									int separatorIndex = heightStr1.indexOf('-', heightStr1.charAt(0) == '-' ? 1 : 0);
+									try {
+										if (separatorIndex == -1) {
+											int height = Integer.parseInt(heightStr1);
+											predicateListBuilder.add(y -> y == height);
+										} else {
+											int min = Integer.parseInt(heightStr1.substring(0, separatorIndex));
+											int max = Integer.parseInt(heightStr1.substring(separatorIndex + 1));
+											if (min < max) {
+												predicateListBuilder.add(y -> y >= min && y <= max);
+											} else if (min > max) {
+												predicateListBuilder.add(y -> y >= max && y <= min);
+											} else {
+												predicateListBuilder.add(y -> y == min);
+											}
+										}
+										continue;
+									} catch (NumberFormatException e) {
+										//
+									}
+								}
 							}
+							ContinuityClient.LOGGER.warn("Invalid 'heights' element '" + heightStr + "' at index " + i + " in file '" + id + "' in pack '" + packName + "'");
 						}
-						ContinuityClient.LOGGER.warn("Invalid 'heights' element '" + heightStr + "' at index " + i + " in file '" + id + "' in pack '" + packName + "'");
 					}
 				}
+
 				ImmutableList<IntPredicate> predicateList = predicateListBuilder.build();
 				if (!predicateList.isEmpty()) {
 					int amount = predicateList.size();
@@ -438,7 +452,9 @@ public class BaseCTMProperties implements CTMProperties {
 				}
 			}
 		}
+	}
 
+	protected void parseLegacyHeights() {
 		if (heightPredicate == null) {
 			String minHeightStr = properties.getProperty("minHeight");
 			String maxHeightStr = properties.getProperty("maxHeight");
@@ -448,23 +464,22 @@ public class BaseCTMProperties implements CTMProperties {
 				int min = 0;
 				int max = 0;
 				if (hasMinHeight) {
-					minHeightStr = minHeightStr.trim();
 					try {
-						min = Integer.parseInt(minHeightStr);
+						min = Integer.parseInt(minHeightStr.trim());
 					} catch (NumberFormatException e) {
 						hasMinHeight = false;
 						ContinuityClient.LOGGER.warn("Invalid 'minHeight' value '" + minHeightStr + "' in file '" + id + "' in pack '" + packName + "'");
 					}
 				}
 				if (hasMaxHeight) {
-					maxHeightStr = maxHeightStr.trim();
 					try {
-						max = Integer.parseInt(maxHeightStr);
+						max = Integer.parseInt(maxHeightStr.trim());
 					} catch (NumberFormatException e) {
 						hasMaxHeight = false;
 						ContinuityClient.LOGGER.warn("Invalid 'maxHeight' value '" + minHeightStr + "' in file '" + id + "' in pack '" + packName + "'");
 					}
 				}
+
 				int finalMin = min;
 				int finalMax = max;
 				if (hasMinHeight && hasMaxHeight) {
@@ -487,19 +502,22 @@ public class BaseCTMProperties implements CTMProperties {
 	protected void parseName() {
 		String nameStr = properties.getProperty("name");
 		if (nameStr != null) {
-			nameStr = nameStr.trim();
-			nameStr = StringEscapeUtils.escapeJava(nameStr);
+			nameStr = StringEscapeUtils.escapeJava(nameStr.trim());
 
-			boolean isPattern = false;
-			boolean caseInsensitive = false;
+			boolean isPattern;
+			boolean caseInsensitive;
 			if (nameStr.startsWith("regex:")) {
 				nameStr = nameStr.substring(6);
+				isPattern = false;
+				caseInsensitive = false;
 			} else if (nameStr.startsWith("iregex:")) {
 				nameStr = nameStr.substring(7);
+				isPattern = false;
 				caseInsensitive = true;
 			} else if (nameStr.startsWith("pattern:")) {
 				nameStr = nameStr.substring(8);
 				isPattern = true;
+				caseInsensitive = false;
 			} else if (nameStr.startsWith("ipattern:")) {
 				nameStr = nameStr.substring(9);
 				isPattern = true;
@@ -523,18 +541,24 @@ public class BaseCTMProperties implements CTMProperties {
 	protected void parseResourceCondition() {
 		String conditionsStr = properties.getProperty("resourceCondition");
 		if (conditionsStr != null) {
-			conditionsStr = conditionsStr.trim();
-			String[] conditionStrs = conditionsStr.split("\\|");
+			String[] conditionStrs = conditionsStr.trim().split("\\|");
 			if (conditionStrs.length != 0) {
 				DefaultResourcePack defaultPack = ResourcePackUtil.getDefaultResourcePack();
-				BooleanState invalidIdentifierState = InvalidIdentifierStateHolder.get();
-				invalidIdentifierState.enable();
+
 				for (int i = 0; i < conditionStrs.length; i++) {
 					String conditionStr = conditionStrs[i];
 					if (!conditionStr.isEmpty()) {
 						String[] parts = conditionStr.split("@", 2);
 						if (parts.length != 0) {
-							Identifier resourceId = new Identifier(parts[0]);
+							String resourceStr = parts[0];
+							Identifier resourceId;
+							try {
+								resourceId = new Identifier(resourceStr);
+							} catch (InvalidIdentifierException e) {
+								ContinuityClient.LOGGER.warn("Invalid resource '" + resourceStr + "' in 'resourceCondition' element '" + conditionStr + "' at index " + i + " in file '" + id + "' in pack '" + packName + "'");
+								continue;
+							}
+
 							String packStr;
 							if (parts.length > 1) {
 								packStr = parts[1];
@@ -555,12 +579,11 @@ public class BaseCTMProperties implements CTMProperties {
 									break;
 								}
 							} else {
-								ContinuityClient.LOGGER.warn("Invalid pack '" + packStr + "' in 'resourceCondition' element '" + conditionStr + "' at index " + i + " in file '" + id + "' in pack '" + packName + "'");
+								ContinuityClient.LOGGER.warn("Unknown pack '" + packStr + "' in 'resourceCondition' element '" + conditionStr + "' at index " + i + " in file '" + id + "' in pack '" + packName + "'");
 							}
 						}
 					}
 				}
-				invalidIdentifierState.disable();
 			}
 		}
 	}

@@ -33,6 +33,7 @@ public class CompactConnectingCTMProperties extends StandardConnectingCTMPropert
 				if (index < 0) {
 					continue;
 				}
+
 				String valueStr = properties.getProperty(key);
 				int value;
 				try {
@@ -46,6 +47,7 @@ public class CompactConnectingCTMProperties extends StandardConnectingCTMPropert
 					ContinuityClient.LOGGER.warn("Invalid '" + key + "' value '" + valueStr + "' in file '" + id + "' in pack '" + packName + "'");
 					continue;
 				}
+
 				if (tileReplacementMap == null) {
 					tileReplacementMap = new Int2IntArrayMap();
 				}
