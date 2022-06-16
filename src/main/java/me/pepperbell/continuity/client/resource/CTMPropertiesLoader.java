@@ -188,6 +188,7 @@ public final class CTMPropertiesLoader {
 			for (SpriteIdentifier spriteId : spriteIds) {
 				if (container.getProperties().affectsTexture(spriteId.getTextureId())) {
 					consumer.accept(container);
+					break;
 				}
 			}
 		}

@@ -37,8 +37,10 @@ public class RepeatCTMProperties extends BaseCTMProperties {
 				//
 			}
 			ContinuityClient.LOGGER.error("Invalid 'width' value '" + widthStr + "' in file '" + id + "' in pack '" + packName + "'");
-			valid = false;
+		} else {
+			ContinuityClient.LOGGER.error("No 'width' value provided in file '" + id + "' in pack '" + packName + "'");
 		}
+		valid = false;
 	}
 
 	protected void parseHeight() {
@@ -55,8 +57,10 @@ public class RepeatCTMProperties extends BaseCTMProperties {
 				//
 			}
 			ContinuityClient.LOGGER.error("Invalid 'height' value '" + heightStr + "' in file '" + id + "' in pack '" + packName + "'");
-			valid = false;
+		} else {
+			ContinuityClient.LOGGER.error("No 'height' value provided in file '" + id + "' in pack '" + packName + "'");
 		}
+		valid = false;
 	}
 
 	protected void parseSymmetry() {
