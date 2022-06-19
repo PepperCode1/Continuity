@@ -1,0 +1,9 @@
+{
+  "options.continuity.title": "Ρυθμίσεις του Continuity",
+  "options.continuity.connected_textures": "Ενωμένα Είδη",
+  "options.continuity.connected_textures.tooltip": "Ενεργοποιήστε ή απενεργοποιήστε τα ενωμένα είδη για τους κύβους.",
+  "options.continuity.emissive_textures": "Λαμπρά Είδη",
+  "options.continuity.emissive_textures.tooltip": "Ενεργοποιήστε ή απενεργοποιήστε τα λαμπρά είδη για τα μοντέλα των κύβων και των αντικειμένων.",
+  "options.continuity.custom_block_layers": "Ορισμένες Στρώσεις Κύβων",
+  "options.continuity.custom_block_layers.tooltip": "Ενεργοποιήστε ή απενεργοποιήστε τις ορισμένες στρ κύβων."
+}
