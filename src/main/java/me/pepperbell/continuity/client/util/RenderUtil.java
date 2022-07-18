@@ -39,7 +39,7 @@ public final class RenderUtil {
 
 	private static final BlendModeGetter BLEND_MODE_GETTER = createBlendModeGetter();
 
-	private static SpriteFinder blockAtlasSpriteFinder;
+	private static final ThreadLocal<SpriteFinder> BLOCK_ATLAS_SPRITE_FINDER = ThreadLocal.withInitial(() -> SpriteFinder.get(MODEL_MANAGER.getAtlas(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE)));
 
 	private static BlendModeGetter createBlendModeGetter() {
 		if (FabricLoader.getInstance().isModLoaded("frex")) {
@@ -97,13 +97,9 @@ public final class RenderUtil {
 		return BLEND_MODE_GETTER.getBlendMode(quad);
 	}
 
-	public static SpriteFinder getSpriteFinder() {
-		return blockAtlasSpriteFinder;
-	}
+	public static SpriteFinder getSpriteFinder() { return BLOCK_ATLAS_SPRITE_FINDER.get(); }
 
-	private interface BlendModeGetter {
-		BlendMode getBlendMode(QuadView quad);
-	}
+	private interface BlendModeGetter { BlendMode getBlendMode(QuadView quad); }
 
 	public static class ReloadListener implements SimpleSynchronousResourceReloadListener {
 		public static final Identifier ID = ContinuityClient.asId("render_util");
@@ -117,7 +113,7 @@ public final class RenderUtil {
 
 		@Override
 		public void reload(ResourceManager manager) {
-			blockAtlasSpriteFinder = SpriteFinder.get(MODEL_MANAGER.getAtlas(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE));
+			BLOCK_ATLAS_SPRITE_FINDER.set(SpriteFinder.get(MODEL_MANAGER.getAtlas(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE)));
 		}
 
 		@Override
