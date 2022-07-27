@@ -1,0 +1,9 @@
+{
+  "options.continuity.title": "Continuity 配置",
+  "options.continuity.connected_textures": "連接的紋理",
+  "options.continuity.connected_textures.tooltip": "為方塊啟用或禁用連接的紋理。",
+  "options.continuity.emissive_textures": "發光紋理",
+  "options.continuity.emissive_textures.tooltip": "為方塊和物品模型啟用或禁用發光的紋理。",
+  "options.continuity.custom_block_layers": "自訂方塊層",
+  "options.continuity.custom_block_layers.tooltip": "啟用或禁用自訂的方塊層。"
+}
