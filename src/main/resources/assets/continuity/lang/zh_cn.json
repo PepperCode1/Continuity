@@ -1,7 +1,9 @@
 {
-  "options.continuity.title": "纹理链接配置",
-  "options.continuity.disable_ctm": "禁用CTM",
-  "options.continuity.disable_ctm.tooltip": "完全禁用纹理连接",
-  "options.continuity.use_manual_culling": "使用手动剔除",
-  "options.continuity.use_manual_culling.tooltip": "通过仅对可见四边形应用CTM，可以显著提高性能，但可能会导致某些MOD出现错误行为"
+  "options.continuity.title": "Continuity配置",
+  "options.continuity.connected_textures": "连接的纹理",
+  "options.continuity.connected_textures.tooltip": "为方块启用或禁用连接的纹理。",
+  "options.continuity.emissive_textures": "发光纹理",
+  "options.continuity.emissive_textures.tooltip": "为方块和物品模型启用或禁用发光的纹理。",
+  "options.continuity.custom_block_layers": "自定义方块层",
+  "options.continuity.custom_block_layers.tooltip": "启用或禁用自定义的方块层。"
 }
