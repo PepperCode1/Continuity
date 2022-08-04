@@ -1,9 +1,9 @@
 {
   "options.continuity.title": "Настройки Continuity",
   "options.continuity.connected_textures": "Соединённые текстуры",
-  "options.continuity.connected_textures.tooltip": "Включить/отключить соединённые текстуры блоков.",
+  "options.continuity.connected_textures.tooltip": "Включить соединённые\nтекстуры блоков.",
   "options.continuity.emissive_textures": "Светящиеся текстуры",
-  "options.continuity.emissive_textures.tooltip": "Включить/отключить светящиеся текстуры блоков и моделей предметов.",
+  "options.continuity.emissive_textures.tooltip": "Включить светящиеся текстуры\nблоков и моделей предметов.",
   "options.continuity.custom_block_layers": "Пользов. слои отрисовки",
-  "options.continuity.custom_block_layers.tooltip": "Включить/отключить возможность изменения типа отрисовки для блоков."
+  "options.continuity.custom_block_layers.tooltip": "Включить возможность изменения\nтипа отрисовки для блоков."
 }
