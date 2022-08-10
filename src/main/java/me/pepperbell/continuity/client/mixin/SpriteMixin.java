@@ -13,7 +13,8 @@ public class SpriteMixin implements SpriteExtension {
 	private Sprite emissiveSprite;
 
 	@Override
-	public @Nullable Sprite getEmissiveSprite() {
+	@Nullable
+	public Sprite getEmissiveSprite() {
 		return emissiveSprite;
 	}
 

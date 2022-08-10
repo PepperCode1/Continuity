@@ -16,7 +16,8 @@ public class SpriteAtlasTextureDataMixin implements SpriteAtlasTextureDataExtens
 	private Map<Identifier, Identifier> emissiveIdMap;
 
 	@Override
-	public @Nullable Map<Identifier, Identifier> getEmissiveIdMap() {
+	@Nullable
+	public Map<Identifier, Identifier> getEmissiveIdMap() {
 		return emissiveIdMap;
 	}
 

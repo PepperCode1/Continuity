@@ -17,8 +17,8 @@ public class EmissiveUnbakedModel extends WrappingUnbakedModel {
 		super(wrapped);
 	}
 
-	@Nullable
 	@Override
+	@Nullable
 	public BakedModel wrapBaked(@Nullable BakedModel bakedWrapped, ModelLoader loader, Function<SpriteIdentifier, Sprite> textureGetter, ModelBakeSettings rotationContainer, Identifier modelId) {
 		if (bakedWrapped == null || bakedWrapped.isBuiltin()) {
 			return bakedWrapped;

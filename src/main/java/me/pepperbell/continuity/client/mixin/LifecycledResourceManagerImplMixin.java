@@ -46,7 +46,8 @@ public class LifecycledResourceManagerImplMixin implements LifecycledResourceMan
 	}
 
 	@Override
-	public @Nullable ResourceRedirectHandler getRedirectHandler() {
+	@Nullable
+	public ResourceRedirectHandler getRedirectHandler() {
 		return redirectHandler;
 	}
 }

@@ -54,12 +54,10 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 		ArrayUtils.shift(map[7], 1);
 	}
 
-	protected boolean innerSeams;
 	protected Sprite[] replacementSprites;
 
 	public CompactCTMQuadProcessor(Sprite[] sprites, ProcessingPredicate processingPredicate, ConnectionPredicate connectionPredicate, boolean innerSeams, Sprite[] replacementSprites) {
-		super(sprites, processingPredicate, connectionPredicate);
-		this.innerSeams = innerSeams;
+		super(sprites, processingPredicate, connectionPredicate, innerSeams);
 		this.replacementSprites = replacementSprites;
 	}
 
@@ -115,17 +113,17 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 		boolean vSplit30 = shouldSplitUV(vSignum3, vSignum0);
 
 		// Cannot split across U and V at the same time
-		if (uSplit01 & vSplit01 || uSplit12 & vSplit12 || uSplit23 & vSplit23 || uSplit30 & vSplit30) {
+		if (uSplit01 & vSplit01 | uSplit12 & vSplit12 | uSplit23 & vSplit23 | uSplit30 & vSplit30) {
 			return ProcessingResult.CONTINUE;
 		}
 
 		// Cannot split across U twice in a row
-		if (uSplit01 & uSplit12 || uSplit12 & uSplit23 || uSplit23 & uSplit30 || uSplit30 & uSplit01) {
+		if (uSplit01 & uSplit12 | uSplit12 & uSplit23 | uSplit23 & uSplit30 | uSplit30 & uSplit01) {
 			return ProcessingResult.CONTINUE;
 		}
 
 		// Cannot split across V twice in a row
-		if (vSplit01 & vSplit12 || vSplit12 & vSplit23 || vSplit23 & vSplit30 || vSplit30 & vSplit01) {
+		if (vSplit01 & vSplit12 | vSplit12 & vSplit23 | vSplit23 & vSplit30 | vSplit30 & vSplit01) {
 			return ProcessingResult.CONTINUE;
 		}
 
@@ -551,10 +549,13 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 				normalX = MathHelper.lerp(delta, vertexA.normalX, vertexB.normalX);
 				normalY = MathHelper.lerp(delta, vertexA.normalY, vertexB.normalY);
 				normalZ = MathHelper.lerp(delta, vertexA.normalZ, vertexB.normalZ);
-				float scale = 1 / (float) Math.sqrt(normalX * normalX + normalY * normalY + normalZ * normalZ);
-				normalX *= scale;
-				normalY *= scale;
-				normalZ *= scale;
+				float sqLength = normalX * normalX + normalY * normalY + normalZ * normalZ;
+				if (sqLength != 0) {
+					float scale = 1 / (float) Math.sqrt(sqLength);
+					normalX *= scale;
+					normalY *= scale;
+					normalZ *= scale;
+				}
 			}
 		}
 	}

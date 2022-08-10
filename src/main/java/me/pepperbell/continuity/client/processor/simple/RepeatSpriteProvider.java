@@ -2,6 +2,8 @@ package me.pepperbell.continuity.client.processor.simple;
 
 import java.util.function.Supplier;
 
+import org.jetbrains.annotations.Nullable;
+
 import me.pepperbell.continuity.api.client.ProcessingDataProvider;
 import me.pepperbell.continuity.client.processor.Symmetry;
 import me.pepperbell.continuity.client.properties.RepeatCTMProperties;
@@ -27,6 +29,7 @@ public class RepeatSpriteProvider implements SpriteProvider {
 	}
 
 	@Override
+	@Nullable
 	public Sprite getSprite(QuadView quad, Sprite sprite, BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, ProcessingDataProvider dataProvider) {
 		Direction face = symmetry.getActualFace(quad.lightFace());
 
