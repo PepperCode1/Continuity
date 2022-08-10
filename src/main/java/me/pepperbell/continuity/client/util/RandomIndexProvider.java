@@ -34,10 +34,10 @@ public interface RandomIndexProvider {
 		protected int weightSum;
 		protected int maxIndex;
 
-		public Weighted(int[] weights, int weightSum, int maxIndex) {
+		public Weighted(int[] weights, int weightSum) {
 			this.weights = weights;
 			this.weightSum = weightSum;
-			this.maxIndex = maxIndex;
+			this.maxIndex = weights.length - 1;
 		}
 
 		@Override
@@ -77,7 +77,7 @@ public interface RandomIndexProvider {
 				}
 			}
 
-			return new Weighted(newWeights, weightSum, size - 1);
+			return new Weighted(newWeights, weightSum);
 		}
 	}
 }

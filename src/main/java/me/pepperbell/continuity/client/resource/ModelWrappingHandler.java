@@ -12,7 +12,6 @@ import com.mojang.datafixers.util.Pair;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import me.pepperbell.continuity.client.mixinterface.SpriteAtlasTextureDataExtension;
 import me.pepperbell.continuity.client.model.CTMUnbakedModel;
@@ -77,7 +76,7 @@ public class ModelWrappingHandler {
 					Set<CTMLoadingContainer<?>> dependents = container.getRecursiveMultipassDependents();
 					if (dependents != null) {
 						if (multipassContainerSet == null) {
-							multipassContainerSet = new ObjectArraySet<>();
+							multipassContainerSet = new ObjectOpenHashSet<>();
 						}
 						multipassContainerSet.addAll(dependents);
 					}
@@ -158,10 +157,8 @@ public class ModelWrappingHandler {
 
 	private static void injectWrappedModels(Map<Identifier, UnbakedModel> wrappedModels, Map<Identifier, UnbakedModel> unbakedModels, Map<Identifier, UnbakedModel> modelsToBake) {
 		wrappedModels.forEach((id, wrapped) -> {
-			unbakedModels.put(id, wrapped);
-			if (modelsToBake.containsKey(id)) {
-				modelsToBake.put(id, wrapped);
-			}
+			unbakedModels.replace(id, wrapped);
+			modelsToBake.replace(id, wrapped);
 		});
 	}
 

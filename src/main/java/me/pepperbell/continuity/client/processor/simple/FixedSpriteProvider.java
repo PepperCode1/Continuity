@@ -3,6 +3,8 @@ package me.pepperbell.continuity.client.processor.simple;
 import java.util.Random;
 import java.util.function.Supplier;
 
+import org.jetbrains.annotations.Nullable;
+
 import me.pepperbell.continuity.api.client.ProcessingDataProvider;
 import me.pepperbell.continuity.client.properties.BaseCTMProperties;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadView;
@@ -19,6 +21,7 @@ public class FixedSpriteProvider implements SpriteProvider {
 	}
 
 	@Override
+	@Nullable
 	public Sprite getSprite(QuadView quad, Sprite sprite, BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, ProcessingDataProvider dataProvider) {
 		return this.sprite;
 	}

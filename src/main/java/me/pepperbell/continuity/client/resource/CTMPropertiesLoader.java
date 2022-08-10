@@ -21,7 +21,6 @@ import me.pepperbell.continuity.api.client.CTMLoaderRegistry;
 import me.pepperbell.continuity.api.client.CTMProperties;
 import me.pepperbell.continuity.client.ContinuityClient;
 import me.pepperbell.continuity.client.util.BooleanState;
-import me.pepperbell.continuity.client.util.OptionalListCreator;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.resource.ResourceManager;
@@ -210,5 +209,24 @@ public final class CTMPropertiesLoader {
 		AFFECTS_BLOCK.clear();
 		IGNORES_BLOCK.clear();
 		VALID_FOR_MULTIPASS.clear();
+	}
+
+	private static class OptionalListCreator<T> implements Consumer<T> {
+		private ObjectArrayList<T> list = null;
+
+		@Override
+		public void accept(T t) {
+			if (list == null) {
+				list = new ObjectArrayList<>();
+			}
+			list.add(t);
+		}
+
+		@Nullable
+		public ObjectArrayList<T> get() {
+			ObjectArrayList<T> list = this.list;
+			this.list = null;
+			return list;
+		}
 	}
 }

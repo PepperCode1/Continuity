@@ -196,8 +196,8 @@ public final class PropertiesParsingHelper {
 
 				ImmutableList<Predicate<BlockState>> predicateList = predicateListBuilder.build();
 				if (!predicateList.isEmpty()) {
-					int amount = predicateList.size();
 					return state -> {
+						int amount = predicateList.size();
 						for (int i = 0; i < amount; i++) {
 							if (predicateList.get(i).test(state)) {
 								return true;

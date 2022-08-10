@@ -36,8 +36,8 @@ public abstract class WrappingUnbakedModel implements UnbakedModel {
 		return wrapped.getTextureDependencies(unbakedModelGetter, unresolvedTextureReferences);
 	}
 
-	@Nullable
 	@Override
+	@Nullable
 	public BakedModel bake(ModelLoader loader, Function<SpriteIdentifier, Sprite> textureGetter, ModelBakeSettings rotationContainer, Identifier modelId) {
 		if (isBaking) {
 			return null;
@@ -45,9 +45,9 @@ public abstract class WrappingUnbakedModel implements UnbakedModel {
 		isBaking = true;
 
 		Map<Identifier, UnbakedModel> unbakedModels = ((ModelLoaderAccessor) loader).getUnbakedModels();
-		UnbakedModel previous = unbakedModels.put(modelId, wrapped);
+		UnbakedModel previous = unbakedModels.replace(modelId, wrapped);
 		BakedModel bakedWrapped = loader.bake(modelId, rotationContainer);
-		unbakedModels.put(modelId, previous);
+		unbakedModels.replace(modelId, previous);
 
 		BakedModel baked = wrapBaked(bakedWrapped, loader, textureGetter, rotationContainer, modelId);
 		isBaking = false;

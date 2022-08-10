@@ -22,7 +22,6 @@ import me.pepperbell.continuity.client.processor.simple.RepeatSpriteProvider;
 import me.pepperbell.continuity.client.processor.simple.SimpleQuadProcessor;
 import me.pepperbell.continuity.client.properties.BaseCTMProperties;
 import me.pepperbell.continuity.client.properties.CompactConnectingCTMProperties;
-import me.pepperbell.continuity.client.properties.ConnectingCTMProperties;
 import me.pepperbell.continuity.client.properties.RandomCTMProperties;
 import me.pepperbell.continuity.client.properties.RepeatCTMProperties;
 import me.pepperbell.continuity.client.properties.StandardConnectingCTMProperties;
@@ -94,34 +93,34 @@ public class ContinuityClient implements ClientModInitializer {
 		registry.registerLoader("ctm_compact", loader);
 
 		loader = CTMLoader.of(
-				wrapFactory(ConnectingCTMProperties::new, new TileAmountValidator.Exactly<>(4)),
+				wrapFactory(StandardConnectingCTMProperties::new, new TileAmountValidator.Exactly<>(4)),
 				new HorizontalQuadProcessor.Factory()
 		);
 		registry.registerLoader("horizontal", loader);
 		registry.registerLoader("bookshelf", loader);
 
 		loader = CTMLoader.of(
-				wrapFactory(ConnectingCTMProperties::new, new TileAmountValidator.Exactly<>(4)),
+				wrapFactory(StandardConnectingCTMProperties::new, new TileAmountValidator.Exactly<>(4)),
 				new VerticalQuadProcessor.Factory()
 		);
 		registry.registerLoader("vertical", loader);
 
 		loader = CTMLoader.of(
-				wrapFactory(ConnectingCTMProperties::new, new TileAmountValidator.Exactly<>(7)),
+				wrapFactory(StandardConnectingCTMProperties::new, new TileAmountValidator.Exactly<>(7)),
 				new HorizontalVerticalQuadProcessor.Factory()
 		);
 		registry.registerLoader("horizontal+vertical", loader);
 		registry.registerLoader("h+v", loader);
 
 		loader = CTMLoader.of(
-				wrapFactory(ConnectingCTMProperties::new, new TileAmountValidator.Exactly<>(7)),
+				wrapFactory(StandardConnectingCTMProperties::new, new TileAmountValidator.Exactly<>(7)),
 				new VerticalHorizontalQuadProcessor.Factory()
 		);
 		registry.registerLoader("vertical+horizontal", loader);
 		registry.registerLoader("v+h", loader);
 
 		loader = CTMLoader.of(
-				wrapFactory(ConnectingCTMProperties::new, new TileAmountValidator.Exactly<>(1)),
+				wrapFactory(StandardConnectingCTMProperties::new, new TileAmountValidator.Exactly<>(1)),
 				new TopQuadProcessor.Factory()
 		);
 		registry.registerLoader("top", loader);
