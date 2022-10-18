@@ -19,9 +19,11 @@ public class StandardConnectingCTMProperties extends ConnectingCTMProperties {
 
 	protected void parseInnerSeams() {
 		String innerSeamsStr = properties.getProperty("innerSeams");
-		if (innerSeamsStr != null) {
-			innerSeams = Boolean.parseBoolean(innerSeamsStr.trim());
+		if (innerSeamsStr == null) {
+			return;
 		}
+
+		innerSeams = Boolean.parseBoolean(innerSeamsStr.trim());
 	}
 
 	public boolean getInnerSeams() {

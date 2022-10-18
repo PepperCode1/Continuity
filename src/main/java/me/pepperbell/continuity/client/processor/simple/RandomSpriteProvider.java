@@ -46,9 +46,12 @@ public class RandomSpriteProvider implements SpriteProvider {
 		if (linked) {
 			Block block = state.getBlock();
 			BlockPos.Mutable mutablePos = dataProvider.getData(ProcessingDataKeys.MUTABLE_POS_KEY).set(pos);
+
+			int i = 0;
 			do {
 				mutablePos.setY(mutablePos.getY() - 1);
-			} while (block == blockView.getBlockState(mutablePos).getBlock());
+				i++;
+			} while (i < 3 && block == blockView.getBlockState(mutablePos).getBlock());
 			y = mutablePos.getY() + 1;
 		}
 

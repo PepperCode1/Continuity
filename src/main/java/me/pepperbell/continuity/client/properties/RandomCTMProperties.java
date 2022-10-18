@@ -30,60 +30,64 @@ public class RandomCTMProperties extends BaseCTMProperties {
 
 	protected void parseWeights() {
 		String weightsStr = properties.getProperty("weights");
-		if (weightsStr != null) {
-			String[] weightStrs = weightsStr.trim().split("[ ,]");
-			if (weightStrs.length != 0) {
-				IntList weights = new IntArrayList();
+		if (weightsStr == null) {
+			return;
+		}
 
-				for (int i = 0; i < weightStrs.length; i++) {
-					String weightStr = weightStrs[i];
-					if (!weightStr.isEmpty()) {
-						String[] parts = weightStr.split("-");
-						try {
-							if (parts.length == 2) {
-								int min = Integer.parseInt(parts[0]);
-								int max = Integer.parseInt(parts[1]);
-								if (max >= min) {
-									for (int weight = min; weight <= max; weight++) {
-										weights.add(weight);
-									}
-									continue;
-								}
-							} else if (parts.length == 1) {
-								int weight = Integer.parseInt(parts[0]);
-								if (weight > 0) {
+		String[] weightStrs = weightsStr.trim().split("[ ,]");
+		if (weightStrs.length != 0) {
+			IntList weights = new IntArrayList();
+
+			for (int i = 0; i < weightStrs.length; i++) {
+				String weightStr = weightStrs[i];
+				if (!weightStr.isEmpty()) {
+					String[] parts = weightStr.split("-");
+					try {
+						if (parts.length == 2) {
+							int min = Integer.parseInt(parts[0]);
+							int max = Integer.parseInt(parts[1]);
+							if (min > 0 && max > 0 && max >= min) {
+								for (int weight = min; weight <= max; weight++) {
 									weights.add(weight);
-									continue;
 								}
+								continue;
 							}
-						} catch (NumberFormatException e) {
-							//
+						} else if (parts.length == 1) {
+							int weight = Integer.parseInt(parts[0]);
+							if (weight > 0) {
+								weights.add(weight);
+								continue;
+							}
 						}
-						ContinuityClient.LOGGER.warn("Invalid 'weights' element '" + weightStr + "' at index '" + i + "' in file '" + id + "' in pack '" + packName + "'");
+					} catch (NumberFormatException e) {
+						//
 					}
+					ContinuityClient.LOGGER.warn("Invalid 'weights' element '" + weightStr + "' at index '" + i + "' in file '" + id + "' in pack '" + packName + "'");
 				}
+			}
 
-				if (!weights.isEmpty()) {
-					indexProviderFactory = new RandomIndexProvider.WeightedFactory(weights.toIntArray());
-				}
+			if (!weights.isEmpty()) {
+				indexProviderFactory = new RandomIndexProvider.WeightedFactory(weights.toIntArray());
 			}
 		}
 	}
 
 	protected void parseRandomLoops() {
 		String randomLoopsStr = properties.getProperty("randomLoops");
-		if (randomLoopsStr != null) {
-			try {
-				int randomLoops = Integer.parseInt(randomLoopsStr.trim());
-				if (randomLoops >= 0 && randomLoops <= 9) {
-					this.randomLoops = randomLoops;
-					return;
-				}
-			} catch (NumberFormatException e) {
-				//
-			}
-			ContinuityClient.LOGGER.warn("Invalid 'randomLoops' value '" + randomLoopsStr + "' in file '" + id + "' in pack '" + packName + "'");
+		if (randomLoopsStr == null) {
+			return;
 		}
+
+		try {
+			int randomLoops = Integer.parseInt(randomLoopsStr.trim());
+			if (randomLoops >= 0 && randomLoops <= 9) {
+				this.randomLoops = randomLoops;
+				return;
+			}
+		} catch (NumberFormatException e) {
+			//
+		}
+		ContinuityClient.LOGGER.warn("Invalid 'randomLoops' value '" + randomLoopsStr + "' in file '" + id + "' in pack '" + packName + "'");
 	}
 
 	protected void parseSymmetry() {
@@ -95,9 +99,11 @@ public class RandomCTMProperties extends BaseCTMProperties {
 
 	protected void parseLinked() {
 		String linkedStr = properties.getProperty("linked");
-		if (linkedStr != null) {
-			linked = Boolean.parseBoolean(linkedStr.trim());
+		if (linkedStr == null) {
+			return;
 		}
+
+		linked = Boolean.parseBoolean(linkedStr.trim());
 	}
 
 	public RandomIndexProvider.Factory getIndexProviderFactory() {
