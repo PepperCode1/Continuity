@@ -18,6 +18,8 @@ import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.EmptyBlockView;
 
 public final class CustomBlockLayers {
 	public static final Identifier LOCATION = new Identifier("optifine/block.properties");
@@ -28,8 +30,16 @@ public final class CustomBlockLayers {
 	@SuppressWarnings("unchecked")
 	private static final Predicate<BlockState>[] LAYER_PREDICATES = new Predicate[BlockLayer.VALUES.length];
 
+	private static boolean disableSolidCheck;
+
 	@Nullable
 	public static RenderLayer getLayer(BlockState state) {
+		if (!disableSolidCheck) {
+			if (state.isOpaqueFullCube(EmptyBlockView.INSTANCE, BlockPos.ORIGIN)) {
+				return null;
+			}
+		}
+
 		for (int i = 0; i < BlockLayer.VALUES.length; i++) {
 			Predicate<BlockState> predicate = LAYER_PREDICATES[i];
 			if (predicate != null) {
@@ -58,8 +68,15 @@ public final class CustomBlockLayers {
 	private static void reload(Properties properties, Identifier fileLocation, String packName) {
 		for (BlockLayer blockLayer : BlockLayer.VALUES) {
 			String propertyKey = "layer." + blockLayer.getKey();
-			Predicate<BlockState> predicate = PropertiesParsingHelper.parseBlockStates(properties, propertyKey, fileLocation, packName, true);
-			LAYER_PREDICATES[blockLayer.ordinal()] = predicate;
+			Predicate<BlockState> predicate = PropertiesParsingHelper.parseBlockStates(properties, propertyKey, fileLocation, packName);
+			if (predicate != PropertiesParsingHelper.EMPTY_BLOCK_STATE_PREDICATE) {
+				LAYER_PREDICATES[blockLayer.ordinal()] = predicate;
+			}
+		}
+
+		String disableSolidCheckStr = properties.getProperty("disableSolidCheck");
+		if (disableSolidCheckStr != null) {
+			disableSolidCheck = Boolean.parseBoolean(disableSolidCheckStr.trim());
 		}
 	}
 

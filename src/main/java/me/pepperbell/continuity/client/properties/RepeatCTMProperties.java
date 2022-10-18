@@ -25,41 +25,43 @@ public class RepeatCTMProperties extends BaseCTMProperties {
 
 	protected void parseWidth() {
 		String widthStr = properties.getProperty("width");
-		if (widthStr != null) {
-			widthStr = widthStr.trim();
-			try {
-				int width = Integer.parseInt(widthStr);
-				if (width > 0) {
-					this.width = width;
-					return;
-				}
-			} catch (NumberFormatException e) {
-				//
-			}
-			ContinuityClient.LOGGER.error("Invalid 'width' value '" + widthStr + "' in file '" + id + "' in pack '" + packName + "'");
-		} else {
+		if (widthStr == null) {
 			ContinuityClient.LOGGER.error("No 'width' value provided in file '" + id + "' in pack '" + packName + "'");
+			valid = false;
+			return;
 		}
+
+		try {
+			int width = Integer.parseInt(widthStr.trim());
+			if (width > 0) {
+				this.width = width;
+				return;
+			}
+		} catch (NumberFormatException e) {
+			//
+		}
+		ContinuityClient.LOGGER.error("Invalid 'width' value '" + widthStr + "' in file '" + id + "' in pack '" + packName + "'");
 		valid = false;
 	}
 
 	protected void parseHeight() {
 		String heightStr = properties.getProperty("height");
-		if (heightStr != null) {
-			heightStr = heightStr.trim();
-			try {
-				int height = Integer.parseInt(heightStr);
-				if (height > 0) {
-					this.height = height;
-					return;
-				}
-			} catch (NumberFormatException e) {
-				//
-			}
-			ContinuityClient.LOGGER.error("Invalid 'height' value '" + heightStr + "' in file '" + id + "' in pack '" + packName + "'");
-		} else {
+		if (heightStr == null) {
 			ContinuityClient.LOGGER.error("No 'height' value provided in file '" + id + "' in pack '" + packName + "'");
+			valid = false;
+			return;
 		}
+
+		try {
+			int height = Integer.parseInt(heightStr.trim());
+			if (height > 0) {
+				this.height = height;
+				return;
+			}
+		} catch (NumberFormatException e) {
+			//
+		}
+		ContinuityClient.LOGGER.error("Invalid 'height' value '" + heightStr + "' in file '" + id + "' in pack '" + packName + "'");
 		valid = false;
 	}
 

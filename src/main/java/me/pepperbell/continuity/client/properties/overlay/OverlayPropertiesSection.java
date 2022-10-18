@@ -35,57 +35,63 @@ public class OverlayPropertiesSection {
 
 	protected void parseTintIndex() {
 		String tintIndexStr = properties.getProperty("tintIndex");
-		if (tintIndexStr != null) {
-			try {
-				int tintIndex = Integer.parseInt(tintIndexStr.trim());
-				if (tintIndex >= 0) {
-					this.tintIndex = tintIndex;
-					return;
-				}
-			} catch (NumberFormatException e) {
-				//
-			}
-			ContinuityClient.LOGGER.warn("Invalid 'tintIndex' value '" + tintIndexStr + "' in file '" + id + "' in pack '" + packName + "'");
+		if (tintIndexStr == null) {
+			return;
 		}
+
+		try {
+			int tintIndex = Integer.parseInt(tintIndexStr.trim());
+			if (tintIndex >= 0) {
+				this.tintIndex = tintIndex;
+				return;
+			}
+		} catch (NumberFormatException e) {
+			//
+		}
+		ContinuityClient.LOGGER.warn("Invalid 'tintIndex' value '" + tintIndexStr + "' in file '" + id + "' in pack '" + packName + "'");
 	}
 
 	protected void parseTintBlock() {
 		String tintBlockStr = properties.getProperty("tintBlock");
-		if (tintBlockStr != null) {
-			String[] parts = tintBlockStr.trim().split(":", 3);
-			if (parts.length != 0) {
-				Identifier blockId;
-				try {
-					if (parts.length == 1 || parts[1].contains("=")) {
-						blockId = new Identifier(parts[0]);
-					} else {
-						blockId = new Identifier(parts[0], parts[1]);
-					}
-				} catch (InvalidIdentifierException e) {
-					ContinuityClient.LOGGER.warn("Invalid 'tintBlock' value '" + tintBlockStr + "' in file '" + id + "' in pack '" + packName + "'", e);
-					return;
-				}
+		if (tintBlockStr == null) {
+			return;
+		}
 
-				Block block = Registry.BLOCK.get(blockId);
-				if (block != Blocks.AIR) {
-					tintBlock = block.getDefaultState();
+		String[] parts = tintBlockStr.trim().split(":", 3);
+		if (parts.length != 0) {
+			Identifier blockId;
+			try {
+				if (parts.length == 1 || parts[1].contains("=")) {
+					blockId = new Identifier(parts[0]);
 				} else {
-					ContinuityClient.LOGGER.warn("Unknown block '" + blockId + "' in 'tintBlock' value '" + tintBlockStr + "' in file '" + id + "' in pack '" + packName + "'");
+					blockId = new Identifier(parts[0], parts[1]);
 				}
+			} catch (InvalidIdentifierException e) {
+				ContinuityClient.LOGGER.warn("Invalid 'tintBlock' value '" + tintBlockStr + "' in file '" + id + "' in pack '" + packName + "'", e);
+				return;
+			}
+
+			Block block = Registry.BLOCK.get(blockId);
+			if (block != Blocks.AIR) {
+				tintBlock = block.getDefaultState();
+			} else {
+				ContinuityClient.LOGGER.warn("Unknown block '" + blockId + "' in 'tintBlock' value '" + tintBlockStr + "' in file '" + id + "' in pack '" + packName + "'");
 			}
 		}
 	}
 
 	protected void parseLayer() {
 		String layerStr = properties.getProperty("layer");
-		if (layerStr != null) {
-			layerStr = layerStr.trim().toLowerCase(Locale.ROOT);
-			switch (layerStr) {
-				case "cutout_mipped" -> layer = BlendMode.CUTOUT_MIPPED;
-				case "cutout" -> layer = BlendMode.CUTOUT;
-				case "translucent" -> layer = BlendMode.TRANSLUCENT;
-				default -> ContinuityClient.LOGGER.warn("Unknown 'layer' value '" + layerStr + " in file '" + id + "' in pack '" + packName + "'");
-			}
+		if (layerStr == null) {
+			return;
+		}
+
+		String layerStr1 = layerStr.trim().toLowerCase(Locale.ROOT);
+		switch (layerStr1) {
+			case "cutout_mipped" -> layer = BlendMode.CUTOUT_MIPPED;
+			case "cutout" -> layer = BlendMode.CUTOUT;
+			case "translucent" -> layer = BlendMode.TRANSLUCENT;
+			default -> ContinuityClient.LOGGER.warn("Unknown 'layer' value '" + layerStr + " in file '" + id + "' in pack '" + packName + "'");
 		}
 	}
 

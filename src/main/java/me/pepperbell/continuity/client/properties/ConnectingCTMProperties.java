@@ -30,12 +30,14 @@ public class ConnectingCTMProperties extends BaseCTMProperties {
 
 	protected void parseConnect() {
 		String connectStr = properties.getProperty("connect");
-		if (connectStr != null) {
-			try {
-				connectionPredicate = ConnectionType.valueOf(connectStr.trim().toUpperCase(Locale.ROOT));
-			} catch (IllegalArgumentException e) {
-				//
-			}
+		if (connectStr == null) {
+			return;
+		}
+
+		try {
+			connectionPredicate = ConnectionType.valueOf(connectStr.trim().toUpperCase(Locale.ROOT));
+		} catch (IllegalArgumentException e) {
+			//
 		}
 	}
 
