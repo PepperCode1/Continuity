@@ -1,0 +1,7 @@
+{
+  "options.continuity.title": "紋理鏈接配置",
+  "options.continuity.disable_ctm": "禁用CTM",
+  "options.continuity.disable_ctm.tooltip": "完全禁用紋理連接",
+  "options.continuity.use_manual_culling": "使用手動剔除",
+  "options.continuity.use_manual_culling.tooltip": "通過僅對可見四邊形應用CTM，可以顯著提高性能，但可能會導致某些模組出現錯誤"
+}
