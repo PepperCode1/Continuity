@@ -1,7 +1,9 @@
 {
   "options.continuity.title": "Continuity Konfiguration",
-  "options.continuity.disable_ctm": "Deaktiviere CTM",
-  "options.continuity.disable_ctm.tooltip": "Deaktiviert verbundene Texturen vollständig.",
-  "options.continuity.use_manual_culling": "Manuelles Culling verwenden",
-  "options.continuity.use_manual_culling.tooltip": "Verbessert die Leistung erheblich, indem CTM nur auf sichtbare Texturen angewendet wird, kann aber bei einigen Mods zu fehlerhaftem Verhalten führen."
+  "options.continuity.connected_textures": "Verbundene Texturen",
+  "options.continuity.connected_textures.tooltip": "Aktiviert oder deaktiviert verbundene Texturen für Blöcke.",
+  "options.continuity.emissive_textures": "Leuchtende Texturen",
+  "options.continuity.emissive_textures.tooltip": "Aktiviert oder deaktiviert leuchtende Texturen für Blöcke und Gegenstände.",
+  "options.continuity.custom_block_layers": "Benutzerdefinierte Block Ebenen",
+  "options.continuity.custom_block_layers.tooltip": "Aktiviert oder deaktiviert benutzerdefinierte Block Ebenen."
 }
