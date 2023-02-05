@@ -14,7 +14,7 @@ import net.minecraft.client.render.RenderLayers;
 @Mixin(RenderLayers.class)
 public class RenderLayersMixin {
 	@Inject(method = "getBlockLayer(Lnet/minecraft/block/BlockState;)Lnet/minecraft/client/render/RenderLayer;", at = @At("HEAD"), cancellable = true)
-	private static void onHeadGetBlockLayer(BlockState state, CallbackInfoReturnable<RenderLayer> cir) {
+	private static void continuity$onHeadGetBlockLayer(BlockState state, CallbackInfoReturnable<RenderLayer> cir) {
 		if (ContinuityConfig.INSTANCE.customBlockLayers.get()) {
 			RenderLayer layer = CustomBlockLayers.getLayer(state);
 			if (layer != null) {

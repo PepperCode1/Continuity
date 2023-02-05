@@ -14,14 +14,14 @@ import net.minecraft.client.util.math.MatrixStack;
 @Mixin(PistonBlockEntityRenderer.class)
 public class PistonBlockEntityRendererMixin {
 	@Inject(method = "render(Lnet/minecraft/block/entity/PistonBlockEntity;FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/block/BlockModelRenderer;enableBrightnessCache()V"))
-	private void beforeRenderModels(PistonBlockEntity pistonBlockEntity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, CallbackInfo ci) {
+	private void continuity$beforeRenderModels(PistonBlockEntity pistonBlockEntity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, CallbackInfo ci) {
 		ContinuityFeatureStates states = ContinuityFeatureStates.get();
 		states.getConnectedTexturesState().disable();
 		states.getEmissiveTexturesState().disable();
 	}
 
 	@Inject(method = "render(Lnet/minecraft/block/entity/PistonBlockEntity;FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/block/BlockModelRenderer;disableBrightnessCache()V", shift = At.Shift.AFTER))
-	private void afterRenderModels(PistonBlockEntity pistonBlockEntity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, CallbackInfo ci) {
+	private void continuity$afterRenderModels(PistonBlockEntity pistonBlockEntity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, CallbackInfo ci) {
 		ContinuityFeatureStates states = ContinuityFeatureStates.get();
 		states.getConnectedTexturesState().enable();
 		states.getEmissiveTexturesState().enable();

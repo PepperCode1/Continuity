@@ -6,7 +6,7 @@ import net.minecraft.client.texture.Sprite;
 
 public interface SpriteExtension {
 	@Nullable
-	Sprite getEmissiveSprite();
+	Sprite continuity$getEmissiveSprite();
 
-	void setEmissiveSprite(Sprite sprite);
+	void continuity$setEmissiveSprite(Sprite sprite);
 }

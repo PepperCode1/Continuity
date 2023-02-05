@@ -65,7 +65,7 @@ public final class BiomeRetriever {
 
 	private static Biome getBiomeByExtension(BlockRenderView blockView, BlockPos pos) {
 		if (blockView instanceof BiomeView biomeView) {
-			return biomeView.getBiome(pos).value();
+			return biomeView.continuity$getBiome(pos).value();
 		}
 		return getBiomeByWorldView(blockView, pos);
 	}

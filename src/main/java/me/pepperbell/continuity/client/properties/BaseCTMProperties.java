@@ -57,12 +57,13 @@ public class BaseCTMProperties implements CTMProperties {
 
 	protected Set<Identifier> matchTilesSet;
 	protected Predicate<BlockState> matchBlocksPredicate;
-	protected int weight = 0;
 	protected List<Identifier> tiles = Collections.emptyList();
 	protected EnumSet<Direction> faces;
 	protected Predicate<Biome> biomePredicate;
 	protected IntPredicate heightPredicate;
 	protected Predicate<String> blockEntityNamePredicate;
+
+	protected boolean prioritized = false;
 
 	protected boolean valid = true;
 	protected Set<SpriteIdentifier> textureDependencies;
@@ -110,6 +111,7 @@ public class BaseCTMProperties implements CTMProperties {
 		return textureDependencies;
 	}
 
+	// TODO: sorting API using Comparator
 	/*
 	-1 this < o
 	0 this == o
@@ -118,18 +120,12 @@ public class BaseCTMProperties implements CTMProperties {
 	@Override
 	public int compareTo(@NotNull CTMProperties o) {
 		if (o instanceof BaseCTMProperties o1) {
-			int c = MathUtil.signum(weight - o1.weight);
-			if (c != 0) {
-				return c;
+			if (prioritized && !o1.prioritized) {
+				return 1;
 			}
-		}
-		if (affectsTextures() && !o.affectsTextures()) {
-			return 1;
-		}
-		if (!affectsTextures() && o.affectsTextures()) {
-			return -1;
-		}
-		if (o instanceof BaseCTMProperties o1) {
+			if (!prioritized && o1.prioritized) {
+				return -1;
+			}
 			int c = MathUtil.signum(packPriority - o1.packPriority);
 			if (c != 0) {
 				return c;
@@ -144,13 +140,13 @@ public class BaseCTMProperties implements CTMProperties {
 		parseMatchBlocks();
 		detectMatches();
 		validateMatches();
-		parseWeight();
 		parseTiles();
 		parseFaces();
 		parseBiomes();
 		parseHeights();
 		parseLegacyHeights();
 		parseName();
+		parsePrioritize();
 		parseResourceCondition();
 	}
 
@@ -189,19 +185,6 @@ public class BaseCTMProperties implements CTMProperties {
 		if (matchTilesSet == null && matchBlocksPredicate == null) {
 			ContinuityClient.LOGGER.error("No tile or block matches provided in file '" + id + "' in pack '" + packName + "'");
 			valid = false;
-		}
-	}
-
-	protected void parseWeight() {
-		String weightStr = properties.getProperty("weight");
-		if (weightStr == null) {
-			return;
-		}
-
-		try {
-			weight = Integer.parseInt(weightStr.trim());
-		} catch (NumberFormatException e) {
-			ContinuityClient.LOGGER.warn("Invalid 'weight' value '" + weightStr + "' in file '" + id + "' in pack '" + packName + "'");
 		}
 	}
 
@@ -253,12 +236,12 @@ public class BaseCTMProperties implements CTMProperties {
 									namespace = parts[0];
 									path = parts[1];
 								} else {
-									namespace = id.getNamespace();
+									namespace = null;
 									path = parts[0];
 								}
 
 								if (!path.endsWith(".png")) {
-									path = path + ".png";
+									path += ".png";
 								}
 								if (path.startsWith("./")) {
 									path = basePath + path.substring(2);
@@ -268,6 +251,9 @@ public class BaseCTMProperties implements CTMProperties {
 									path = "optifine/" + path.substring(1);
 								} else if (!path.startsWith("textures/") && !path.startsWith("optifine/")) {
 									path = basePath + path;
+								}
+								if (path.startsWith("optifine/") && namespace == null) {
+									namespace = id.getNamespace();
 								}
 
 								try {
@@ -564,6 +550,16 @@ public class BaseCTMProperties implements CTMProperties {
 		blockEntityNamePredicate = blockEntityName -> pattern.matcher(blockEntityName).matches();
 	}
 
+	protected void parsePrioritize() {
+		String prioritizeStr = properties.getProperty("prioritize");
+		if (prioritizeStr == null) {
+			prioritized = affectsTextures();
+			return;
+		}
+
+		prioritized = Boolean.parseBoolean(prioritizeStr.trim());
+	}
+
 	protected void parseResourceCondition() {
 		String conditionsStr = properties.getProperty("resourceCondition");
 		if (conditionsStr == null) {
@@ -655,12 +651,20 @@ public class BaseCTMProperties implements CTMProperties {
 		}
 	}
 
+	public Properties getProperties() {
+		return properties;
+	}
+
 	public Identifier getId() {
 		return id;
 	}
 
 	public String getPackName() {
 		return packName;
+	}
+
+	public int getPackPriority() {
+		return packPriority;
 	}
 
 	public String getMethod() {
@@ -675,8 +679,8 @@ public class BaseCTMProperties implements CTMProperties {
 		return matchBlocksPredicate;
 	}
 
-	public int getWeight() {
-		return weight;
+	public int getTileAmount() {
+		return tiles.size();
 	}
 
 	public EnumSet<Direction> getFaces() {
@@ -693,6 +697,10 @@ public class BaseCTMProperties implements CTMProperties {
 
 	public Predicate<String> getBlockEntityNamePredicate() {
 		return blockEntityNamePredicate;
+	}
+
+	public boolean isPrioritized() {
+		return prioritized;
 	}
 
 	public List<SpriteIdentifier> getSpriteIds() {
