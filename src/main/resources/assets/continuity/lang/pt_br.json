@@ -1,0 +1,9 @@
+{
+  "options.continuity.title": "Configuração de continuidade",
+  "options.continuity.connected_textures": "Texturas conectadas",
+  "options.continuity.connected_textures.tooltip": "Habilitar ou desabilitar texturas conectadas para blocos.",
+  "options.continuity.emissive_textures": "Texturas Emissivas",
+  "options.continuity.emissive_textures.tooltip": "Habilite ou desabilite texturas emissivas para modelos de blocos e itens.",
+  "options.continuity.custom_block_layers": "Camadas de bloco personalizadas",
+  "options.continuity.custom_block_layers.tooltip": "Habilitar ou desabilitar camadas de bloco personalizadas."
+}
