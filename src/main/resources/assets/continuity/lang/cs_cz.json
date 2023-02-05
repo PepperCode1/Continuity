@@ -1,0 +1,9 @@
+{
+  "options.continuity.title": "Konfigurovat Continuity",
+  "options.continuity.connected_textures": "Spojené textury",
+  "options.continuity.connected_textures.tooltip": "Zapnout či vypnout spojené textury bloků.",
+  "options.continuity.emissive_textures": "Zářící textury",
+  "options.continuity.emissive_textures.tooltip": "Zapnout či vypnout zářící textury bloků a modelů předmětů.",
+  "options.continuity.custom_block_layers": "Vlastní vrstvy bloků",
+  "options.continuity.custom_block_layers.tooltip": "Zapnout či vypnout vlastní vrstvy bloků."
+}
