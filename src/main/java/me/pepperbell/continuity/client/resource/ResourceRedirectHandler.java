@@ -46,7 +46,7 @@ public class ResourceRedirectHandler {
 			resourceManager = accessor.getActiveManager();
 		}
 		if (resourceManager instanceof LifecycledResourceManagerImplExtension extension) {
-			return extension.getRedirectHandler();
+			return extension.continuity$getRedirectHandler();
 		}
 		return null;
 	}

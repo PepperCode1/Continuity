@@ -32,9 +32,9 @@ public class SpriteAtlasTextureMixin {
 	private Map<Identifier, Sprite> sprites;
 
 	@Unique
-	private boolean loadingEmissiveSprites;
+	private boolean continuity$loadingEmissiveSprites;
 	@Unique
-	private Map<Identifier, Identifier> emissiveIdMap;
+	private Map<Identifier, Identifier> continuity$emissiveIdMap;
 
 	@Shadow
 	private Collection<Sprite.Info> loadSprites(ResourceManager resourceManager, Set<Identifier> ids) {
@@ -47,14 +47,14 @@ public class SpriteAtlasTextureMixin {
 	}
 
 	@Inject(method = "loadSprites(Lnet/minecraft/resource/ResourceManager;Ljava/util/Set;)Ljava/util/Collection;", at = @At("TAIL"))
-	private void onTailLoadSprites(ResourceManager resourceManager, Set<Identifier> ids, CallbackInfoReturnable<Collection<Sprite.Info>> cir) {
-		if (!loadingEmissiveSprites) {
-			loadingEmissiveSprites = true;
+	private void continuity$onTailLoadSprites(ResourceManager resourceManager, Set<Identifier> ids, CallbackInfoReturnable<Collection<Sprite.Info>> cir) {
+		if (!continuity$loadingEmissiveSprites) {
+			continuity$loadingEmissiveSprites = true;
 			String emissiveSuffix = EmissiveSuffixLoader.getEmissiveSuffix();
 			if (emissiveSuffix != null) {
 				Collection<Sprite.Info> spriteInfos = cir.getReturnValue();
 				Set<Identifier> emissiveIds = new ObjectOpenHashSet<>();
-				emissiveIdMap = new Object2ObjectOpenHashMap<>();
+				continuity$emissiveIdMap = new Object2ObjectOpenHashMap<>();
 				for (Sprite.Info spriteInfo : spriteInfos) {
 					Identifier id = spriteInfo.getId();
 					if (!id.getPath().endsWith(emissiveSuffix)) {
@@ -62,7 +62,7 @@ public class SpriteAtlasTextureMixin {
 						Identifier emissiveLocation = getTexturePath(emissiveId);
 						if (resourceManager.containsResource(emissiveLocation)) {
 							emissiveIds.add(emissiveId);
-							emissiveIdMap.put(id, emissiveId);
+							continuity$emissiveIdMap.put(id, emissiveId);
 						}
 					}
 				}
@@ -70,30 +70,30 @@ public class SpriteAtlasTextureMixin {
 					Collection<Sprite.Info> emissiveSpriteInfos = loadSprites(resourceManager, emissiveIds);
 					spriteInfos.addAll(emissiveSpriteInfos);
 				} else {
-					emissiveIdMap = null;
+					continuity$emissiveIdMap = null;
 				}
 			}
-			loadingEmissiveSprites = false;
+			continuity$loadingEmissiveSprites = false;
 		}
 	}
 
 	@Inject(method = "stitch(Lnet/minecraft/resource/ResourceManager;Ljava/util/stream/Stream;Lnet/minecraft/util/profiler/Profiler;I)Lnet/minecraft/client/texture/SpriteAtlasTexture$Data;", at = @At("TAIL"))
-	private void onTailStitch(ResourceManager resourceManager, Stream<Identifier> idStream, Profiler profiler, int mipmapLevel, CallbackInfoReturnable<SpriteAtlasTexture.Data> cir) {
+	private void continuity$onTailStitch(ResourceManager resourceManager, Stream<Identifier> idStream, Profiler profiler, int mipmapLevel, CallbackInfoReturnable<SpriteAtlasTexture.Data> cir) {
 		SpriteAtlasTexture.Data data = cir.getReturnValue();
-		((SpriteAtlasTextureDataExtension) data).setEmissiveIdMap(emissiveIdMap);
-		emissiveIdMap = null;
+		((SpriteAtlasTextureDataExtension) data).continuity$setEmissiveIdMap(continuity$emissiveIdMap);
+		continuity$emissiveIdMap = null;
 	}
 
 	@Inject(method = "upload(Lnet/minecraft/client/texture/SpriteAtlasTexture$Data;)V", at = @At("TAIL"))
-	private void onTailUpload(SpriteAtlasTexture.Data data, CallbackInfo ci) {
-		Map<Identifier, Identifier> emissiveIdMap = ((SpriteAtlasTextureDataExtension) data).getEmissiveIdMap();
+	private void continuity$onTailUpload(SpriteAtlasTexture.Data data, CallbackInfo ci) {
+		Map<Identifier, Identifier> emissiveIdMap = ((SpriteAtlasTextureDataExtension) data).continuity$getEmissiveIdMap();
 		if (emissiveIdMap != null) {
 			emissiveIdMap.forEach((id, emissiveId) -> {
 				Sprite sprite = sprites.get(id);
 				if (sprite != null) {
 					Sprite emissiveSprite = sprites.get(emissiveId);
 					if (emissiveSprite != null) {
-						((SpriteExtension) sprite).setEmissiveSprite(emissiveSprite);
+						((SpriteExtension) sprite).continuity$setEmissiveSprite(emissiveSprite);
 					}
 				}
 			});

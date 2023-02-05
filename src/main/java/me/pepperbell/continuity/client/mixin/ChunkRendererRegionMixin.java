@@ -18,7 +18,7 @@ public class ChunkRendererRegionMixin implements BiomeView {
 	protected World world;
 
 	@Override
-	public RegistryEntry<Biome> getBiome(BlockPos pos) {
+	public RegistryEntry<Biome> continuity$getBiome(BlockPos pos) {
 		return world.getBiome(pos);
 	}
 }

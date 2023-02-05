@@ -10,16 +10,16 @@ import net.minecraft.client.texture.Sprite;
 @Mixin(Sprite.class)
 public class SpriteMixin implements SpriteExtension {
 	@Unique
-	private Sprite emissiveSprite;
+	private Sprite continuity$emissiveSprite;
 
 	@Override
 	@Nullable
-	public Sprite getEmissiveSprite() {
-		return emissiveSprite;
+	public Sprite continuity$getEmissiveSprite() {
+		return continuity$emissiveSprite;
 	}
 
 	@Override
-	public void setEmissiveSprite(Sprite sprite) {
-		emissiveSprite = sprite;
+	public void continuity$setEmissiveSprite(Sprite sprite) {
+		continuity$emissiveSprite = sprite;
 	}
 }

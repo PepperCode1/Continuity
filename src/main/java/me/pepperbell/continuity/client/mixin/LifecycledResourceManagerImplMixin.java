@@ -20,42 +20,42 @@ import net.minecraft.util.Identifier;
 @Mixin(LifecycledResourceManagerImpl.class)
 public class LifecycledResourceManagerImplMixin implements LifecycledResourceManagerImplExtension {
 	@Unique
-	private ResourceRedirectHandler redirectHandler;
-
-	@Inject(method = "<init>(Lnet/minecraft/resource/ResourceType;Ljava/util/List;)V", at = @At("TAIL"))
-	private void onTailInit(ResourceType type, List<ResourcePack> packs, CallbackInfo ci) {
-		if (type == ResourceType.CLIENT_RESOURCES) {
-			redirectHandler = new ResourceRedirectHandler();
-		}
-	}
-
-	@ModifyVariable(method = "getResource(Lnet/minecraft/util/Identifier;)Lnet/minecraft/resource/Resource;", at = @At("HEAD"))
-	private Identifier redirectGetResourceId(Identifier id) {
-		if (redirectHandler != null) {
-			return redirectHandler.redirect(id);
-		}
-		return id;
-	}
-
-	@ModifyVariable(method = "containsResource(Lnet/minecraft/util/Identifier;)Z", at = @At("HEAD"))
-	private Identifier redirectContainsResourceId(Identifier id) {
-		if (redirectHandler != null) {
-			return redirectHandler.redirect(id);
-		}
-		return id;
-	}
-
-	@ModifyVariable(method = "getAllResources(Lnet/minecraft/util/Identifier;)Ljava/util/List;", at = @At("HEAD"))
-	private Identifier redirectGetAllResourcesId(Identifier id) {
-		if (redirectHandler != null) {
-			return redirectHandler.redirect(id);
-		}
-		return id;
-	}
+	private ResourceRedirectHandler continuity$redirectHandler;
 
 	@Override
 	@Nullable
-	public ResourceRedirectHandler getRedirectHandler() {
-		return redirectHandler;
+	public ResourceRedirectHandler continuity$getRedirectHandler() {
+		return continuity$redirectHandler;
+	}
+
+	@Inject(method = "<init>(Lnet/minecraft/resource/ResourceType;Ljava/util/List;)V", at = @At("TAIL"))
+	private void continuity$onTailInit(ResourceType type, List<ResourcePack> packs, CallbackInfo ci) {
+		if (type == ResourceType.CLIENT_RESOURCES) {
+			continuity$redirectHandler = new ResourceRedirectHandler();
+		}
+	}
+
+	@ModifyVariable(method = "getResource(Lnet/minecraft/util/Identifier;)Lnet/minecraft/resource/Resource;", at = @At("HEAD"), argsOnly = true)
+	private Identifier continuity$redirectGetResourceId(Identifier id) {
+		if (continuity$redirectHandler != null) {
+			return continuity$redirectHandler.redirect(id);
+		}
+		return id;
+	}
+
+	@ModifyVariable(method = "containsResource(Lnet/minecraft/util/Identifier;)Z", at = @At("HEAD"), argsOnly = true)
+	private Identifier continuity$redirectContainsResourceId(Identifier id) {
+		if (continuity$redirectHandler != null) {
+			return continuity$redirectHandler.redirect(id);
+		}
+		return id;
+	}
+
+	@ModifyVariable(method = "getAllResources(Lnet/minecraft/util/Identifier;)Ljava/util/List;", at = @At("HEAD"), argsOnly = true)
+	private Identifier continuity$redirectGetAllResourcesId(Identifier id) {
+		if (continuity$redirectHandler != null) {
+			return continuity$redirectHandler.redirect(id);
+		}
+		return id;
 	}
 }

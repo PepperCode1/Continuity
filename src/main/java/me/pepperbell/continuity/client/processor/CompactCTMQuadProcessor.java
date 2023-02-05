@@ -8,8 +8,8 @@ import java.util.function.Supplier;
 import org.apache.commons.lang3.ArrayUtils;
 
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.Int2IntMaps;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
-import it.unimi.dsi.fastutil.objects.ObjectSet;
 import me.pepperbell.continuity.api.client.QuadProcessor;
 import me.pepperbell.continuity.api.client.QuadProcessorFactory;
 import me.pepperbell.continuity.client.ContinuityClient;
@@ -32,9 +32,9 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.BlockRenderView;
 
 public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
-	protected static int[][] QUAD_INDEX_MAP = new int[8][];
+	protected static final int[][] QUADRANT_INDEX_MAPS = new int[8][];
 	static {
-		int[][] map = QUAD_INDEX_MAP;
+		int[][] map = QUADRANT_INDEX_MAPS;
 
 		map[0] = new int[] { 0, 1, 2, 3 }; // 0 - 0 1 2 3
 		map[1] = map[0].clone(); // 1 - 3 0 1 2
@@ -129,20 +129,16 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 
 		//
 
-		boolean uSplit = ((uSplit01 ? 1 : 0) + (uSplit12 ? 1 : 0) + (uSplit23 ? 1 : 0) + (uSplit30 ? 1 : 0)) == 2;
-		boolean vSplit = ((vSplit01 ? 1 : 0) + (vSplit12 ? 1 : 0) + (vSplit23 ? 1 : 0) + (vSplit30 ? 1 : 0)) == 2;
+		boolean uSplit = uSplit01 & uSplit23 | uSplit12 & uSplit30;
+		boolean vSplit = vSplit01 & vSplit23 | vSplit12 & vSplit30;
 
-		if (!uSplit && !vSplit) {
-			return ProcessingResult.ABORT_AND_RENDER_QUAD;
-		}
+		if (uSplit & vSplit) {
+			int[] quadrantIndexMap = QUADRANT_INDEX_MAPS[orientation];
 
-		int[] quadIndices = QUAD_INDEX_MAP[orientation];
-
-		if (uSplit && vSplit) {
-			int spriteIndex0 = getSpriteIndex(quadIndices[0], connections);
-			int spriteIndex1 = getSpriteIndex(quadIndices[1], connections);
-			int spriteIndex2 = getSpriteIndex(quadIndices[2], connections);
-			int spriteIndex3 = getSpriteIndex(quadIndices[3], connections);
+			int spriteIndex0 = getSpriteIndex(quadrantIndexMap[0], connections);
+			int spriteIndex1 = getSpriteIndex(quadrantIndexMap[1], connections);
+			int spriteIndex2 = getSpriteIndex(quadrantIndexMap[2], connections);
+			int spriteIndex3 = getSpriteIndex(quadrantIndexMap[3], connections);
 
 			boolean split01 = spriteIndex0 != spriteIndex1;
 			boolean split12 = spriteIndex1 != spriteIndex2;
@@ -313,7 +309,7 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 						splitQuadrant(quad, sprite, material, vertexContainer, 0, extraQuadEmitter, spriteIndex0);
 						splitQuadrant(quad, sprite, material, vertexContainer, 1, extraQuadEmitter, spriteIndex1);
 						splitHalf(quad, sprite, material, vertexContainer, 2, extraQuadEmitter, spriteIndex2);
-					} else {
+					} else { // !split30
 						float delta01;
 						float delta23;
 						float delta12;
@@ -344,36 +340,42 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 
 			context.markHasExtraQuads();
 			return ProcessingResult.ABORT_AND_CANCEL_QUAD;
-		} else {
+		} else if (uSplit | vSplit) {
 			boolean firstSplit;
-			boolean firstHalf;
+			boolean swapAB;
+			int spriteIndexA;
+			int spriteIndexB;
 			if (uSplit) {
 				firstSplit = uSplit01;
-				firstHalf = (vSignum0 + vSignum1 + vSignum2 + vSignum3) <= 0;
-				if (orientation == 2 || orientation == 3 || orientation == 5 || orientation == 6) {
-					firstHalf = !firstHalf;
+				swapAB = orientation == 2 || orientation == 3 || orientation == 4 || orientation == 7;
+				if ((vSignum0 + vSignum1 + vSignum2 + vSignum3) <= 0) {
+					spriteIndexA = getSpriteIndex(0, connections);
+					spriteIndexB = getSpriteIndex(3, connections);
+				} else {
+					spriteIndexA = getSpriteIndex(1, connections);
+					spriteIndexB = getSpriteIndex(2, connections);
 				}
 			} else {
 				firstSplit = vSplit01;
-				firstHalf = (uSignum0 + uSignum1 + uSignum2 + uSignum3) <= 0;
-				if (orientation == 1 || orientation == 2 || orientation == 6 || orientation == 7) {
-					firstHalf = !firstHalf;
+				swapAB = orientation == 1 || orientation == 2 || orientation == 4 || orientation == 5;
+				if ((uSignum0 + uSignum1 + uSignum2 + uSignum3) <= 0) {
+					spriteIndexA = getSpriteIndex(1, connections);
+					spriteIndexB = getSpriteIndex(0, connections);
+				} else {
+					spriteIndexA = getSpriteIndex(2, connections);
+					spriteIndexB = getSpriteIndex(3, connections);
 				}
-			}
-
-			int spriteIndexA;
-			int spriteIndexB;
-			if (firstHalf) {
-				spriteIndexA = getSpriteIndex(quadIndices[0], connections);
-				spriteIndexB = getSpriteIndex(quadIndices[firstSplit ? 1 : 3], connections);
-			} else {
-				spriteIndexA = getSpriteIndex(quadIndices[firstSplit ? 3 : 1], connections);
-				spriteIndexB = getSpriteIndex(quadIndices[2], connections);
 			}
 
 			if (spriteIndexA == spriteIndexB) {
 				tryInterpolate(quad, sprite, spriteIndexA);
 				return ProcessingResult.ABORT_AND_RENDER_QUAD;
+			}
+
+			if (swapAB) {
+				int temp = spriteIndexA;
+				spriteIndexA = spriteIndexB;
+				spriteIndexB = temp;
 			}
 
 			VertexContainer vertexContainer = context.getData(ProcessingDataKeys.VERTEX_CONTAINER_KEY);
@@ -397,8 +399,8 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 				vertexContainer.vertex01.setLerped(delta01, vertexContainer.vertex0, vertexContainer.vertex1);
 				vertexContainer.vertex23.setLerped(delta23, vertexContainer.vertex2, vertexContainer.vertex3);
 
-				splitHalf(quad, sprite, material, vertexContainer, 3, extraQuadEmitter, spriteIndexA);
-				splitHalf(quad, sprite, material, vertexContainer, 1, extraQuadEmitter, spriteIndexB);
+				splitHalf(quad, sprite, material, vertexContainer, 1, extraQuadEmitter, spriteIndexA);
+				splitHalf(quad, sprite, material, vertexContainer, 3, extraQuadEmitter, spriteIndexB);
 			} else {
 				float delta12;
 				float delta30;
@@ -419,10 +421,29 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 
 			context.markHasExtraQuads();
 			return ProcessingResult.ABORT_AND_CANCEL_QUAD;
+		} else {
+			int quadrant;
+			if ((uSignum0 + uSignum1 + uSignum2 + uSignum3) <= 0) {
+				if ((vSignum0 + vSignum1 + vSignum2 + vSignum3) <= 0) {
+					quadrant = 0;
+				} else {
+					quadrant = 1;
+				}
+			} else {
+				if ((vSignum0 + vSignum1 + vSignum2 + vSignum3) <= 0) {
+					quadrant = 3;
+				} else {
+					quadrant = 2;
+				}
+			}
+
+			int spriteIndex = getSpriteIndex(quadrant, connections);
+			tryInterpolate(quad, sprite, spriteIndex);
+			return ProcessingResult.ABORT_AND_RENDER_QUAD;
 		}
 	}
 
-	// True only if one argument is 1 and the other is -1
+	// True if and only if one argument is 1 and the other is -1
 	protected static boolean shouldSplitUV(int signumA, int signumB) {
 		return (signumA ^ signumB) == -2;
 	}
@@ -434,9 +455,9 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 	3 - Left and right / horizontal
 	4 - Unconnected corners
 	 */
-	protected int getSpriteIndex(int quadIndex, int connections) {
-		int index1 = quadIndex;
-		int index2 = (quadIndex + 3) % 4;
+	protected int getSpriteIndex(int quadrantIndex, int connections) {
+		int index1 = quadrantIndex;
+		int index2 = (quadrantIndex + 3) % 4;
 		boolean connected1 = ((connections >> index1 * 2) & 1) == 1;
 		boolean connected2 = ((connections >> index2 * 2) & 1) == 1;
 		if (connected1 && connected2) {
@@ -446,10 +467,10 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 			return 4;
 		}
 		if (connected1) { // 0 - h, 1 - v, 2 - h, 3 - v
-			return 3 - quadIndex % 2;
+			return 3 - quadrantIndex % 2;
 		}
 		if (connected2) { // 0 - v, 1 - h, 2 - v, 3 - h
-			return 2 + quadIndex % 2;
+			return 2 + quadrantIndex % 2;
 		}
 		return 0;
 	}
@@ -597,13 +618,7 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 			if (replacementMap != null) {
 				int replacementTextureAmount = getReplacementTextureAmount(properties);
 				replacementSprites = new Sprite[replacementTextureAmount];
-				ObjectSet<Int2IntMap.Entry> entrySet = replacementMap.int2IntEntrySet();
-				ObjectIterator<Int2IntMap.Entry> entryIterator;
-				if (entrySet instanceof Int2IntMap.FastEntrySet fastEntrySet) {
-					entryIterator = fastEntrySet.fastIterator();
-				} else {
-					entryIterator = entrySet.iterator();
-				}
+				ObjectIterator<Int2IntMap.Entry> entryIterator = Int2IntMaps.fastIterator(replacementMap);
 				while (entryIterator.hasNext()) {
 					Int2IntMap.Entry entry = entryIterator.next();
 					int key = entry.getIntKey();

@@ -24,7 +24,7 @@ import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.util.Identifier;
 
-public class ModelWrappingHandler {
+public final class ModelWrappingHandler {
 	private static final Map<ModelIdentifier, BlockState> MODEL_ID_2_STATE_MAP = new Object2ObjectOpenHashMap<>();
 	private static final Map<ModelIdentifier, List<CTMLoadingContainer<?>>> MODEL_ID_2_CONTAINERS_MAP = new Object2ObjectOpenHashMap<>();
 
@@ -110,7 +110,7 @@ public class ModelWrappingHandler {
 
 		spriteAtlasData.forEach((atlasId, pair) -> {
 			SpriteAtlasTexture.Data data = pair.getSecond();
-			Map<Identifier, Identifier> emissiveIdMap = ((SpriteAtlasTextureDataExtension) data).getEmissiveIdMap();
+			Map<Identifier, Identifier> emissiveIdMap = ((SpriteAtlasTextureDataExtension) data).continuity$getEmissiveIdMap();
 			if (emissiveIdMap != null) {
 				for (Identifier id : emissiveIdMap.keySet()) {
 					spriteIdsToWrap.add(new SpriteIdentifier(atlasId, id));

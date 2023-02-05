@@ -52,7 +52,7 @@ public final class PropertiesParsingHelper {
 							namespace = parts[0];
 							path = parts[1];
 						} else {
-							namespace = fileLocation.getNamespace();
+							namespace = null;
 							path = parts[0];
 						}
 
@@ -75,6 +75,9 @@ public final class PropertiesParsingHelper {
 								continue;
 							}
 							path = redirectHandler.getSourceSpritePath(path + ".png");
+							if (namespace == null) {
+								namespace = fileLocation.getNamespace();
+							}
 						}
 
 						try {
@@ -228,5 +231,18 @@ public final class PropertiesParsingHelper {
 			ContinuityClient.LOGGER.warn("Unknown '" + propertyKey + "' value '" + symmetryStr + "' in file '" + fileLocation + "' in pack '" + packName + "'");
 		}
 		return null;
+	}
+
+	public static boolean parseOptifineOnly(Properties properties, Identifier fileLocation) {
+		if (!fileLocation.getNamespace().equals(Identifier.DEFAULT_NAMESPACE)) {
+			return false;
+		}
+
+		String optifineOnlyStr = properties.getProperty("optifineOnly");
+		if (optifineOnlyStr == null) {
+			return false;
+		}
+
+		return Boolean.parseBoolean(optifineOnlyStr.trim());
 	}
 }

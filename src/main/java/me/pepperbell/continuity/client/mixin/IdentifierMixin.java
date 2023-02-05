@@ -11,7 +11,7 @@ import net.minecraft.util.Identifier;
 @Mixin(Identifier.class)
 public class IdentifierMixin {
 	@Inject(method = "isPathValid(Ljava/lang/String;)Z", at = @At("HEAD"), cancellable = true)
-	private static void onIsPathValid(String path, CallbackInfoReturnable<Boolean> cir) {
+	private static void continuity$onIsPathValid(String path, CallbackInfoReturnable<Boolean> cir) {
 		if (InvalidIdentifierStateHolder.get().isEnabled()) {
 			cir.setReturnValue(true);
 		}

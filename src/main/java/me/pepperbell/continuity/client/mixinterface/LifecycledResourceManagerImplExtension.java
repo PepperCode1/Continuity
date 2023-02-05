@@ -6,5 +6,5 @@ import me.pepperbell.continuity.client.resource.ResourceRedirectHandler;
 
 public interface LifecycledResourceManagerImplExtension {
 	@Nullable
-	ResourceRedirectHandler getRedirectHandler();
+	ResourceRedirectHandler continuity$getRedirectHandler();
 }

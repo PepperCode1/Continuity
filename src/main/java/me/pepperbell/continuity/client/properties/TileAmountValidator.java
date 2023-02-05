@@ -12,7 +12,7 @@ public interface TileAmountValidator<T extends BaseCTMProperties> {
 			if (ctmProperties == null) {
 				return null;
 			}
-			if (validator.validateTileAmount(ctmProperties.tiles.size(), ctmProperties)) {
+			if (validator.validateTileAmount(ctmProperties.getTileAmount(), ctmProperties)) {
 				return ctmProperties;
 			}
 			return null;
