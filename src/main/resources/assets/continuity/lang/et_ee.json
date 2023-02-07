@@ -8,6 +8,6 @@
   "options.continuity.custom_block_layers.tooltip": "Luba või keela kohandatud plokikihid.",
   "resourcePack.continuity.default.name": "Vaikimisi ühendatud tekstuurid",
   "resourcePack.continuity.default.description": "Raamaturiiulid, liivakivi ja klaas",
-  "resourcePack.continuity.glass_pane_culling_fix.name": "Klaaspaneelide eralduse parandus",
-  "resourcePack.continuity.glass_pane_culling_fix.description": "Parandab eralduse ülemisel ja alumisel küljel"
+  "resourcePack.continuity.glass_pane_culling_fix.name": "Klaaspaneelide eral. parandus",
+  "resourcePack.continuity.glass_pane_culling_fix.description": "Parandab ülemise ja alumise külje eralduse"
 }
