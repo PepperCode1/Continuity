@@ -1,0 +1,9 @@
+{
+  "options.continuity.title": "Pagsasaayos ng Continuity",
+  "options.continuity.connected_textures": "Konektado na mga Textures",
+  "options.continuity.connected_textures.tooltip": "Paganahin o hindi paganahin ang mga konektadong textures sa mga bloke.",
+  "options.continuity.emissive_textures": "Emisibo na mga Textures",
+  "options.continuity.emissive_textures.tooltip": "Paganahin o hindi paganahin ang mga emisibong textures sa mga bloke at modelong aytem.",
+  "options.continuity.custom_block_layers": "Mga Pasadyang Suson",
+  "options.continuity.custom_block_layers.tooltip": "Paganahin o hindi paganahin ang mga pasadyang suson."
+}
