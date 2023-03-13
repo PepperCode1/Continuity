@@ -33,11 +33,11 @@ public class StandardOverlayCTMProperties extends ConnectingCTMProperties implem
 	}
 
 	protected void parseConnectTiles() {
-		connectTilesSet = PropertiesParsingHelper.parseMatchTiles(properties, "connectTiles", id, packName, false);
+		connectTilesSet = PropertiesParsingHelper.parseMatchTiles(properties, "connectTiles", id, packName);
 	}
 
 	protected void parseConnectBlocks() {
-		connectBlocksPredicate = PropertiesParsingHelper.parseBlockStates(properties, "connectBlocks", id, packName, false);
+		connectBlocksPredicate = PropertiesParsingHelper.parseBlockStates(properties, "connectBlocks", id, packName);
 	}
 
 	public Set<Identifier> getConnectTilesSet() {

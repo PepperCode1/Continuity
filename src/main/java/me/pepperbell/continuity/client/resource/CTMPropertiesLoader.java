@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.function.Consumer;
 
-import org.apache.http.annotation.Contract;
-import org.apache.http.annotation.ThreadingBehavior;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,7 +19,6 @@ import me.pepperbell.continuity.api.client.CTMLoaderRegistry;
 import me.pepperbell.continuity.api.client.CTMProperties;
 import me.pepperbell.continuity.client.ContinuityClient;
 import me.pepperbell.continuity.client.util.BooleanState;
-import me.pepperbell.continuity.client.util.OptionalListCreator;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.resource.ResourceManager;
@@ -29,7 +26,6 @@ import net.minecraft.resource.ResourcePack;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
 
-@Contract(threading = ThreadingBehavior.UNSAFE)
 public final class CTMPropertiesLoader {
 	private static final List<CTMLoadingContainer<?>> ALL = new ObjectArrayList<>();
 	private static final List<CTMLoadingContainer<?>> AFFECTS_BLOCK = new ObjectArrayList<>();
@@ -210,5 +206,24 @@ public final class CTMPropertiesLoader {
 		AFFECTS_BLOCK.clear();
 		IGNORES_BLOCK.clear();
 		VALID_FOR_MULTIPASS.clear();
+	}
+
+	private static class OptionalListCreator<T> implements Consumer<T> {
+		private ObjectArrayList<T> list = null;
+
+		@Override
+		public void accept(T t) {
+			if (list == null) {
+				list = new ObjectArrayList<>();
+			}
+			list.add(t);
+		}
+
+		@Nullable
+		public ObjectArrayList<T> get() {
+			ObjectArrayList<T> list = this.list;
+			this.list = null;
+			return list;
+		}
 	}
 }

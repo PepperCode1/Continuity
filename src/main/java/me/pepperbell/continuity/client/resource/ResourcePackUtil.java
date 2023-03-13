@@ -11,7 +11,7 @@ import net.minecraft.resource.ResourcePack;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
 
-public class ResourcePackUtil {
+public final class ResourcePackUtil {
 	private static ResourcePack[] resourcePacks;
 
 	public static DefaultResourcePack getDefaultResourcePack() {

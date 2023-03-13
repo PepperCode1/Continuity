@@ -5,5 +5,5 @@ import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.world.biome.Biome;
 
 public interface BiomeView {
-	RegistryEntry<Biome> getBiome(BlockPos pos);
+	RegistryEntry<Biome> continuity$getBiome(BlockPos pos);
 }

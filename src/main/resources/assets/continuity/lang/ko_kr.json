@@ -1,0 +1,9 @@
+{
+    "options.continuity.title": "Continuity 설정",
+    "options.continuity.connected_textures": "연결된 텍스쳐",
+    "options.continuity.connected_textures.tooltip": "블록의 연결된 텍스쳐를 활성화 하거나 비활성화 합니다.",
+    "options.continuity.emissive_textures": "빛나는 텍스쳐",
+    "options.continuity.emissive_textures.tooltip": "블록 및 아이템 모델의 빛나는 텍스쳐를 활성화 하거나 비활성화 합니다.",
+    "options.continuity.custom_block_layers": "블록 레이어 ",
+    "options.continuity.custom_block_layers.tooltip": "블록 레이어 사용자화를 활성화 하거나 비활성화 합니다."
+}

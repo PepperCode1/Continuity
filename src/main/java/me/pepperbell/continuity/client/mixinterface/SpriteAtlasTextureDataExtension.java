@@ -8,7 +8,7 @@ import net.minecraft.util.Identifier;
 
 public interface SpriteAtlasTextureDataExtension {
 	@Nullable
-	Map<Identifier, Identifier> getEmissiveIdMap();
+	Map<Identifier, Identifier> continuity$getEmissiveIdMap();
 
-	void setEmissiveIdMap(Map<Identifier, Identifier> map);
+	void continuity$setEmissiveIdMap(Map<Identifier, Identifier> map);
 }

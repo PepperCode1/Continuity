@@ -2,6 +2,8 @@ package me.pepperbell.continuity.client.processor.simple;
 
 import java.util.function.Supplier;
 
+import org.jetbrains.annotations.Nullable;
+
 import me.pepperbell.continuity.api.client.ProcessingDataProvider;
 import me.pepperbell.continuity.client.processor.ConnectionPredicate;
 import me.pepperbell.continuity.client.processor.DirectionMaps;
@@ -52,6 +54,7 @@ public class CTMSpriteProvider implements SpriteProvider {
 	}
 
 	@Override
+	@Nullable
 	public Sprite getSprite(QuadView quad, Sprite sprite, BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, ProcessingDataProvider dataProvider) {
 		Direction[] directions = useTextureOrientation ? DirectionMaps.getDirections(quad) : DirectionMaps.getMap(quad.lightFace())[0];
 		BlockPos.Mutable mutablePos = dataProvider.getData(ProcessingDataKeys.MUTABLE_POS_KEY);
@@ -60,38 +63,21 @@ public class CTMSpriteProvider implements SpriteProvider {
 	}
 
 	public static int getConnections(ConnectionPredicate connectionPredicate, boolean innerSeams, Direction[] directions, BlockPos.Mutable mutablePos, BlockRenderView blockView, BlockState state, BlockPos pos, Direction face, Sprite quadSprite) {
-		mutablePos.set(pos);
 		int connections = 0;
 		for (int i = 0; i < 4; i++) {
-			mutablePos.move(directions[i]);
-			if (connectionPredicate.shouldConnect(state, quadSprite, pos, mutablePos, face, blockView)) {
-				if (innerSeams) {
-					mutablePos.move(face);
-					if (!connectionPredicate.shouldConnect(state, quadSprite, pos, mutablePos, face, blockView)) {
-						connections |= 1 << (i * 2);
-					}
-				} else {
-					connections |= 1 << (i * 2);
-				}
+			mutablePos.set(pos, directions[i]);
+			if (connectionPredicate.shouldConnect(blockView, state, pos, mutablePos, face, quadSprite, innerSeams)) {
+				connections |= 1 << (i * 2);
 			}
-			mutablePos.set(pos);
 		}
 		for (int i = 0; i < 4; i++) {
 			int index1 = i;
 			int index2 = (i + 1) % 4;
 			if (((connections >> index1 * 2) & 1) == 1 && ((connections >> index2 * 2) & 1) == 1) {
-				mutablePos.move(directions[index1]).move(directions[index2]);
-				if (connectionPredicate.shouldConnect(state, quadSprite, pos, mutablePos, face, blockView)) {
-					if (innerSeams) {
-						mutablePos.move(face);
-						if (!connectionPredicate.shouldConnect(state, quadSprite, pos, mutablePos, face, blockView)) {
-							connections |= 1 << (i * 2 + 1);
-						}
-					} else {
-						connections |= 1 << (i * 2 + 1);
-					}
+				mutablePos.set(pos, directions[index1]).move(directions[index2]);
+				if (connectionPredicate.shouldConnect(blockView, state, pos, mutablePos, face, quadSprite, innerSeams)) {
+					connections |= 1 << (i * 2 + 1);
 				}
-				mutablePos.set(pos);
 			}
 		}
 		return connections;

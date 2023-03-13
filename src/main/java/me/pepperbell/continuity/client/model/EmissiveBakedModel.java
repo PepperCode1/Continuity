@@ -53,7 +53,7 @@ public class EmissiveBakedModel extends ForwardingBakedModel {
 		}
 
 		ModelObjectsContainer container = ModelObjectsContainer.get();
-		if (!container.featureStates.getConnectedTexturesState().isEnabled()) {
+		if (!container.featureStates.getEmissiveTexturesState().isEnabled()) {
 			super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
 			return;
 		}

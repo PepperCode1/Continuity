@@ -2,8 +2,6 @@ package me.pepperbell.continuity.client.util.biome;
 
 import java.util.Map;
 
-import org.apache.http.annotation.Contract;
-import org.apache.http.annotation.ThreadingBehavior;
 import org.jetbrains.annotations.ApiStatus;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -13,7 +11,6 @@ import net.minecraft.util.registry.DynamicRegistryManager;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
 
-@Contract(threading = ThreadingBehavior.UNSAFE)
 public final class BiomeHolderManager {
 	private static final Map<Identifier, BiomeHolder> HOLDER_CACHE = new Object2ObjectOpenHashMap<>();
 	private static DynamicRegistryManager registryManager;

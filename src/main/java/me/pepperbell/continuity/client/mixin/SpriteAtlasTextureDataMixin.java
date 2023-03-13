@@ -13,15 +13,16 @@ import net.minecraft.util.Identifier;
 @Mixin(SpriteAtlasTexture.Data.class)
 public class SpriteAtlasTextureDataMixin implements SpriteAtlasTextureDataExtension {
 	@Unique
-	private Map<Identifier, Identifier> emissiveIdMap;
+	private Map<Identifier, Identifier> continuity$emissiveIdMap;
 
 	@Override
-	public @Nullable Map<Identifier, Identifier> getEmissiveIdMap() {
-		return emissiveIdMap;
+	@Nullable
+	public Map<Identifier, Identifier> continuity$getEmissiveIdMap() {
+		return continuity$emissiveIdMap;
 	}
 
 	@Override
-	public void setEmissiveIdMap(Map<Identifier, Identifier> map) {
-		emissiveIdMap = map;
+	public void continuity$setEmissiveIdMap(Map<Identifier, Identifier> map) {
+		continuity$emissiveIdMap = map;
 	}
 }

@@ -4,7 +4,7 @@ import java.util.function.Supplier;
 
 import me.pepperbell.continuity.api.client.QuadProcessor;
 import me.pepperbell.continuity.client.processor.simple.SimpleQuadProcessor;
-import me.pepperbell.continuity.client.properties.ConnectingCTMProperties;
+import me.pepperbell.continuity.client.properties.StandardConnectingCTMProperties;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.texture.Sprite;
@@ -18,15 +18,15 @@ public class HorizontalVerticalQuadProcessor extends HorizontalQuadProcessor {
 	// 32  16  8
 	//     *
 	// 1   2   4
-	protected static final int[] SPRITE_INDEX_MAP_1 = new int[] {
+	protected static final int[] SECONDARY_SPRITE_INDEX_MAP = new int[] {
 			3, 3, 6, 3, 3, 3, 3, 3, 3, 3, 6, 3, 3, 3, 3, 3,
 			4, 4, 5, 4, 4, 4, 4, 4, 3, 3, 6, 3, 3, 3, 3, 3,
 			3, 3, 6, 3, 3, 3, 3, 3, 3, 3, 6, 3, 3, 3, 3, 3,
 			3, 3, 6, 3, 3, 3, 3, 3, 3, 3, 6, 3, 3, 3, 3, 3,
 	};
 
-	public HorizontalVerticalQuadProcessor(Sprite[] sprites, ProcessingPredicate processingPredicate, ConnectionPredicate connectionPredicate) {
-		super(sprites, processingPredicate, connectionPredicate);
+	public HorizontalVerticalQuadProcessor(Sprite[] sprites, ProcessingPredicate processingPredicate, ConnectionPredicate connectionPredicate, boolean innerSeams) {
+		super(sprites, processingPredicate, connectionPredicate, innerSeams);
 	}
 
 	@Override
@@ -38,49 +38,38 @@ public class HorizontalVerticalQuadProcessor extends HorizontalQuadProcessor {
 		if (connections != 0) {
 			newSprite = sprites[SPRITE_INDEX_MAP[connections]];
 		} else {
-			connections = getConnections1(directions, mutablePos, blockView, state, pos, quad.lightFace(), sprite);
-			newSprite = sprites[SPRITE_INDEX_MAP_1[connections]];
+			int secondaryConnections = getSecondaryConnections(directions, mutablePos, blockView, state, pos, quad.lightFace(), sprite);
+			newSprite = sprites[SECONDARY_SPRITE_INDEX_MAP[secondaryConnections]];
 		}
 		return SimpleQuadProcessor.process(quad, sprite, newSprite);
 	}
 
-	protected int getConnections1(Direction[] directions, BlockPos.Mutable mutablePos, BlockRenderView blockView, BlockState state, BlockPos pos, Direction face, Sprite quadSprite) {
-		mutablePos.set(pos);
+	protected int getSecondaryConnections(Direction[] directions, BlockPos.Mutable mutablePos, BlockRenderView blockView, BlockState state, BlockPos pos, Direction face, Sprite quadSprite) {
 		int connections = 0;
 		for (int i = 0; i < 2; i++) {
-			mutablePos.move(directions[i * 2 + 1]);
-			if (connectionPredicate.shouldConnect(state, quadSprite, pos, mutablePos, face, blockView)) {
+			Direction direction = directions[i * 2 + 1];
+			mutablePos.set(pos, direction);
+			if (connectionPredicate.shouldConnect(blockView, state, pos, mutablePos, face, quadSprite, innerSeams)) {
 				connections |= 1 << (i * 3 + 1);
-			}
-			mutablePos.set(pos);
-		}
-		for (int i = 0; i < 4; i++) {
-			int shift = (i / 2) * 3 + 1;
-			int index1 = i;
-			int index2 = (i + 1) % 4;
-			if (((connections >> shift) & 1) == 1) {
-				mutablePos.move(directions[index1]).move(directions[index2]);
-				if (connectionPredicate.shouldConnect(state, quadSprite, pos, mutablePos, face, blockView)) {
-					int shift1 = i % 2;
-					if (shift1 <= 0) {
-						shift1--;
+				for (int j = 0; j < 2; j++) {
+					mutablePos.set(pos, direction).move(directions[((i + j) % 2) * 2]);
+					if (connectionPredicate.shouldConnect(blockView, state, pos, mutablePos, face, quadSprite, innerSeams)) {
+						connections |= 1 << (i * 3 + j * 2);
 					}
-					connections |= 1 << (shift + shift1);
 				}
-				mutablePos.set(pos);
 			}
 		}
 		return connections;
 	}
 
-	public static class Factory extends AbstractQuadProcessorFactory<ConnectingCTMProperties> {
+	public static class Factory extends AbstractQuadProcessorFactory<StandardConnectingCTMProperties> {
 		@Override
-		public QuadProcessor createProcessor(ConnectingCTMProperties properties, Sprite[] sprites) {
-			return new HorizontalVerticalQuadProcessor(sprites, BaseProcessingPredicate.fromProperties(properties), properties.getConnectionPredicate());
+		public QuadProcessor createProcessor(StandardConnectingCTMProperties properties, Sprite[] sprites) {
+			return new HorizontalVerticalQuadProcessor(sprites, BaseProcessingPredicate.fromProperties(properties), properties.getConnectionPredicate(), properties.getInnerSeams());
 		}
 
 		@Override
-		public int getTextureAmount(ConnectingCTMProperties properties) {
+		public int getTextureAmount(StandardConnectingCTMProperties properties) {
 			return 7;
 		}
 	}
