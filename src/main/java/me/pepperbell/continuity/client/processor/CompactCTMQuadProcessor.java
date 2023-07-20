@@ -458,10 +458,10 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 	protected int getSpriteIndex(int quadrantIndex, int connections) {
 		int index1 = quadrantIndex;
 		int index2 = (quadrantIndex + 3) % 4;
-		boolean connected1 = ((connections >> index1 * 2) & 1) == 1;
-		boolean connected2 = ((connections >> index2 * 2) & 1) == 1;
+		boolean connected1 = ((connections >>> index1 * 2) & 1) == 1;
+		boolean connected2 = ((connections >>> index2 * 2) & 1) == 1;
 		if (connected1 && connected2) {
-			if (((connections >> (index2 * 2 + 1)) & 1) == 1) {
+			if (((connections >>> (index2 * 2 + 1)) & 1) == 1) {
 				return 1;
 			}
 			return 4;

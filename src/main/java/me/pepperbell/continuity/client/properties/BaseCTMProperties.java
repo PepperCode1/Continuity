@@ -243,17 +243,31 @@ public class BaseCTMProperties implements CTMProperties {
 								if (!path.endsWith(".png")) {
 									path += ".png";
 								}
-								if (path.startsWith("./")) {
-									path = basePath + path.substring(2);
-								} else if (path.startsWith("~/")) {
-									path = "optifine/" + path.substring(2);
-								} else if (path.startsWith("/")) {
-									path = "optifine/" + path.substring(1);
-								} else if (!path.startsWith("textures/") && !path.startsWith("optifine/")) {
-									path = basePath + path;
-								}
-								if (path.startsWith("optifine/") && namespace == null) {
-									namespace = id.getNamespace();
+
+								if (namespace == null) {
+									if (path.startsWith("assets/minecraft/")) {
+										path = path.substring(17);
+									} else if (path.startsWith("./")) {
+										path = basePath + path.substring(2);
+									} else if (path.startsWith("~/")) {
+										path = "optifine/" + path.substring(2);
+									} else if (path.startsWith("/")) {
+										path = "optifine/" + path.substring(1);
+									}
+
+									if (!path.startsWith("textures/") && !path.startsWith("optifine/")) {
+										path = basePath + path;
+									}
+
+									if (path.startsWith("optifine/")) {
+										namespace = id.getNamespace();
+									}
+								} else {
+									if (!path.contains("/")) {
+										path = "textures/block/" + path;
+									} else if (!path.startsWith("textures/") && !path.startsWith("optifine/")) {
+										path = "textures/" + path;
+									}
 								}
 
 								try {

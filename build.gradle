@@ -1,5 +1,6 @@
 plugins {
 	id 'fabric-loom' version "${loom_version}"
+	id 'io.github.juuxel.loom-vineflower' version "${loom_vineflower_version}"
 	id 'maven-publish'
 }
 
@@ -9,6 +10,14 @@ targetCompatibility = JavaVersion.VERSION_17
 archivesBaseName = project.archives_base_name
 version = project.mod_version + '+' + project.mod_minecraft_version + getExtraBuildMetadata()
 group = project.maven_group
+
+String getExtraBuildMetadata() {
+	String buildNumber = System.getenv('GITHUB_RUN_NUMBER')
+	if (buildNumber != null) {
+		return ".build.${buildNumber}"
+	}
+	return ''
+}
 
 repositories {
 	maven {
@@ -20,6 +29,7 @@ repositories {
 		url 'https://api.modrinth.com/maven'
 	}
 	maven {
+		name "VRAM"
 		url 'https://maven.vram.io'
 	}
 	maven {
@@ -37,22 +47,14 @@ dependencies {
 	// Fabric API
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	modImplementation('com.terraformersmc:modmenu:4.0.4') {
+	modImplementation("com.terraformersmc:modmenu:${modmenu_version}") {
 		exclude group: 'net.fabricmc.fabric-api'
 	}
 
-	modCompileOnly 'maven.modrinth:sodium:mc1.19-0.4.2'
-	modCompileOnly 'maven.modrinth:indium:1.0.7+mc1.19'
-	modCompileOnly 'io.vram:frex-fabric-mc119:6.0.278'
-	modCompileOnly 'io.vram:canvas-fabric-mc119:1.0.2453'
-}
-
-String getExtraBuildMetadata() {
-	String buildNumber = System.getenv('GITHUB_RUN_NUMBER')
-	if (buildNumber != null) {
-		return "-build.${buildNumber}"
-	}
-	return ''
+	modCompileOnly "maven.modrinth:sodium:${sodium_version}"
+	modCompileOnly "maven.modrinth:indium:${indium_version}"
+	modCompileOnly "io.vram:frex-fabric:${frex_version}"
+	modCompileOnly "io.vram:canvas-fabric:${canvas_version}"
 }
 
 processResources {

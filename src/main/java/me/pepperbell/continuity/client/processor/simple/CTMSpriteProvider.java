@@ -73,7 +73,7 @@ public class CTMSpriteProvider implements SpriteProvider {
 		for (int i = 0; i < 4; i++) {
 			int index1 = i;
 			int index2 = (i + 1) % 4;
-			if (((connections >> index1 * 2) & 1) == 1 && ((connections >> index2 * 2) & 1) == 1) {
+			if (((connections >>> index1 * 2) & 1) == 1 && ((connections >>> index2 * 2) & 1) == 1) {
 				mutablePos.set(pos, directions[index1]).move(directions[index2]);
 				if (connectionPredicate.shouldConnect(blockView, state, pos, mutablePos, face, quadSprite, innerSeams)) {
 					connections |= 1 << (i * 2 + 1);

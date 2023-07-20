@@ -22,4 +22,14 @@ public class RenderLayersMixin {
 			}
 		}
 	}
+
+	@Inject(method = "getMovingBlockLayer(Lnet/minecraft/block/BlockState;)Lnet/minecraft/client/render/RenderLayer;", at = @At("HEAD"), cancellable = true)
+	private static void continuity$onHeadGetMovingBlockLayer(BlockState state, CallbackInfoReturnable<RenderLayer> cir) {
+		if (ContinuityConfig.INSTANCE.customBlockLayers.get()) {
+			RenderLayer layer = CustomBlockLayers.getLayer(state);
+			if (layer != null) {
+				cir.setReturnValue(layer == RenderLayer.getTranslucent() ? RenderLayer.getTranslucentMovingBlock() : layer);
+			}
+		}
+	}
 }

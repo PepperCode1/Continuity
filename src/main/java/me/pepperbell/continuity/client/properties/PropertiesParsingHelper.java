@@ -59,15 +59,19 @@ public final class PropertiesParsingHelper {
 						if (path.endsWith(".png")) {
 							path = path.substring(0, path.length() - 4);
 						}
-						if (path.startsWith("./")) {
-							path = basePath + path.substring(2);
-						} else if (path.startsWith("~/")) {
-							path = "optifine/" + path.substring(2);
-						} else if (path.startsWith("/")) {
-							path = "optifine/" + path.substring(1);
-						} else if (!path.contains("/")) {
-							path = "textures/block/" + path;
+
+						if (namespace == null) {
+							if (path.startsWith("assets/minecraft/")) {
+								path = path.substring(17);
+							} else if (path.startsWith("./")) {
+								path = basePath + path.substring(2);
+							} else if (path.startsWith("~/")) {
+								path = "optifine/" + path.substring(2);
+							} else if (path.startsWith("/")) {
+								path = "optifine/" + path.substring(1);
+							}
 						}
+
 						if (path.startsWith("textures/")) {
 							path = path.substring(9);
 						} else if (path.startsWith("optifine/")) {
@@ -78,6 +82,8 @@ public final class PropertiesParsingHelper {
 							if (namespace == null) {
 								namespace = fileLocation.getNamespace();
 							}
+						} else if (!path.contains("/")) {
+							path = "block/" + path;
 						}
 
 						try {

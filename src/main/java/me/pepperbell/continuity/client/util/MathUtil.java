@@ -21,15 +21,15 @@ public final class MathUtil {
 	}
 
 	public static int lerpColor(float delta, int colorA, int colorB) {
-		return (lerp(delta, colorA >> 24 & 0xFF, colorB >> 24 & 0xFF) << 24)
-				| (lerp(delta, colorA >> 16 & 0xFF, colorB >> 16 & 0xFF) << 16)
-				| (lerp(delta, colorA >> 8 & 0xFF, colorB >> 8 & 0xFF) << 8)
+		return (lerp(delta, colorA >>> 24 & 0xFF, colorB >>> 24 & 0xFF) << 24)
+				| (lerp(delta, colorA >>> 16 & 0xFF, colorB >>> 16 & 0xFF) << 16)
+				| (lerp(delta, colorA >>> 8 & 0xFF, colorB >>> 8 & 0xFF) << 8)
 				| (lerp(delta, colorA & 0xFF, colorB & 0xFF));
 	}
 
 	public static int lerpLight(float delta, int lightA, int lightB) {
-		return (lerp(delta, lightA >> 20 & 0xF, lightB >> 20 & 0xF) << 20)
-				| (lerp(delta, lightA >> 4 & 0xF, lightB >> 4 & 0xF) << 4);
+		return (lerp(delta, lightA >>> 20 & 0xF, lightB >>> 20 & 0xF) << 20)
+				| (lerp(delta, lightA >>> 4 & 0xF, lightB >>> 4 & 0xF) << 4);
 	}
 
 	// Borrowed from SplittableRandom

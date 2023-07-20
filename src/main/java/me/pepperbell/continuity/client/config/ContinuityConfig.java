@@ -21,7 +21,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectBidirectionalIterator;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
 
 public class ContinuityConfig {
 	protected static final Logger LOGGER = LoggerFactory.getLogger("Continuity Config");
@@ -62,10 +61,6 @@ public class ContinuityConfig {
 		} catch (Exception e) {
 			LOGGER.error("Could not save config to file '" + file.getAbsolutePath() + "'", e);
 		}
-	}
-
-	public void onChange() {
-		MinecraftClient.getInstance().worldRenderer.reload();
 	}
 
 	protected void fromJson(JsonElement json) throws JsonParseException {
