@@ -3,6 +3,8 @@ package me.pepperbell.continuity.client.properties.overlay;
 import java.util.Locale;
 import java.util.Properties;
 
+import org.jetbrains.annotations.Nullable;
+
 import me.pepperbell.continuity.client.ContinuityClient;
 import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
 import net.minecraft.block.Block;
@@ -18,6 +20,7 @@ public class OverlayPropertiesSection {
 	protected String packName;
 
 	protected int tintIndex = -1;
+	@Nullable
 	protected BlockState tintBlock;
 	protected BlendMode layer = BlendMode.CUTOUT_MIPPED;
 
@@ -77,6 +80,8 @@ public class OverlayPropertiesSection {
 			} else {
 				ContinuityClient.LOGGER.warn("Unknown block '" + blockId + "' in 'tintBlock' value '" + tintBlockStr + "' in file '" + id + "' in pack '" + packName + "'");
 			}
+		} else {
+			ContinuityClient.LOGGER.warn("Invalid 'tintBlock' value '" + tintBlockStr + "' in file '" + id + "' in pack '" + packName + "'");
 		}
 	}
 
@@ -99,6 +104,7 @@ public class OverlayPropertiesSection {
 		return tintIndex;
 	}
 
+	@Nullable
 	public BlockState getTintBlock() {
 		return tintBlock;
 	}

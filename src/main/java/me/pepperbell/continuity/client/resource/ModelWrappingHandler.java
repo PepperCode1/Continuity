@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.mojang.datafixers.util.Pair;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -24,88 +26,92 @@ import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.util.Identifier;
 
-public final class ModelWrappingHandler {
-	private static final Map<ModelIdentifier, BlockState> MODEL_ID_2_STATE_MAP = new Object2ObjectOpenHashMap<>();
-	private static final Map<ModelIdentifier, List<CTMLoadingContainer<?>>> MODEL_ID_2_CONTAINERS_MAP = new Object2ObjectOpenHashMap<>();
+public class ModelWrappingHandler {
+	private final CTMPropertiesLoader.LoadingResult ctmLoadingResult;
 
-	public static void onAddBlockStateModel(ModelIdentifier id, BlockState state) {
-		MODEL_ID_2_STATE_MAP.put(id, state);
-		List<CTMLoadingContainer<?>> containerList = CTMPropertiesLoader.getAllAffecting(state);
-		if (containerList != null) {
-			MODEL_ID_2_CONTAINERS_MAP.put(id, containerList);
+	private final Map<ModelIdentifier, BlockState> modelId2StateMap = new Object2ObjectOpenHashMap<>();
+
+	public ModelWrappingHandler(CTMPropertiesLoader.LoadingResult ctmLoadingResult) {
+		this.ctmLoadingResult = ctmLoadingResult;
+	}
+
+	public void onAddBlockStateModel(ModelIdentifier id, BlockState state) {
+		if (!ctmLoadingResult.isEmpty()) {
+			modelId2StateMap.put(id, state);
 		}
 	}
 
-	public static void wrapCTMModels(Map<Identifier, UnbakedModel> unbakedModels, Map<Identifier, UnbakedModel> modelsToBake) {
-		if (CTMPropertiesLoader.isEmpty()) {
-			clearMaps();
+	public void wrapCTMModels(Map<Identifier, UnbakedModel> unbakedModels, Map<Identifier, UnbakedModel> modelsToBake) {
+		if (ctmLoadingResult.isEmpty()) {
 			return;
 		}
 
 		Map<Identifier, UnbakedModel> wrappedModels = new Object2ObjectOpenHashMap<>();
 		Function<Identifier, UnbakedModel> unbakedModelGetter = createUnbakedModelGetter(unbakedModels);
 		VoidSet<Pair<String, String>> voidSet = VoidSet.get();
-		CollectionBasedConsumer<CTMLoadingContainer<?>> reusableConsumer = new CollectionBasedConsumer<>();
+		OptionalListCreator<CTMLoadingContainer<?>> listCreator = new OptionalListCreator<>();
 
 		modelsToBake.forEach((id, model) -> {
-			// Only wrap final block state models
-			if (id instanceof ModelIdentifier modelId && isBlockStateModelId(modelId)) {
-				Collection<SpriteIdentifier> dependencies;
-				try {
-					dependencies = model.getTextureDependencies(unbakedModelGetter, voidSet);
-				} catch (ModelNotLoadedException e) {
-					return;
-				}
-
-				List<CTMLoadingContainer<?>> containerList = MODEL_ID_2_CONTAINERS_MAP.get(modelId);
-				if (containerList == null) {
-					containerList = CTMPropertiesLoader.getAllAffecting(dependencies);
-					if (containerList == null) {
-						return;
-					}
-				} else {
-					reusableConsumer.setCollection(containerList);
-					CTMPropertiesLoader.consumeAllAffecting(dependencies, reusableConsumer);
-				}
-				containerList.sort(Collections.reverseOrder());
-
-				Set<CTMLoadingContainer<?>> multipassContainerSet = null;
-				int amount = containerList.size();
-				for (int i = 0; i < amount; i++) {
-					CTMLoadingContainer<?> container = containerList.get(i);
-					Set<CTMLoadingContainer<?>> dependents = container.getRecursiveMultipassDependents();
-					if (dependents != null) {
-						if (multipassContainerSet == null) {
-							multipassContainerSet = new ObjectOpenHashSet<>();
-						}
-						multipassContainerSet.addAll(dependents);
-					}
-				}
-				List<CTMLoadingContainer<?>> multipassContainerList = null;
-				if (multipassContainerSet != null) {
-					BlockState state = MODEL_ID_2_STATE_MAP.get(modelId);
-					for (CTMLoadingContainer<?> container : multipassContainerSet) {
-						if (!container.getProperties().affectsBlockStates() || container.getProperties().affectsBlockState(state)) {
-							if (multipassContainerList == null) {
-								multipassContainerList = new ObjectArrayList<>();
-							}
-							multipassContainerList.add(container);
-						}
-					}
-					if (multipassContainerList != null) {
-						multipassContainerList.sort(Collections.reverseOrder());
-					}
-				}
-
-				wrappedModels.put(modelId, new CTMUnbakedModel(model, containerList, multipassContainerList));
+			// Only wrap top-level block state models
+			if (!(id instanceof ModelIdentifier modelId) || !isBlockStateModelId(modelId)) {
+				return;
 			}
+
+			BlockState state = modelId2StateMap.get(modelId);
+			if (state == null) {
+				return;
+			}
+
+			Collection<SpriteIdentifier> spriteIds;
+			try {
+				spriteIds = model.getTextureDependencies(unbakedModelGetter, voidSet);
+			} catch (ModelNotLoadedException e) {
+				return;
+			}
+
+			ctmLoadingResult.consumeAllAffecting(state, listCreator);
+			ctmLoadingResult.consumeAllAffecting(spriteIds, listCreator);
+			List<CTMLoadingContainer<?>> containerList = listCreator.get();
+			if (containerList == null) {
+				return;
+			}
+			containerList.sort(Collections.reverseOrder());
+
+			Set<CTMLoadingContainer<?>> multipassContainerSet = null;
+			int amount = containerList.size();
+			for (int i = 0; i < amount; i++) {
+				CTMLoadingContainer<?> container = containerList.get(i);
+				Set<CTMLoadingContainer<?>> dependents = container.getRecursiveMultipassDependents();
+				if (dependents != null) {
+					if (multipassContainerSet == null) {
+						multipassContainerSet = new ObjectOpenHashSet<>();
+					}
+					multipassContainerSet.addAll(dependents);
+				}
+			}
+
+			List<CTMLoadingContainer<?>> multipassContainerList = null;
+			if (multipassContainerSet != null) {
+				for (CTMLoadingContainer<?> container : multipassContainerSet) {
+					if (!container.getProperties().affectsBlockStates() || container.getProperties().affectsBlockState(state)) {
+						if (multipassContainerList == null) {
+							multipassContainerList = new ObjectArrayList<>();
+						}
+						multipassContainerList.add(container);
+					}
+				}
+				if (multipassContainerList != null) {
+					multipassContainerList.sort(Collections.reverseOrder());
+				}
+			}
+
+			wrappedModels.put(modelId, new CTMUnbakedModel(model, containerList, multipassContainerList));
 		});
 
-		clearMaps();
 		injectWrappedModels(wrappedModels, unbakedModels, modelsToBake);
 	}
 
-	public static void wrapEmissiveModels(Map<Identifier, Pair<SpriteAtlasTexture, SpriteAtlasTexture.Data>> spriteAtlasData, Map<Identifier, UnbakedModel> unbakedModels, Map<Identifier, UnbakedModel> modelsToBake) {
+	public void wrapEmissiveModels(Map<Identifier, UnbakedModel> unbakedModels, Map<Identifier, UnbakedModel> modelsToBake, Map<Identifier, Pair<SpriteAtlasTexture, SpriteAtlasTexture.Data>> spriteAtlasData) {
 		Set<SpriteIdentifier> spriteIdsToWrap = new ObjectOpenHashSet<>();
 
 		spriteAtlasData.forEach((atlasId, pair) -> {
@@ -127,14 +133,14 @@ public final class ModelWrappingHandler {
 		VoidSet<Pair<String, String>> voidSet = VoidSet.get();
 
 		unbakedModels.forEach((id, model) -> {
-			Collection<SpriteIdentifier> dependencies;
+			Collection<SpriteIdentifier> spriteIds;
 			try {
-				dependencies = model.getTextureDependencies(unbakedModelGetter, voidSet);
+				spriteIds = model.getTextureDependencies(unbakedModelGetter, voidSet);
 			} catch (ModelNotLoadedException e) {
 				return;
 			}
 
-			for (SpriteIdentifier spriteId : dependencies) {
+			for (SpriteIdentifier spriteId : spriteIds) {
 				if (spriteIdsToWrap.contains(spriteId)) {
 					wrappedModels.put(id, new EmissiveUnbakedModel(model));
 					return;
@@ -166,24 +172,25 @@ public final class ModelWrappingHandler {
 		return !id.getVariant().equals("inventory");
 	}
 
-	private static void clearMaps() {
-		MODEL_ID_2_STATE_MAP.clear();
-		MODEL_ID_2_CONTAINERS_MAP.clear();
-	}
-
 	private static class ModelNotLoadedException extends RuntimeException {
 	}
 
-	private static class CollectionBasedConsumer<T> implements Consumer<T> {
-		private Collection<T> collection;
+	private static class OptionalListCreator<T> implements Consumer<T> {
+		private ObjectArrayList<T> list = null;
 
 		@Override
 		public void accept(T t) {
-			collection.add(t);
+			if (list == null) {
+				list = new ObjectArrayList<>();
+			}
+			list.add(t);
 		}
 
-		public void setCollection(Collection<T> collection) {
-			this.collection = collection;
+		@Nullable
+		public ObjectArrayList<T> get() {
+			ObjectArrayList<T> list = this.list;
+			this.list = null;
+			return list;
 		}
 	}
 }

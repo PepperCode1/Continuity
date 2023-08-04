@@ -6,6 +6,8 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import org.jetbrains.annotations.Nullable;
+
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.pepperbell.continuity.api.client.ProcessingDataProvider;
 import me.pepperbell.continuity.api.client.QuadProcessor;
@@ -35,17 +37,22 @@ import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.EmptyBlockView;
 
 public class StandardOverlayQuadProcessor extends AbstractQuadProcessor {
+	@Nullable
 	protected Set<Identifier> matchTilesSet;
+	@Nullable
 	protected Predicate<BlockState> matchBlocksPredicate;
+	@Nullable
 	protected Set<Identifier> connectTilesSet;
+	@Nullable
 	protected Predicate<BlockState> connectBlocksPredicate;
 	protected ConnectionPredicate connectionPredicate;
 
 	protected int tintIndex;
+	@Nullable
 	protected BlockState tintBlock;
 	protected RenderMaterial material;
 
-	public StandardOverlayQuadProcessor(Sprite[] sprites, ProcessingPredicate processingPredicate, Set<Identifier> matchTilesSet, Predicate<BlockState> matchBlocksPredicate, Set<Identifier> connectTilesSet, Predicate<BlockState> connectBlocksPredicate, ConnectionPredicate connectionPredicate, int tintIndex, BlockState tintBlock, BlendMode layer) {
+	public StandardOverlayQuadProcessor(Sprite[] sprites, ProcessingPredicate processingPredicate, @Nullable Set<Identifier> matchTilesSet, @Nullable Predicate<BlockState> matchBlocksPredicate, @Nullable Set<Identifier> connectTilesSet, @Nullable Predicate<BlockState> connectBlocksPredicate, ConnectionPredicate connectionPredicate, int tintIndex, @Nullable BlockState tintBlock, BlendMode layer) {
 		super(sprites, processingPredicate);
 		this.matchTilesSet = matchTilesSet;
 		this.matchBlocksPredicate = matchBlocksPredicate;
@@ -61,9 +68,9 @@ public class StandardOverlayQuadProcessor extends AbstractQuadProcessor {
 	@Override
 	public ProcessingResult processQuadInner(MutableQuadView quad, Sprite sprite, BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, int pass, int processorIndex, ProcessingContext context) {
 		Direction lightFace = quad.lightFace();
-		OverlayRenderer renderer = getRenderer(blockView, pos, state, lightFace, sprite, DirectionMaps.getMap(lightFace)[0], context);
-		if (renderer != null) {
-			context.addEmitterConsumer(renderer);
+		OverlayEmitter emitter = getEmitter(blockView, pos, state, lightFace, sprite, DirectionMaps.getMap(lightFace)[0], context);
+		if (emitter != null) {
+			context.addEmitterConsumer(emitter);
 		}
 		return ProcessingResult.CONTINUE;
 	}
@@ -130,58 +137,58 @@ public class StandardOverlayQuadProcessor extends AbstractQuadProcessor {
 		return corner0;
 	}
 
-	protected OverlayRenderer fromCorner(Direction direction0, Direction direction1, int sprite0, int sprite1, OverlayRenderer renderer, BlockRenderView blockView, BlockPos pos, BlockState state, Direction lightFace, Sprite quadSprite, BlockPos.Mutable mutablePos) {
-		Sprite[] rendererSprites = prepareRenderer(renderer, lightFace, blockView, pos);
+	protected OverlayEmitter fromCorner(Direction direction0, Direction direction1, int sprite0, int sprite1, OverlayEmitter emitter, BlockRenderView blockView, BlockPos pos, BlockState state, Direction lightFace, Sprite quadSprite, BlockPos.Mutable mutablePos) {
+		prepareEmitter(emitter, lightFace, blockView, pos);
+		emitter.addSprite(sprites[sprite0]);
 		mutablePos.set(pos, direction0).move(direction1);
 		if (appliesOverlay(blockView.getBlockState(mutablePos), blockView, state, pos, lightFace, quadSprite)) {
 			mutablePos.move(lightFace);
 			if (!blockView.getBlockState(mutablePos).isOpaqueFullCube(blockView, mutablePos)) {
-				rendererSprites[1] = sprites[sprite1];
+				emitter.addSprite(sprites[sprite1]);
 			}
 		}
-		rendererSprites[0] = sprites[sprite0];
-		return renderer;
+		return emitter;
 	}
 
-	protected OverlayRenderer fromOneSide(BlockState state0, BlockState state1, BlockState state2, Direction direction0, Direction direction1, Direction direction2, int sprite0, int sprite1, int sprite2, OverlayRenderer renderer, BlockRenderView blockView, BlockPos pos, BlockState state, Direction lightFace, Sprite quadSprite, BlockPos.Mutable mutablePos) {
+	protected OverlayEmitter fromOneSide(BlockState state0, BlockState state1, BlockState state2, Direction direction0, Direction direction1, Direction direction2, int sprite0, int sprite1, int sprite2, OverlayEmitter emitter, BlockRenderView blockView, BlockPos pos, BlockState state, Direction lightFace, Sprite quadSprite, BlockPos.Mutable mutablePos) {
 		boolean s0 = hasSameOverlayUnobscured(state0, direction0, blockView, pos, state, lightFace, quadSprite, mutablePos);
 		boolean s1 = hasSameOverlayUnobscured(state1, direction1, blockView, pos, state, lightFace, quadSprite, mutablePos);
 		boolean s2 = hasSameOverlayUnobscured(state2, direction2, blockView, pos, state, lightFace, quadSprite, mutablePos);
 
-		Sprite[] rendererSprites = prepareRenderer(renderer, lightFace, blockView, pos);
-		rendererSprites[0] = sprites[sprite0];
+		prepareEmitter(emitter, lightFace, blockView, pos);
+		emitter.addSprite(sprites[sprite0]);
 		if (s0 | s1) {
 			if (appliesOverlayCorner(direction0, direction1, blockView, pos, state, lightFace, quadSprite, mutablePos)) {
-				rendererSprites[1] = sprites[sprite1];
+				emitter.addSprite(sprites[sprite1]);
 			}
 		}
 		if (s1 | s2) {
 			if (appliesOverlayCorner(direction1, direction2, blockView, pos, state, lightFace, quadSprite, mutablePos)) {
-				rendererSprites[2] = sprites[sprite2];
+				emitter.addSprite(sprites[sprite2]);
 			}
 		}
-		return renderer;
+		return emitter;
 	}
 
-	protected static OverlayRenderer getRenderer(ProcessingDataProvider dataProvider) {
-		return dataProvider.getData(ProcessingDataKeys.STANDARD_OVERLAY_RENDERER_POOL_KEY).getRenderer();
+	protected static OverlayEmitter getEmitter(ProcessingDataProvider dataProvider) {
+		return dataProvider.getData(ProcessingDataKeys.STANDARD_OVERLAY_EMITTER_POOL_KEY).get();
 	}
 
-	protected Sprite[] prepareRenderer(OverlayRenderer renderer, Direction face, BlockRenderView blockView, BlockPos pos) {
-		return renderer.prepare(face, RenderUtil.getTintColor(tintBlock, blockView, pos, tintIndex), material);
+	protected void prepareEmitter(OverlayEmitter emitter, Direction face, BlockRenderView blockView, BlockPos pos) {
+		emitter.prepare(face, RenderUtil.getTintColor(tintBlock, blockView, pos, tintIndex), material);
 	}
 
-	protected OverlayRenderer prepareRenderer(OverlayRenderer renderer, Direction face, BlockRenderView blockView, BlockPos pos, int sprite1) {
-		Sprite[] rendererSprites = prepareRenderer(renderer, face, blockView, pos);
-		rendererSprites[0] = sprites[sprite1];
-		return renderer;
+	protected OverlayEmitter prepareEmitter(OverlayEmitter emitter, Direction face, BlockRenderView blockView, BlockPos pos, int sprite1) {
+		prepareEmitter(emitter, face, blockView, pos);
+		emitter.addSprite(sprites[sprite1]);
+		return emitter;
 	}
 
-	protected OverlayRenderer prepareRenderer(OverlayRenderer renderer, Direction face, BlockRenderView blockView, BlockPos pos, int sprite1, int sprite2) {
-		Sprite[] rendererSprites = prepareRenderer(renderer, face, blockView, pos);
-		rendererSprites[0] = sprites[sprite1];
-		rendererSprites[1] = sprites[sprite2];
-		return renderer;
+	protected OverlayEmitter prepareEmitter(OverlayEmitter emitter, Direction face, BlockRenderView blockView, BlockPos pos, int sprite1, int sprite2) {
+		prepareEmitter(emitter, face, blockView, pos);
+		emitter.addSprite(sprites[sprite1]);
+		emitter.addSprite(sprites[sprite2]);
+		return emitter;
 	}
 
 	/*
@@ -203,7 +210,8 @@ public class StandardOverlayQuadProcessor extends AbstractQuadProcessor {
 	15:	U
 	16:	L U (CORNER)
 	 */
-	protected OverlayRenderer getRenderer(BlockRenderView blockView, BlockPos pos, BlockState state, Direction lightFace, Sprite quadSprite, Direction[] directions, ProcessingDataProvider dataProvider) {
+	@Nullable
+	protected OverlayEmitter getEmitter(BlockRenderView blockView, BlockPos pos, BlockState state, Direction lightFace, Sprite quadSprite, Direction[] directions, ProcessingDataProvider dataProvider) {
 		BlockPos.Mutable mutablePos = dataProvider.getData(ProcessingDataKeys.MUTABLE_POS_KEY);
 
 		//
@@ -224,54 +232,54 @@ public class StandardOverlayQuadProcessor extends AbstractQuadProcessor {
 		//
 
 		if (left & down & right & up) {
-			return prepareRenderer(getRenderer(dataProvider), lightFace, blockView, pos, 8);
+			return prepareEmitter(getEmitter(dataProvider), lightFace, blockView, pos, 8);
 		}
 		if (left & down & right) {
-			return prepareRenderer(getRenderer(dataProvider), lightFace, blockView, pos, 5);
+			return prepareEmitter(getEmitter(dataProvider), lightFace, blockView, pos, 5);
 		}
 		if (left & down & up) {
-			return prepareRenderer(getRenderer(dataProvider), lightFace, blockView, pos, 6);
+			return prepareEmitter(getEmitter(dataProvider), lightFace, blockView, pos, 6);
 		}
 		if (left & right & up) {
-			return prepareRenderer(getRenderer(dataProvider), lightFace, blockView, pos, 13);
+			return prepareEmitter(getEmitter(dataProvider), lightFace, blockView, pos, 13);
 		}
 		if (down & right & up) {
-			return prepareRenderer(getRenderer(dataProvider), lightFace, blockView, pos, 12);
+			return prepareEmitter(getEmitter(dataProvider), lightFace, blockView, pos, 12);
 		}
 
 		if (left & right) {
-			return prepareRenderer(getRenderer(dataProvider), lightFace, blockView, pos, 9, 7);
+			return prepareEmitter(getEmitter(dataProvider), lightFace, blockView, pos, 9, 7);
 		}
 		if (up & down) {
-			return prepareRenderer(getRenderer(dataProvider), lightFace, blockView, pos, 15, 1);
+			return prepareEmitter(getEmitter(dataProvider), lightFace, blockView, pos, 15, 1);
 		}
 
 		if (left & down) {
-			return fromCorner(directions[2], directions[3], 4, 14, getRenderer(dataProvider), blockView, pos, state, lightFace, quadSprite, mutablePos);
+			return fromCorner(directions[2], directions[3], 4, 14, getEmitter(dataProvider), blockView, pos, state, lightFace, quadSprite, mutablePos);
 		}
 		if (down & right) {
-			return fromCorner(directions[0], directions[3], 3, 16, getRenderer(dataProvider), blockView, pos, state, lightFace, quadSprite, mutablePos);
+			return fromCorner(directions[0], directions[3], 3, 16, getEmitter(dataProvider), blockView, pos, state, lightFace, quadSprite, mutablePos);
 		}
 		if (right & up) {
-			return fromCorner(directions[0], directions[1], 10, 2, getRenderer(dataProvider), blockView, pos, state, lightFace, quadSprite, mutablePos);
+			return fromCorner(directions[0], directions[1], 10, 2, getEmitter(dataProvider), blockView, pos, state, lightFace, quadSprite, mutablePos);
 		}
 		if (up & left) {
-			return fromCorner(directions[1], directions[2], 11, 0, getRenderer(dataProvider), blockView, pos, state, lightFace, quadSprite, mutablePos);
+			return fromCorner(directions[1], directions[2], 11, 0, getEmitter(dataProvider), blockView, pos, state, lightFace, quadSprite, mutablePos);
 		}
 
 		//
 
 		if (left) {
-			return fromOneSide(state1, state2, state3, directions[1], directions[2], directions[3], 9, 0, 14, getRenderer(dataProvider), blockView, pos, state, lightFace, quadSprite, mutablePos);
+			return fromOneSide(state1, state2, state3, directions[1], directions[2], directions[3], 9, 0, 14, getEmitter(dataProvider), blockView, pos, state, lightFace, quadSprite, mutablePos);
 		}
 		if (down) {
-			return fromOneSide(state2, state3, state0, directions[2], directions[3], directions[0], 1, 14, 16, getRenderer(dataProvider), blockView, pos, state, lightFace, quadSprite, mutablePos);
+			return fromOneSide(state2, state3, state0, directions[2], directions[3], directions[0], 1, 14, 16, getEmitter(dataProvider), blockView, pos, state, lightFace, quadSprite, mutablePos);
 		}
 		if (right) {
-			return fromOneSide(state3, state0, state1, directions[3], directions[0], directions[1], 7, 16, 2, getRenderer(dataProvider), blockView, pos, state, lightFace, quadSprite, mutablePos);
+			return fromOneSide(state3, state0, state1, directions[3], directions[0], directions[1], 7, 16, 2, getEmitter(dataProvider), blockView, pos, state, lightFace, quadSprite, mutablePos);
 		}
 		if (up) {
-			return fromOneSide(state0, state1, state2, directions[0], directions[1], directions[2], 15, 2, 0, getRenderer(dataProvider), blockView, pos, state, lightFace, quadSprite, mutablePos);
+			return fromOneSide(state0, state1, state2, directions[0], directions[1], directions[2], 15, 2, 0, getEmitter(dataProvider), blockView, pos, state, lightFace, quadSprite, mutablePos);
 		}
 
 		//
@@ -299,21 +307,21 @@ public class StandardOverlayQuadProcessor extends AbstractQuadProcessor {
 		}
 
 		if (corner0 | corner1 | corner2 | corner3) {
-			OverlayRenderer renderer = getRenderer(dataProvider);
-			Sprite[] rendererSprites = prepareRenderer(renderer, lightFace, blockView, pos);
+			OverlayEmitter emitter = getEmitter(dataProvider);
+			prepareEmitter(emitter, lightFace, blockView, pos);
 			if (corner0) {
-				rendererSprites[0] = sprites[2];
+				emitter.addSprite(sprites[2]);
 			}
 			if (corner1) {
-				rendererSprites[1] = sprites[0];
+				emitter.addSprite(sprites[0]);
 			}
 			if (corner2) {
-				rendererSprites[2] = sprites[14];
+				emitter.addSprite(sprites[14]);
 			}
 			if (corner3) {
-				rendererSprites[3] = sprites[16];
+				emitter.addSprite(sprites[16]);
 			}
-			return renderer;
+			return emitter;
 		}
 
 		//
@@ -321,43 +329,49 @@ public class StandardOverlayQuadProcessor extends AbstractQuadProcessor {
 		return null;
 	}
 
-	public static class OverlayRenderer implements Consumer<QuadEmitter> {
+	public static class OverlayEmitter implements Consumer<QuadEmitter> {
 		protected static final Sprite[] EMPTY_SPRITES = new Sprite[4];
 
 		protected Sprite[] sprites = new Sprite[4];
+		protected int spriteAmount;
 		protected Direction face;
 		protected int color;
 		protected RenderMaterial material;
 
 		@Override
 		public void accept(QuadEmitter emitter) {
-			for (Sprite sprite : sprites) {
-				if (sprite != null && !TextureUtil.isMissingSprite(sprite)) {
-					QuadUtil.emitOverlayQuad(emitter, face, sprite, color, material);
-				}
+			for (int i = 0; i < spriteAmount; i++) {
+				QuadUtil.emitOverlayQuad(emitter, face, sprites[i], color, material);
 			}
 		}
 
-		public Sprite[] prepare(Direction face, int color, RenderMaterial material) {
+		public void prepare(Direction face, int color, RenderMaterial material) {
 			System.arraycopy(EMPTY_SPRITES, 0, sprites, 0, EMPTY_SPRITES.length);
+			spriteAmount = 0;
 			this.face = face;
 			this.color = color;
 			this.material = material;
-			return sprites;
+		}
+
+		public void addSprite(Sprite sprite) {
+			if (sprite != null && !TextureUtil.isMissingSprite(sprite)) {
+				sprites[spriteAmount] = sprite;
+				spriteAmount++;
+			}
 		}
 	}
 
-	public static class OverlayRendererPool {
-		protected final List<OverlayRenderer> list = new ObjectArrayList<>();
+	public static class OverlayEmitterPool {
+		protected final List<OverlayEmitter> list = new ObjectArrayList<>();
 		protected int nextIndex = 0;
 
-		public OverlayRenderer getRenderer() {
+		public OverlayEmitter get() {
 			if (nextIndex >= list.size()) {
-				list.add(new OverlayRenderer());
+				list.add(new OverlayEmitter());
 			}
-			OverlayRenderer renderer = list.get(nextIndex);
+			OverlayEmitter emitter = list.get(nextIndex);
 			nextIndex++;
-			return renderer;
+			return emitter;
 		}
 
 		public void reset() {

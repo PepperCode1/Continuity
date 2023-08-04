@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Predicate;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import me.pepperbell.continuity.client.ContinuityClient;
@@ -32,7 +31,13 @@ public final class CustomBlockLayers {
 	@SuppressWarnings("unchecked")
 	private static final Predicate<BlockState>[] LAYER_PREDICATES = new Predicate[BlockLayer.VALUES.length];
 
+	private static boolean empty;
+
 	private static boolean disableSolidCheck;
+
+	public static boolean isEmpty() {
+		return empty;
+	}
 
 	@Nullable
 	public static RenderLayer getLayer(BlockState state) {
@@ -54,7 +59,9 @@ public final class CustomBlockLayers {
 	}
 
 	private static void reload(ResourceManager manager) {
+		empty = true;
 		System.arraycopy(EMPTY_LAYER_PREDICATES, 0, LAYER_PREDICATES, 0, EMPTY_LAYER_PREDICATES.length);
+		disableSolidCheck = false;
 
 		Optional<Resource> optionalResource = manager.getResource(LOCATION);
 		if (optionalResource.isPresent()) {
@@ -64,7 +71,7 @@ public final class CustomBlockLayers {
 				properties.load(inputStream);
 				reload(properties, LOCATION, resource.getResourcePackName());
 			} catch (IOException e) {
-				ContinuityClient.LOGGER.error("Failed to load custom block layers from file '" + LOCATION + "'", e);
+				ContinuityClient.LOGGER.error("Failed to load custom block layers from file '" + LOCATION + "' from pack '" + resource.getResourcePackName() + "'", e);
 			}
 		}
 	}
@@ -73,8 +80,9 @@ public final class CustomBlockLayers {
 		for (BlockLayer blockLayer : BlockLayer.VALUES) {
 			String propertyKey = "layer." + blockLayer.getKey();
 			Predicate<BlockState> predicate = PropertiesParsingHelper.parseBlockStates(properties, propertyKey, fileLocation, packName);
-			if (predicate != PropertiesParsingHelper.EMPTY_BLOCK_STATE_PREDICATE) {
+			if (predicate != null && predicate != PropertiesParsingHelper.EMPTY_BLOCK_STATE_PREDICATE) {
 				LAYER_PREDICATES[blockLayer.ordinal()] = predicate;
+				empty = false;
 			}
 		}
 
@@ -88,7 +96,6 @@ public final class CustomBlockLayers {
 		public static final Identifier ID = ContinuityClient.asId("custom_block_layers");
 		private static final ReloadListener INSTANCE = new ReloadListener();
 
-		@ApiStatus.Internal
 		public static void init() {
 			ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(INSTANCE);
 		}

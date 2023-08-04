@@ -9,11 +9,11 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
 
-public class BiomeHolder {
-	protected Identifier id;
-	protected Biome biome;
+public final class BiomeHolder {
+	private final Identifier id;
+	private Biome biome;
 
-	protected BiomeHolder(Identifier id) {
+	BiomeHolder(Identifier id) {
 		this.id = id;
 	}
 
@@ -26,15 +26,28 @@ public class BiomeHolder {
 		return biome;
 	}
 
-	public void refresh(Registry<Biome> biomeRegistry, Map<Identifier, Identifier> compressedIdMap) {
-		Identifier realId = compressedIdMap.get(id);
-		if (realId == null) {
-			realId = id;
+	void refresh(Registry<Biome> biomeRegistry, Map<Identifier, Identifier> compactIdMap) {
+		Identifier id = compactIdMap.get(this.id);
+		if (id == null) {
+			id = this.id;
 		}
-		if (biomeRegistry.containsId(realId)) {
-			biome = biomeRegistry.get(realId);
+		if (biomeRegistry.containsId(id)) {
+			biome = biomeRegistry.get(id);
 		} else {
-			ContinuityClient.LOGGER.warn("Unknown biome '" + id + "'");
+			ContinuityClient.LOGGER.warn("Unknown biome '" + this.id + "'");
 		}
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		BiomeHolder that = (BiomeHolder) o;
+		return id.equals(that.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return id.hashCode();
 	}
 }

@@ -4,7 +4,7 @@
   "version": "${version}",
 
   "name": "Continuity",
-  "description": "Continuity is a Fabric mod built around modern APIs to allow for the most efficient connected textures experience possible. It is designed to provide full Optifine parity for all resource packs that use the Optifine CTM format. Continuity also supports Optifine-format emissive textures for block and item models.",
+  "description": "Continuity is a Fabric mod that allows resource packs that use the OptiFine connected textures format, OptiFine emissive textures format (only for blocks and item models), or OptiFine custom block layers format to work without OptiFine.",
   "authors": [
     "PepperCode1"
   ],
@@ -32,7 +32,7 @@
 
   "depends": {
     "minecraft": "1.19.2",
-    "fabric": ">=0.58.0"
+    "fabric-api": ">=0.59.0"
   },
 
   "custom": {

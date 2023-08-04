@@ -6,7 +6,7 @@ public interface CTMLoader<T extends CTMProperties> {
 	QuadProcessorFactory<T> getProcessorFactory();
 
 	static <T extends CTMProperties> CTMLoader<T> of(CTMPropertiesFactory<T> propertiesFactory, QuadProcessorFactory<T> processorFactory) {
-		return new CTMLoader<T>() {
+		return new CTMLoader<>() {
 			@Override
 			public CTMPropertiesFactory<T> getPropertiesFactory() {
 				return propertiesFactory;

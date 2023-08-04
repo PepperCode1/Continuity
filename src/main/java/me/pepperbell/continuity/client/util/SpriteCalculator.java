@@ -6,9 +6,7 @@ import java.util.Map;
 import java.util.concurrent.locks.StampedLock;
 import java.util.function.Supplier;
 
-import org.jetbrains.annotations.ApiStatus;
-
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.block.BlockModels;
@@ -55,7 +53,6 @@ public final class SpriteCalculator {
 		return model.getParticleSprite();
 	}
 
-	@ApiStatus.Internal
 	public static void clearCache() {
 		for (SpriteCache cache : SPRITE_CACHES.values()) {
 			cache.clear();
@@ -64,7 +61,7 @@ public final class SpriteCalculator {
 
 	private static class SpriteCache {
 		private final Direction face;
-		private final Map<BlockState, Sprite> sprites = new Object2ObjectOpenHashMap<>();
+		private final Map<BlockState, Sprite> sprites = new Reference2ReferenceOpenHashMap<>();
 		private final Supplier<Random> randomSupplier = new Supplier<>() {
 			private final Random random = Random.create();
 

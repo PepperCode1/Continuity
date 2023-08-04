@@ -1,7 +1,6 @@
 package me.pepperbell.continuity.client.resource;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.client.MinecraftClient;
@@ -18,7 +17,6 @@ public final class ResourcePackUtil {
 		return MinecraftClient.getInstance().getResourcePackProvider().getPack();
 	}
 
-	@ApiStatus.Internal
 	public static void setup(ResourceManager resourceManager) {
 		resourcePacks = resourceManager.streamResourcePacks().toArray(ResourcePack[]::new);
 		ArrayUtils.reverse(resourcePacks);
@@ -34,7 +32,6 @@ public final class ResourcePackUtil {
 		return null;
 	}
 
-	@ApiStatus.Internal
 	public static void clear() {
 		resourcePacks = null;
 	}

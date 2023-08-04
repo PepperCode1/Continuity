@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.util.Optional;
 import java.util.Properties;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import me.pepperbell.continuity.client.ContinuityClient;
@@ -23,7 +22,6 @@ public final class EmissiveSuffixLoader {
 		return emissiveSuffix;
 	}
 
-	@ApiStatus.Internal
 	public static void load(ResourceManager manager) {
 		emissiveSuffix = null;
 

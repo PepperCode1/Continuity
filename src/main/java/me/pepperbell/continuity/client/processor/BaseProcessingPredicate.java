@@ -23,13 +23,18 @@ import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.biome.Biome;
 
 public class BaseProcessingPredicate implements ProcessingPredicate {
+	@Nullable
 	protected Set<Identifier> matchTilesSet;
+	@Nullable
 	protected EnumSet<Direction> faces;
+	@Nullable
 	protected Predicate<Biome> biomePredicate;
+	@Nullable
 	protected IntPredicate heightPredicate;
+	@Nullable
 	protected Predicate<String> blockEntityNamePredicate;
 
-	public BaseProcessingPredicate(Set<Identifier> matchTilesSet, EnumSet<Direction> faces, Predicate<Biome> biomePredicate, IntPredicate heightPredicate, Predicate<String> blockEntityNamePredicate) {
+	public BaseProcessingPredicate(@Nullable Set<Identifier> matchTilesSet, @Nullable EnumSet<Direction> faces, @Nullable Predicate<Biome> biomePredicate, @Nullable IntPredicate heightPredicate, @Nullable Predicate<String> blockEntityNamePredicate) {
 		this.matchTilesSet = matchTilesSet;
 		this.faces = faces;
 		this.biomePredicate = biomePredicate;

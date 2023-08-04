@@ -1,6 +1,5 @@
 package me.pepperbell.continuity.client.resource;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import net.fabricmc.loader.api.FabricLoader;
@@ -22,7 +21,6 @@ public final class EmissiveIdProvider {
 		return PROVIDER.toEmissiveId(spriteId, emissiveSuffix);
 	}
 
-	@ApiStatus.Internal
 	public static void init() {
 	}
 

@@ -4,6 +4,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import org.jetbrains.annotations.Nullable;
+
 import me.pepperbell.continuity.client.properties.ConnectingCTMProperties;
 import me.pepperbell.continuity.client.properties.PropertiesParsingHelper;
 import net.minecraft.block.BlockState;
@@ -11,7 +13,9 @@ import net.minecraft.util.Identifier;
 
 public class StandardOverlayCTMProperties extends ConnectingCTMProperties implements OverlayPropertiesSection.Provider {
 	protected OverlayPropertiesSection overlaySection;
+	@Nullable
 	protected Set<Identifier> connectTilesSet;
+	@Nullable
 	protected Predicate<BlockState> connectBlocksPredicate;
 
 	public StandardOverlayCTMProperties(Properties properties, Identifier id, String packName, int packPriority, String method) {
@@ -40,10 +44,12 @@ public class StandardOverlayCTMProperties extends ConnectingCTMProperties implem
 		connectBlocksPredicate = PropertiesParsingHelper.parseBlockStates(properties, "connectBlocks", id, packName);
 	}
 
+	@Nullable
 	public Set<Identifier> getConnectTilesSet() {
 		return connectTilesSet;
 	}
 
+	@Nullable
 	public Predicate<BlockState> getConnectBlocksPredicate() {
 		return connectBlocksPredicate;
 	}

@@ -29,7 +29,7 @@ repositories {
 		url 'https://api.modrinth.com/maven'
 	}
 	maven {
-		name "VRAM"
+		name 'VRAM'
 		url 'https://maven.vram.io'
 	}
 	maven {

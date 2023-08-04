@@ -5,6 +5,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.annotations.Nullable;
 
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMaps;
@@ -54,9 +55,10 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 		ArrayUtils.shift(map[7], 1);
 	}
 
+	@Nullable
 	protected Sprite[] replacementSprites;
 
-	public CompactCTMQuadProcessor(Sprite[] sprites, ProcessingPredicate processingPredicate, ConnectionPredicate connectionPredicate, boolean innerSeams, Sprite[] replacementSprites) {
+	public CompactCTMQuadProcessor(Sprite[] sprites, ProcessingPredicate processingPredicate, ConnectionPredicate connectionPredicate, boolean innerSeams, @Nullable Sprite[] replacementSprites) {
 		super(sprites, processingPredicate, connectionPredicate, innerSeams);
 		this.replacementSprites = replacementSprites;
 	}
@@ -668,7 +670,7 @@ public class CompactCTMQuadProcessor extends ConnectingQuadProcessor {
 			return createProcessor(properties, sprites, replacementSprites);
 		}
 
-		public QuadProcessor createProcessor(CompactConnectingCTMProperties properties, Sprite[] sprites, Sprite[] replacementSprites) {
+		public QuadProcessor createProcessor(CompactConnectingCTMProperties properties, Sprite[] sprites, @Nullable Sprite[] replacementSprites) {
 			return new CompactCTMQuadProcessor(sprites, BaseProcessingPredicate.fromProperties(properties), properties.getConnectionPredicate(), properties.getInnerSeams(), replacementSprites);
 		}
 

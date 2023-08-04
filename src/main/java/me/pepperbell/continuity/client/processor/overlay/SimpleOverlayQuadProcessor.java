@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import org.jetbrains.annotations.Nullable;
+
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.pepperbell.continuity.api.client.QuadProcessor;
 import me.pepperbell.continuity.client.processor.ProcessingDataKeys;
@@ -28,10 +30,11 @@ import net.minecraft.world.BlockRenderView;
 
 public class SimpleOverlayQuadProcessor extends SimpleQuadProcessor {
 	protected int tintIndex;
+	@Nullable
 	protected BlockState tintBlock;
 	protected RenderMaterial material;
 
-	public SimpleOverlayQuadProcessor(SpriteProvider spriteProvider, ProcessingPredicate processingPredicate, int tintIndex, BlockState tintBlock, BlendMode layer) {
+	public SimpleOverlayQuadProcessor(SpriteProvider spriteProvider, ProcessingPredicate processingPredicate, int tintIndex, @Nullable BlockState tintBlock, BlendMode layer) {
 		super(spriteProvider, processingPredicate);
 		this.tintIndex = tintIndex;
 		this.tintBlock = tintBlock;
@@ -42,16 +45,16 @@ public class SimpleOverlayQuadProcessor extends SimpleQuadProcessor {
 	public ProcessingResult processQuad(MutableQuadView quad, Sprite sprite, BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, int pass, int processorIndex, ProcessingContext context) {
 		if (processingPredicate.shouldProcessQuad(quad, sprite, blockView, state, pos, context)) {
 			Sprite newSprite = spriteProvider.getSprite(quad, sprite, blockView, state, pos, randomSupplier, context);
-			if (!TextureUtil.isMissingSprite(newSprite)) {
-				OverlayRenderer renderer = context.getData(ProcessingDataKeys.SIMPLE_OVERLAY_RENDERER_POOL_KEY).getRenderer();
-				renderer.prepare(quad.lightFace(), newSprite, RenderUtil.getTintColor(tintBlock, blockView, pos, tintIndex), material);
-				context.addEmitterConsumer(renderer);
+			if (newSprite != null && !TextureUtil.isMissingSprite(newSprite)) {
+				OverlayEmitter emitter = context.getData(ProcessingDataKeys.SIMPLE_OVERLAY_EMITTER_POOL_KEY).get();
+				emitter.prepare(quad.lightFace(), newSprite, RenderUtil.getTintColor(tintBlock, blockView, pos, tintIndex), material);
+				context.addEmitterConsumer(emitter);
 			}
 		}
 		return ProcessingResult.CONTINUE;
 	}
 
-	public static class OverlayRenderer implements Consumer<QuadEmitter> {
+	public static class OverlayEmitter implements Consumer<QuadEmitter> {
 		protected Direction face;
 		protected Sprite sprite;
 		protected int color;
@@ -70,17 +73,17 @@ public class SimpleOverlayQuadProcessor extends SimpleQuadProcessor {
 		}
 	}
 
-	public static class OverlayRendererPool {
-		protected final List<OverlayRenderer> list = new ObjectArrayList<>();
+	public static class OverlayEmitterPool {
+		protected final List<OverlayEmitter> list = new ObjectArrayList<>();
 		protected int nextIndex = 0;
 
-		public OverlayRenderer getRenderer() {
+		public OverlayEmitter get() {
 			if (nextIndex >= list.size()) {
-				list.add(new OverlayRenderer());
+				list.add(new OverlayEmitter());
 			}
-			OverlayRenderer renderer = list.get(nextIndex);
+			OverlayEmitter emitter = list.get(nextIndex);
 			nextIndex++;
-			return renderer;
+			return emitter;
 		}
 
 		public void reset() {

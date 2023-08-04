@@ -1,7 +1,6 @@
 package me.pepperbell.continuity.client.util.biome;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import grondag.canvas.terrain.region.input.InputRegion;
@@ -53,7 +52,6 @@ public final class BiomeRetriever {
 		return PROVIDER.getBiome(blockView, pos);
 	}
 
-	@ApiStatus.Internal
 	public static void init() {
 	}
 

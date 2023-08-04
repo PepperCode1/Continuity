@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
 
-import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import io.vram.frex.api.material.MaterialConstants;
 import io.vram.frex.fabric.compat.FabricQuadView;
@@ -82,7 +82,7 @@ public final class RenderUtil {
 		return quad -> BlendMode.DEFAULT;
 	}
 
-	public static int getTintColor(BlockState state, BlockRenderView blockView, BlockPos pos, int tintIndex) {
+	public static int getTintColor(@Nullable BlockState state, BlockRenderView blockView, BlockPos pos, int tintIndex) {
 		if (state == null || tintIndex == -1) {
 			return -1;
 		}
@@ -110,7 +110,6 @@ public final class RenderUtil {
 		public static final List<Identifier> DEPENDENCIES = List.of(ResourceReloadListenerKeys.MODELS);
 		private static final ReloadListener INSTANCE = new ReloadListener();
 
-		@ApiStatus.Internal
 		public static void init() {
 			ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(INSTANCE);
 		}
