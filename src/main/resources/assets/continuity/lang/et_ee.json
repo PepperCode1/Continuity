@@ -5,5 +5,9 @@
   "options.continuity.emissive_textures": "Hõõguvad tekstuurid",
   "options.continuity.emissive_textures.tooltip": "Luba või keela ploki- ja esememudelite hõõguvad tekstuurid.",
   "options.continuity.custom_block_layers": "Kohandatud plokikihid",
-  "options.continuity.custom_block_layers.tooltip": "Luba või keela kohandatud plokikihid."
+  "options.continuity.custom_block_layers.tooltip": "Luba või keela kohandatud plokikihid.",
+  "resourcePack.continuity.default.name": "Vaikimisi ühendatud tekstuurid",
+  "resourcePack.continuity.default.description": "Raamaturiiulid, liivakivi ja klaas",
+  "resourcePack.continuity.glass_pane_culling_fix.name": "Klaaspaneelide eral. parandus",
+  "resourcePack.continuity.glass_pane_culling_fix.description": "Parandab ülemise ja alumise külje eralduse"
 }
