@@ -1,9 +1,15 @@
 {
   "options.continuity.title": "Continuity 配置",
   "options.continuity.connected_textures": "连接纹理",
-  "options.continuity.connected_textures.tooltip": "启用或禁用方块的连接纹理.",
+  "options.continuity.connected_textures.tooltip": "启用或禁用方块的连接纹理。",
   "options.continuity.emissive_textures": "发光纹理",
-  "options.continuity.emissive_textures.tooltip": "启用或禁用方块和物品模型的发光纹理.",
-  "options.continuity.custom_block_layers": "自定义方块层",
-  "options.continuity.custom_block_layers.tooltip": "启用或禁用自定义方块层."
+  "options.continuity.emissive_textures.tooltip": "启用或禁用方块和物品模型的发光纹理。",
+  "options.continuity.custom_block_layers": "自定义方块贴图",
+  "options.continuity.custom_block_layers.tooltip": "启用或禁用自定义方块贴图。",
+  "resourcePack.continuity.default.name": "默认连接纹理",
+  "resourcePack.continuity.default.description": "玻璃、砂岩、书架 ",
+  "resourcePack.continuity.glass_pane_culling_fix.name": "玻璃板剔除修复",
+  "resourcePack.continuity.glass_pane_culling_fix.description": "剔除玻璃板之间的面 ",
+  "modmenu.summaryTranslation.continuity": "连接纹理模组",
+  "modmenu.descriptionTranslation.continuity": "Continuity 是一个围绕现代化 API 构建的 Fabric 模组，虑及最有效的连接纹理体验可能性。它旨在为使用 Optifine CTM 格式的所有资源包提供完整的 Optifine 校验。Continuity 也支持 Optifine 格式的方块发光纹理和物品模型。"
 }
