@@ -1,0 +1,9 @@
+{
+  "options.continuity.title": "Cấu hình Continuity",
+  "options.continuity.connected_textures": "Hoạ tiết được kết nối",
+  "options.continuity.connected_textures.tooltip": "Bật hoặc tắt hoạ tiết được kết nối cho các khối.",
+  "options.continuity.emissive_textures": "Hoạ tiết phát xạ",
+  "options.continuity.emissive_textures.tooltip": "Bật hoặc tắt hoạ tiết phát xạ cho các mô hình khối và vật phẩm.",
+  "options.continuity.custom_block_layers": "Lớp khối tùy chỉnh",
+  "options.continuity.custom_block_layers.tooltip": "Bật hoặc tắt các lớp khối tùy chỉnh."
+}
