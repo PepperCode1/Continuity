@@ -1,9 +1,13 @@
 {
-  "options.continuity.title": "Налаштування Continuity",
+  "options.continuity.title": "Параметри Continuity",
   "options.continuity.connected_textures": "З'єднані текстури",
-  "options.continuity.connected_textures.tooltip": "Увімкнути/вимкнути з'єднані текстури для блоків.",
-  "options.continuity.emissive_textures": "Текстури, що світяться",
-  "options.continuity.emissive_textures.tooltip": "Увімкнути/вимкнути текстури, що світяться для блоків та моделів предметів.",
+  "options.continuity.connected_textures.tooltip": "Увімкнути з'єднані текстури для блоків.",
+  "options.continuity.emissive_textures": "Випромінюючі текстури",
+  "options.continuity.emissive_textures.tooltip": "Увімкнути випромінюючі текстури для блоків та моделів предметів.",
   "options.continuity.custom_block_layers": "Власні шари блоків",
-  "options.continuity.custom_block_layers.tooltip": "Увімкнути/вимкнути власні шари текстур для блоків."
+  "options.continuity.custom_block_layers.tooltip": "Увімкнути власні шари текстур для блоків.",
+  "resourcePack.continuity.default.name": "Станд. з'єдн. текстури",
+  "resourcePack.continuity.default.description": "Книжні полиці, пісковик та скло",
+  "resourcePack.continuity.glass_pane_culling_fix.name": "Виправл. скляні панелі",
+  "resourcePack.continuity.glass_pane_culling_fix.description": "Виправл. поглинення горизонтальних граней"
 }
