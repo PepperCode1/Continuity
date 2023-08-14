@@ -11,5 +11,5 @@
   "resourcePack.continuity.glass_pane_culling_fix.name": "玻璃板剔除修复",
   "resourcePack.continuity.glass_pane_culling_fix.description": "剔除玻璃板之间的面 ",
   "modmenu.summaryTranslation.continuity": "连接纹理模组",
-  "modmenu.descriptionTranslation.continuity": "Continuity 是一个围绕现代化 API 构建的 Fabric 模组，虑及最有效的连接纹理体验可能性。它旨在为使用 Optifine CTM 格式的所有资源包提供完整的 Optifine 校验。Continuity 也支持 Optifine 格式的方块发光纹理和物品模型。"
+  "modmenu.descriptionTranslation.continuity": "Continuity 是一个围绕现代化 API 构建的 Fabric 模组，虑及最有效的连接纹理体验可能性。它旨在为使用 Optifine CTM 格式的所有资源包提供完整的与 Optifine 同步的支持。Continuity 也支持 Optifine 格式的方块发光纹理和物品模型。"
 }
