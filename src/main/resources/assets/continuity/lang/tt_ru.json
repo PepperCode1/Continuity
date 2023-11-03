@@ -1,0 +1,11 @@
+{
+  "modmenu.summaryTranslation.continuity": "Бу модны кулланып, Optifine-ның тоташтырылган текстуралары, җемелдек текстуралары, көйләнгән блок катламнары Optifine-сыз эшли.",
+  "modmenu.descriptionTranslation.continuity": "Continuity — Optifine тоташтырылган текстуралары форматын, OptiFine җемелдек текстуралар форматын (блок һәм предмет модельләре өчен генә) яки OptiFine-сыз эшләү өчен OptiFine көйләнгән блок катламнары форматын кулланучы ресурс җыелмаларын рөхсәт итә торган Fabric моды.",
+  "options.continuity.title": "Continuity көйләүләре",
+  "options.continuity.connected_textures": "Тоташтырылган текстуралар",
+  "options.continuity.connected_textures.tooltip": "Блоклар өчен тоташтырылган текстураларны кушырга яки сүндерергә.",
+  "options.continuity.emissive_textures": "Җемелдек текстуралар",
+  "options.continuity.emissive_textures.tooltip": "Блок һәм предмет модельләре өчен җемелдек текстураларны кушырга яки сүндерергә.",
+  "options.continuity.custom_block_layers": "Көйләнгән катламнар",
+  "options.continuity.custom_block_layers.tooltip": "Көйләнгән блок катламнарын кушырга яки сүндерергә."
+}
