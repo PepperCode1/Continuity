@@ -1,0 +1,9 @@
+{
+  "options.continuity.title": "Continuity Konfiguration",
+  "options.continuity.connected_textures": "Anslutna Texturer",
+  "options.continuity.connected_textures.tooltip": "Aktivera eller inaktivera anslutna texturer för block.",
+  "options.continuity.emissive_textures": "Emissiva Texturer",
+  "options.continuity.emissive_textures.tooltip": "Aktivera eller inaktivera emissiva texturer för block- och föremålsmodeller.",
+  "options.continuity.custom_block_layers": "Anpassade Blocklager",
+  "options.continuity.custom_block_layers.tooltip": "Aktivera eller inaktivera anpassade blocklager."
+}
