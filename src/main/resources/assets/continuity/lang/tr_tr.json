@@ -1,0 +1,9 @@
+{
+  "options.continuity.title": "Continuity Yapılandırması",
+  "options.continuity.connected_textures": "Bağlantılı Dokular",
+  "options.continuity.connected_textures.tooltip": "Bloklar için bağlantılı dokuları aç veya kapat.",
+  "options.continuity.emissive_textures": "Parlayan Dokular",
+  "options.continuity.emissive_textures.tooltip": "Eşya ve block modelleri için parlayan dokuları aç veya kapat.",
+  "options.continuity.custom_block_layers": "Özel Blok Katmanları",
+  "options.continuity.custom_block_layers.tooltip": "Özel blok katmanlarını aç veya kapat."
+}
