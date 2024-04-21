@@ -1,0 +1,9 @@
+{
+  "options.continuity.title": "Konfigurasi Continuity",
+  "options.continuity.connected_textures": "Tekstur Bersambung",
+  "options.continuity.connected_textures.tooltip": "Dayakan atau nyahdayakan tekstur yang disambungkan untuk blok.",
+  "options.continuity.emissive_textures": "Tekstur Emisif",
+  "options.continuity.emissive_textures.tooltip": "Dayakan atau nyahdayakan tekstur emisif untuk model blok dan item.",
+  "options.continuity.custom_block_layers": "Lapisan Blok Tersuai",
+  "options.continuity.custom_block_layers.tooltip": "Dayakan atau nyahdayakan lapisan blok tersuai."
+}
