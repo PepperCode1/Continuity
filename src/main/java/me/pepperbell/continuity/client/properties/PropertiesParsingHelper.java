@@ -1,15 +1,11 @@
 package me.pepperbell.continuity.client.properties;
 
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
 
 import org.apache.commons.io.FilenameUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import it.unimi.dsi.fastutil.Hash;
@@ -32,9 +28,38 @@ import net.minecraft.util.InvalidIdentifierException;
 public final class PropertiesParsingHelper {
 	public static final Predicate<BlockState> EMPTY_BLOCK_STATE_PREDICATE = state -> false;
 
+	/**
+	 * Called when the {@code properties} don't contain the key {@code propertyKey}
+	 * <p>
+	 * This function searches for a match of {@code propertyKey} inside every key of the properties.
+	 * If one such match is found, we return the property associated with it
+	 *
+	 * @param properties The properties object
+	 * @param propertyKey The key of the property
+	 * @return The property associated with the misspelled key, or {@code null} if it wasn't found
+	 */
+	@Nullable
+	private static String searchMisspelled(@NotNull Properties properties, String propertyKey){
+		for (String key : properties.stringPropertyNames())
+		{
+			if (key.contains(propertyKey)) {
+				ContinuityClient.LOGGER.error(
+						("Invalid key found : '%s', but it contains the propertyKey '%s'. We will assume it is "
+						 + "misspelled and use it").formatted(key, propertyKey)
+				);
+				return properties.getProperty(key);
+			}
+		}
+		return null;
+	}
+
 	@Nullable
 	public static Set<Identifier> parseMatchTiles(Properties properties, String propertyKey, Identifier fileLocation, String packId, @Nullable ResourceRedirectHandler redirectHandler) {
-		String matchTilesStr = properties.getProperty(propertyKey);
+		// If the given key doesn't exist, we check if it misspelled
+		String matchTilesStr = properties.containsKey(propertyKey)
+							   ? properties.getProperty(propertyKey)
+							   : searchMisspelled(properties, propertyKey);
+
 		if (matchTilesStr == null) {
 			return null;
 		}
@@ -114,7 +139,10 @@ public final class PropertiesParsingHelper {
 
 	@Nullable
 	public static Predicate<BlockState> parseBlockStates(Properties properties, String propertyKey, Identifier fileLocation, String packId) {
-		String blockStatesStr = properties.getProperty(propertyKey);
+		// If the given key doesn't exist, we check if it misspelled
+		String blockStatesStr = properties.containsKey(propertyKey)
+								? properties.getProperty(propertyKey)
+								: searchMisspelled(properties, propertyKey);
 		if (blockStatesStr == null) {
 			return null;
 		}
