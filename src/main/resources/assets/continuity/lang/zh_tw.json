@@ -5,5 +5,9 @@
   "options.continuity.emissive_textures": "高光紋理",
   "options.continuity.emissive_textures.tooltip": "啟用或停用方塊和物品模型的高光紋理。",
   "options.continuity.custom_block_layers": "自訂方塊層",
-  "options.continuity.custom_block_layers.tooltip": "啟用或停用自訂方塊層。"
+  "options.continuity.custom_block_layers.tooltip": "啟用或停用自訂方塊層。",
+  "resourcePack.continuity.default.name": "預設連接紋理",
+  "resourcePack.continuity.default.description": "玻璃、砂岩、書櫃",
+  "resourcePack.continuity.glass_pane_culling_fix.name": "玻璃片剔除修正",
+  "resourcePack.continuity.glass_pane_culling_fix.description": "剔除玻璃片之間的面"
 }

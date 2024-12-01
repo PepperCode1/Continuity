@@ -5,5 +5,9 @@
   "options.continuity.emissive_textures": "Tekstury emisyjne",
   "options.continuity.emissive_textures.tooltip": "Włącz lub wyłącz tekstury emisyjne dla bloków i modeli przedmiotów.",
   "options.continuity.custom_block_layers": "Niestandardowe warstwy bloków",
-  "options.continuity.custom_block_layers.tooltip": "Włącz lub wyłącz niestandardowe warstwy bloków."
+  "options.continuity.custom_block_layers.tooltip": "Włącz lub wyłącz niestandardowe warstwy bloków.",
+  "resourcePack.continuity.default.name": "Domyślne połączone tekstury",
+  "resourcePack.continuity.default.description": "Szkło, piaskowiec, biblioteczki",
+  "resourcePack.continuity.glass_pane_culling_fix.name": "Poprawka chowania szyb",
+  "resourcePack.continuity.glass_pane_culling_fix.description": "Chowanie ścian pomiędzy szybami"
 }
