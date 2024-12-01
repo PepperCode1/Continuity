@@ -1,9 +1,13 @@
 {
   "options.continuity.title": "Pagsasaayos ng Continuity",
-  "options.continuity.connected_textures": "Konektado na mga Textures",
-  "options.continuity.connected_textures.tooltip": "Paganahin o hindi paganahin ang mga konektadong textures sa mga bloke.",
-  "options.continuity.emissive_textures": "Emisibo na mga Textures",
-  "options.continuity.emissive_textures.tooltip": "Paganahin o hindi paganahin ang mga emisibong textures sa mga bloke at modelong aytem.",
+  "options.continuity.connected_textures": "Konektado na mga Testura",
+  "options.continuity.connected_textures.tooltip": "Paganahin o hindi paganahin ang mga konektadong testura sa mga bloke.",
+  "options.continuity.emissive_textures": "Emisibo na mga Testura",
+  "options.continuity.emissive_textures.tooltip": "Paganahin o hindi paganahin ang mga emisibong testura sa mga bloke at modelong aytem.",
   "options.continuity.custom_block_layers": "Mga Pasadyang Suson",
-  "options.continuity.custom_block_layers.tooltip": "Paganahin o hindi paganahin ang mga pasadyang suson."
+  "options.continuity.custom_block_layers.tooltip": "Paganahin o hindi paganahin ang mga pasadyang suson.",
+  "resourcePack.continuity.default.name": "Default na Konektadong mga Testura",
+  "resourcePack.continuity.default.description": "Salamin, batong buhangin, mga bookshelf",
+  "resourcePack.continuity.glass_pane_culling_fix.name": "Pag-aayos sa gitnang panig ng salamin",
+  "resourcePack.continuity.glass_pane_culling_fix.description": "Tanggalin ang linya sa gitnang panig ng salamin."
 }
