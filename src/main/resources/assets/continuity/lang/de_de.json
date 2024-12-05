@@ -1,9 +1,13 @@
 {
-  "options.continuity.title": "Continuity Konfiguration",
+  "options.continuity.title": "Continuity Einstellungen",
   "options.continuity.connected_textures": "Verbundene Texturen",
   "options.continuity.connected_textures.tooltip": "Aktiviert oder deaktiviert verbundene Texturen für Blöcke.",
   "options.continuity.emissive_textures": "Leuchtende Texturen",
   "options.continuity.emissive_textures.tooltip": "Aktiviert oder deaktiviert leuchtende Texturen für Blöcke und Gegenstände.",
   "options.continuity.custom_block_layers": "Benutzerdefinierte Block Ebenen",
-  "options.continuity.custom_block_layers.tooltip": "Aktiviert oder deaktiviert benutzerdefinierte Block Ebenen."
+  "options.continuity.custom_block_layers.tooltip": "Aktiviert oder deaktiviert benutzerdefinierte Block Ebenen.",
+  "resourcePack.continuity.default.name": "Standard Verbundene Texturen",
+  "resourcePack.continuity.default.description": "Glas, Sandstein, Bücherregale",
+  "resourcePack.continuity.glass_pane_culling_fix.name": "Fix für Glasscheiben-Texturen",
+  "resourcePack.continuity.glass_pane_culling_fix.description": "Verbundene Glasscheiben"
 }
