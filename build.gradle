@@ -1,5 +1,7 @@
+import groovy.xml.XmlSlurper
+
 plugins {
-	id 'fabric-loom' version "${loom_version}"
+	id 'dev.architectury.loom' version "${loom_version}"
 	id 'maven-publish'
 }
 
@@ -20,6 +22,10 @@ static String getExtraBuildMetadata() {
 
 repositories {
 	maven {
+		name 'NeoForged'
+		url 'https://maven.neoforged.net/releases'
+	}
+	maven {
 		name 'TerraformersMC'
 		url 'https://maven.terraformersmc.com'
 	}
@@ -31,27 +37,55 @@ repositories {
 		name 'Shedaniel'
 		url 'https://maven.shedaniel.me'
 	}
+	maven {
+		name 'Sinytra'
+		url "https://maven.su5ed.dev/releases"
+	}
 }
 
 dependencies {
 	// To change the versions see the gradle.properties file
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-
-	// Fabric API
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
-	modImplementation("com.terraformersmc:modmenu:${modmenu_version}") {
-		exclude group: 'net.fabricmc.fabric-api'
+	minecraft "net.minecraft:minecraft:$project.minecraft_version"
+	mappings loom.layered {
+		it.mappings("net.fabricmc:yarn:$project.yarn_mappings:v2")
+		it.mappings("dev.architectury:yarn-mappings-patch-neoforge:$project.yarn_mappings_patch_version")
 	}
+	neoForge "net.neoforged:neoforge:$project.neoforge_version"
+
+	// Fetch the version of the fabric-api modules from the pom file
+	def moduleVer = [:]
+	ArtifactResolutionQuery query = dependencies.createArtifactResolutionQuery()
+		.forModule("org.sinytra.forgified-fabric-api", "forgified-fabric-api", project.fabric_version)
+		.withArtifacts(MavenModule, MavenPomArtifact)
+	ArtifactResolutionResult result = query.execute()
+	for (component in result.resolvedComponents) {
+		Set<ArtifactResult> mavenPomArtifacts = component.getArtifacts(MavenPomArtifact)
+		for (artifact in mavenPomArtifacts) {
+			def pom = new XmlSlurper().parse(artifact.file)
+			for (dependency in pom.dependencies.dependency) {
+				moduleVer.put(dependency.artifactId.toString(), dependency.version.toString())
+			}
+		}
+	}
+
+	modImplementation include("org.sinytra.forgified-fabric-api:fabric-api-base:${moduleVer['fabric-api-base']}")
+	modImplementation include("org.sinytra.forgified-fabric-api:fabric-resource-loader-v0:${moduleVer['fabric-resource-loader-v0']}")
+	modImplementation include("org.sinytra.forgified-fabric-api:fabric-model-loading-api-v1:${moduleVer['fabric-model-loading-api-v1']}")
+	modImplementation include("org.sinytra.forgified-fabric-api:fabric-renderer-api-v1:${moduleVer['fabric-renderer-api-v1']}")
+	modImplementation include("org.sinytra.forgified-fabric-api:fabric-renderer-indigo:${moduleVer['fabric-renderer-indigo']}")
+	modImplementation include("org.sinytra.forgified-fabric-api:fabric-block-view-api-v2:${moduleVer['fabric-block-view-api-v2']}")
+
+	modImplementation include("org.sinytra.forgified-fabric-api:fabric-lifecycle-events-v1:${moduleVer['fabric-lifecycle-events-v1']}")
+	modImplementation include("org.sinytra.forgified-fabric-api:fabric-networking-api-v1:${moduleVer['fabric-networking-api-v1']}")
+
+	modImplementation include("org.sinytra:fabric-loader:$project.loader_version")
 }
 
 processResources {
 	inputs.property 'version', project.version
 
-	filesMatching(['fabric.mod.json', 'META-INF/neoforge.mods.toml']) {
-		expand 'version': project.version
+	filesMatching('META-INF/neoforge.mods.toml') {
+		expand version: project.version
 	}
 }
 
