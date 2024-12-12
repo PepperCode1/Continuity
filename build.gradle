@@ -1,5 +1,7 @@
+import groovy.xml.XmlSlurper
+
 plugins {
-	id 'dev.architectury.loom' version '1.7-SNAPSHOT'
+	id 'dev.architectury.loom' version "${loom_version}"
 	id 'maven-publish'
 }
 
@@ -19,18 +21,10 @@ static String getExtraBuildMetadata() {
 }
 
 repositories {
-	// Add NeoForged repository.
 	maven {
-		name = 'NeoForged'
-		url = 'https://maven.neoforged.net/releases'
+		name 'NeoForged'
+		url 'https://maven.neoforged.net/releases'
 	}
-
-	// Add repositories to retrieve artifacts from in here.
-	// You should only use this when depending on other mods because
-	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
-	// for more information about repositories.
-
 	maven {
 		name 'TerraformersMC'
 		url 'https://maven.terraformersmc.com'
@@ -58,16 +52,33 @@ dependencies {
 	}
 	neoForge "net.neoforged:neoforge:$project.neoforge_version"
 
-	modImplementation include("org.sinytra.forgified-fabric-api:fabric-api-base:+")
-	modImplementation include("org.sinytra.forgified-fabric-api:fabric-resource-loader-v0:+")
-	modImplementation include("org.sinytra.forgified-fabric-api:fabric-model-loading-api-v1:+")
-	modImplementation include("org.sinytra.forgified-fabric-api:fabric-renderer-api-v1:+")
-	modImplementation include("org.sinytra.forgified-fabric-api:fabric-block-view-api-v2:+")
+	// Fetch the version of the fabric-api modules from the pom file
+	def moduleVer = [:]
+	ArtifactResolutionQuery query = dependencies.createArtifactResolutionQuery()
+		.forModule("org.sinytra.forgified-fabric-api", "forgified-fabric-api", project.fabric_version)
+		.withArtifacts(MavenModule, MavenPomArtifact)
+	ArtifactResolutionResult result = query.execute()
+	for (component in result.resolvedComponents) {
+		Set<ArtifactResult> mavenPomArtifacts = component.getArtifacts(MavenPomArtifact)
+		for (artifact in mavenPomArtifacts) {
+			def pom = new XmlSlurper().parse(artifact.file)
+			for (dependency in pom.dependencies.dependency) {
+				moduleVer.put(dependency.artifactId.toString(), dependency.version.toString())
+			}
+		}
+	}
 
-	modImplementation include("org.sinytra.forgified-fabric-api:fabric-lifecycle-events-v1:+")
-	modImplementation include("org.sinytra.forgified-fabric-api:fabric-networking-api-v1:+")
+	modImplementation include("org.sinytra.forgified-fabric-api:fabric-api-base:${moduleVer['fabric-api-base']}")
+	modImplementation include("org.sinytra.forgified-fabric-api:fabric-resource-loader-v0:${moduleVer['fabric-resource-loader-v0']}")
+	modImplementation include("org.sinytra.forgified-fabric-api:fabric-model-loading-api-v1:${moduleVer['fabric-model-loading-api-v1']}")
+	modImplementation include("org.sinytra.forgified-fabric-api:fabric-renderer-api-v1:${moduleVer['fabric-renderer-api-v1']}")
+	modImplementation include("org.sinytra.forgified-fabric-api:fabric-renderer-indigo:${moduleVer['fabric-renderer-indigo']}")
+	modImplementation include("org.sinytra.forgified-fabric-api:fabric-block-view-api-v2:${moduleVer['fabric-block-view-api-v2']}")
 
-	modImplementation include("org.sinytra:fabric-loader:+")
+	modImplementation include("org.sinytra.forgified-fabric-api:fabric-lifecycle-events-v1:${moduleVer['fabric-lifecycle-events-v1']}")
+	modImplementation include("org.sinytra.forgified-fabric-api:fabric-networking-api-v1:${moduleVer['fabric-networking-api-v1']}")
+
+	modImplementation include("org.sinytra:fabric-loader:$project.loader_version")
 }
 
 processResources {
