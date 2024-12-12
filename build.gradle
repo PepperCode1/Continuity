@@ -43,6 +43,10 @@ repositories {
 		name 'Shedaniel'
 		url 'https://maven.shedaniel.me'
 	}
+	maven {
+		name 'Sinytra'
+		url "https://maven.su5ed.dev/releases"
+	}
 }
 
 dependencies {
@@ -53,6 +57,17 @@ dependencies {
 		it.mappings("dev.architectury:yarn-mappings-patch-neoforge:$project.yarn_mappings_patch_version")
 	}
 	neoForge "net.neoforged:neoforge:$project.neoforge_version"
+
+	modImplementation include("org.sinytra.forgified-fabric-api:fabric-api-base:+")
+	modImplementation include("org.sinytra.forgified-fabric-api:fabric-resource-loader-v0:+")
+	modImplementation include("org.sinytra.forgified-fabric-api:fabric-model-loading-api-v1:+")
+	modImplementation include("org.sinytra.forgified-fabric-api:fabric-renderer-api-v1:+")
+	modImplementation include("org.sinytra.forgified-fabric-api:fabric-block-view-api-v2:+")
+
+	modImplementation include("org.sinytra.forgified-fabric-api:fabric-lifecycle-events-v1:+")
+	modImplementation include("org.sinytra.forgified-fabric-api:fabric-networking-api-v1:+")
+
+	modImplementation include("org.sinytra:fabric-loader:+")
 }
 
 processResources {
