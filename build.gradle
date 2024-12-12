@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version "${loom_version}"
+	id 'dev.architectury.loom' version '1.7-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -19,6 +19,18 @@ static String getExtraBuildMetadata() {
 }
 
 repositories {
+	// Add NeoForged repository.
+	maven {
+		name = 'NeoForged'
+		url = 'https://maven.neoforged.net/releases'
+	}
+
+	// Add repositories to retrieve artifacts from in here.
+	// You should only use this when depending on other mods because
+	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
+	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
+	// for more information about repositories.
+
 	maven {
 		name 'TerraformersMC'
 		url 'https://maven.terraformersmc.com'
@@ -35,23 +47,19 @@ repositories {
 
 dependencies {
 	// To change the versions see the gradle.properties file
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-
-	// Fabric API
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
-	modImplementation("com.terraformersmc:modmenu:${modmenu_version}") {
-		exclude group: 'net.fabricmc.fabric-api'
+	minecraft "net.minecraft:minecraft:$project.minecraft_version"
+	mappings loom.layered {
+		it.mappings("net.fabricmc:yarn:$project.yarn_mappings:v2")
+		it.mappings("dev.architectury:yarn-mappings-patch-neoforge:$project.yarn_mappings_patch_version")
 	}
+	neoForge "net.neoforged:neoforge:$project.neoforge_version"
 }
 
 processResources {
 	inputs.property 'version', project.version
 
-	filesMatching(['fabric.mod.json', 'META-INF/neoforge.mods.toml']) {
-		expand 'version': project.version
+	filesMatching('META-INF/neoforge.mods.toml') {
+		expand version: project.version
 	}
 }
 
