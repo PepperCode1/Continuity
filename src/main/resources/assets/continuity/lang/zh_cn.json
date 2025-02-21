@@ -1,9 +1,13 @@
 {
-  "options.continuity.title": "Continuity 配置",
+  "options.continuity.title": "Continuity配置",
   "options.continuity.connected_textures": "连接纹理",
-  "options.continuity.connected_textures.tooltip": "启用或禁用方块的连接纹理.",
-  "options.continuity.emissive_textures": "发光纹理",
-  "options.continuity.emissive_textures.tooltip": "启用或禁用方块和物品模型的发光纹理.",
+  "options.continuity.connected_textures.tooltip": "启用或禁用方块的连接纹理。",
+  "options.continuity.emissive_textures": "自发光纹理",
+  "options.continuity.emissive_textures.tooltip": "启用或禁用方块和物品模型的自发光纹理。",
   "options.continuity.custom_block_layers": "自定义方块层",
-  "options.continuity.custom_block_layers.tooltip": "启用或禁用自定义方块层."
+  "options.continuity.custom_block_layers.tooltip": "启用或禁用自定义方块层。",
+  "resourcePack.continuity.default.name": "默认连接纹理",
+  "resourcePack.continuity.default.description": "玻璃、砂岩、书架",
+  "resourcePack.continuity.glass_pane_culling_fix.name": "玻璃板剔除修复",
+  "resourcePack.continuity.glass_pane_culling_fix.description": "剔除玻璃板之间的面"
 }
