@@ -25,7 +25,9 @@ versionRange = "[1.20.1]"
 [[dependencies.continuity]]
 modId = "connectormod"
 mandatory = true
+versionRange = "*"
 
 [[dependencies.continuity]]
 modId = "fabric_api"
 mandatory = true
+versionRange = "*"
