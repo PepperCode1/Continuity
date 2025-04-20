@@ -60,7 +60,12 @@ abstract class BakedModelManagerMixin {
 		return original.thenRun(() -> continuity$reloadExtension = null);
 	}
 
-	@ModifyArg(method = "reload(Lnet/minecraft/resource/ResourceReloader$Synchronizer;Lnet/minecraft/resource/ResourceManager;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;", slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/model/SpriteAtlasManager;reload(Lnet/minecraft/resource/ResourceManager;ILjava/util/concurrent/Executor;)Ljava/util/Map;")), at = @At(value = "INVOKE", target = "Ljava/util/concurrent/CompletableFuture;thenApplyAsync(Ljava/util/function/Function;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;", ordinal = 0), index = 0)
+	@ModifyArg(
+			method = "reload(Lnet/minecraft/resource/ResourceReloader$Synchronizer;Lnet/minecraft/resource/ResourceManager;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;",
+			slice = @Slice(
+					from = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/model/SpriteAtlasManager;reload(Lnet/minecraft/resource/ResourceManager;ILjava/util/concurrent/Executor;)Ljava/util/Map;")),
+			at = @At(value = "INVOKE", target = "Ljava/util/concurrent/CompletableFuture;thenComposeAsync(Ljava/util/function/Function;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;", ordinal = 0),
+			index = 0)
 	private Function<Void, Object> continuity$modifyFunction(Function<Void, Object> function) {
 		BakedModelManagerReloadExtension reloadExtension = continuity$reloadExtension;
 		if (reloadExtension != null) {
@@ -74,8 +79,8 @@ abstract class BakedModelManagerMixin {
 		return function;
 	}
 
-	@Inject(method = "bake(Lnet/minecraft/util/profiler/Profiler;Ljava/util/Map;Lnet/minecraft/client/render/model/ModelBaker;Lit/unimi/dsi/fastutil/objects/Object2IntMap;Lnet/minecraft/client/render/entity/model/LoadedEntityModels;Lnet/minecraft/client/render/block/entity/LoadedBlockEntityModels;)Lnet/minecraft/client/render/model/BakedModelManager$BakingResult;", at = @At("HEAD"))
-	private static void continuity$onHeadBake(Profiler profiler, final Map<Identifier, SpriteAtlasManager.AtlasPreparation> atlases, ModelBaker baker, Object2IntMap<BlockState> groups, LoadedEntityModels entityModels, LoadedBlockEntityModels blockEntityModels, CallbackInfoReturnable<Object> cir) {
+	@Inject(method = "bake", at = @At("HEAD"))
+	private static void continuity$onHeadBake(final Map<Identifier, SpriteAtlasManager.AtlasPreparation> atlases, ModelBaker baker, Object2IntMap<BlockState> blockStates, LoadedEntityModels entityModels, LoadedBlockEntityModels blockEntityModels, Executor executor, CallbackInfoReturnable<Object> cir) {
 		BakedModelManagerBakeContext context = BakedModelManagerBakeContext.THREAD_LOCAL.get();
 		if (context != null) {
 			context.beforeBake(atlases);

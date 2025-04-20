@@ -25,7 +25,7 @@ public final class QuadUtil {
 	}
 
 	public static void assignLerpedUVs(MutableQuadView quad, Sprite sprite) {
-		float delta = sprite.getAnimationFrameDelta();
+		float delta = sprite.getUvScaleDelta();
 		float centerU = (sprite.getMinU() + sprite.getMaxU()) * 0.5f;
 		float centerV = (sprite.getMinV() + sprite.getMaxV()) * 0.5f;
 		float lerpedMinU = MathHelper.lerp(delta, sprite.getMinU(), centerU);

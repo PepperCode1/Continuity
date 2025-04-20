@@ -1,7 +1,9 @@
 package me.pepperbell.continuity.client.util;
 
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.locks.StampedLock;
 import java.util.function.Supplier;
 
@@ -9,7 +11,8 @@ import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.block.BlockModels;
-import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.model.BlockModelPart;
+import net.minecraft.client.render.model.BlockStateModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.math.Direction;
@@ -30,26 +33,32 @@ public final class SpriteCalculator {
 	}
 
 	public static Sprite calculateSprite(BlockState state, Direction face, Supplier<Random> randomSupplier) {
-		BakedModel model = MODELS.getModel(state);
+		BlockStateModel model = MODELS.getModel(state);
 		try {
-			List<BakedQuad> quads = model.getQuads(state, face, randomSupplier.get());
-			if (!quads.isEmpty()) {
-				return quads.get(0).getSprite();
+			List<BlockModelPart> parts = model.getParts(randomSupplier.get());
+
+			Optional<BakedQuad> optFirstQuad = parts.stream()
+					.map(p -> p.getQuads(face))
+					.flatMap(Collection::stream)
+					.findFirst();
+			if(optFirstQuad.isPresent())
+			{
+				return optFirstQuad.get().sprite();
 			}
-			quads = model.getQuads(state, null, randomSupplier.get());
-			if (!quads.isEmpty()) {
-				int amount = quads.size();
-				for (int i = 0; i < amount; i++) {
-					BakedQuad quad = quads.get(i);
-					if (quad.getFace() == face) {
-						return quad.getSprite();
-					}
-				}
+
+			optFirstQuad = parts.stream()
+					.map(p -> p.getQuads(null))
+					.flatMap(Collection::stream)
+					.filter(q -> q.face() == face)
+					.findFirst();
+			if(optFirstQuad.isPresent())
+			{
+				return optFirstQuad.get().sprite();
 			}
 		} catch (Exception e) {
 			//
 		}
-		return model.getParticleSprite();
+		return model.particleSprite();
 	}
 
 	public static void clearCache() {
