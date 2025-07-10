@@ -1,0 +1,13 @@
+{
+"options.continuity.title": "Continuity Configuratie",
+"options.continuity.connected_textures": "Verbonden Texturen",
+"options.continuity.connected_textures.tooltip": "Verbonden texturen voor blokken in- of uitschakelen.",
+"options.continuity.emissive_textures": "Emissieve texturen",
+"options.continuity.emissive_textures.tooltip": "Emissieve texturen voor blok- en itemmodellen in- of uitschakelen.",
+"options.continuity.custom_block_layers": "Aangepaste Bloklagen",
+"options.continuity.custom_block_layers.tooltip": "Aangepaste bloklagen in- of uitschakelen.",
+"resourcePack.continuity.default.name": "Standaard Verbonden Texturen",
+"resourcePack.continuity.default.description": "Glas, zandsteen, boekenkasten",
+"resourcePack.continuity.glass_pane_culling_fix.name": "Reparatie voor het verwijderen van glasplaten",
+"resourcePack.continuity.glass_pane_culling_fix.description": "Vlakken tussen glasplaten verwijderen"
+}
