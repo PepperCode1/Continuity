@@ -35,6 +35,10 @@ repositories {
 		name 'Shedaniel'
 		url 'https://maven.shedaniel.me'
 	}
+
+    flatDir {
+        dirs 'libs'
+    }
 }
 
 dependencies {
