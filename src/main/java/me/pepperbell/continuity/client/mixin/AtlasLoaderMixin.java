@@ -69,7 +69,13 @@ abstract class AtlasLoaderMixin {
 							Optional<Resource> optionalResource = resourceManager.getResource(emissiveLocation);
 							if (optionalResource.isPresent()) {
 								Resource resource = optionalResource.get();
-								emissiveSuppliers.put(emissiveId, () -> SpriteLoader.load(emissiveId, resource));
+								emissiveSuppliers.put(emissiveId, () -> {
+									try {
+										return SpriteLoader.load(emissiveId, resource);
+									} catch (Exception e) {
+										throw new RuntimeException("Error loading emissive resource " + emissiveId, e);
+									}
+								});
 								emissiveIdMap.put(id, emissiveId);
 							}
 						} else {
