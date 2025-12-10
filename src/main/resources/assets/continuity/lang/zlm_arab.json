@@ -1,9 +1,9 @@
 {
   "options.continuity.title": "کونفيݢوراسي Continuity",
   "options.continuity.connected_textures": "تيکستور برسامبوڠ",
-  "options.continuity.connected_textures.tooltip": "داياکن اتاو ڽهدايکن تيکستور يڠ دسامبوڠکن اونتوق بلوک.",
+  "options.continuity.connected_textures.tooltip": "داياکن اتاو ڽهداياکن تيکستور يڠ برسامبوڠ اونتوق بلوک.",
   "options.continuity.emissive_textures": "تيکستور ايميسيف",
   "options.continuity.emissive_textures.tooltip": "داياکن اتاو ڽهدايکن تيکستور ايميسيف اونتوق موديل بلوک دان اٴيتم.",
   "options.continuity.custom_block_layers": "لاڤيسن بلوک ترسواي",
-  "options.continuity.custom_block_layers.tooltip": "داياکن اتاو ڽهدايکن لاڤيسن بلوک ترسواي."
+  "options.continuity.custom_block_layers.tooltip": "داياکن اتاو ڽهداياکن لاڤيسن بلوک ترسواي."
 }
