@@ -6,6 +6,10 @@
   "options.continuity.emissive_textures.tooltip": "Блок һәм предмет модельләре өчен җемелдек текстураларны кушырга яки сүндерергә.",
   "options.continuity.custom_block_layers": "Көйләнгән катламнар",
   "options.continuity.custom_block_layers.tooltip": "Көйләнгән блок катламнарын кушырга яки сүндерергә.",
-  "modmenu.summaryTranslation.continuity": "Бу модны кулланып, Optifine-ның тоташтырылган текстуралары, җемелдек текстуралары, көйләнгән блок катламнары Optifine-сыз эшли.",
-  "modmenu.descriptionTranslation.continuity": "Continuity — Optifine тоташтырылган текстуралары форматын, OptiFine җемелдек текстуралар форматын (блок һәм предмет модельләре өчен генә) яки OptiFine-сыз эшләү өчен OptiFine көйләнгән блок катламнары форматын кулланучы ресурс җыелмаларын рөхсәт итә торган Fabric моды."
+  "resourcePack.continuity.default.name": "Гадәти тоташылган текстуралар",
+  "resourcePack.continuity.default.description": "Пыяла, комташ, китап киштәләре",
+  "resourcePack.continuity.glass_pane_culling_fix.name": "Пыяла панель аерып алуны төзәтү",
+  "resourcePack.continuity.glass_pane_culling_fix.description": "Кырларны пыяла панельләр арасында аерып алу",
+  "modmenu.summaryTranslation.continuity": "Бу модны кулланып, Optifine'ның тоташтырылган текстуралары, җемелдек текстуралары, көйләнгән блок катламнары Optifine'сыз эшли.",
+  "modmenu.descriptionTranslation.continuity": "Continuity — Optifine тоташтырылган текстуралары форматын, OptiFine җемелдек текстуралар форматын (блок һәм предмет модельләре өчен генә) яки OptiFine'сыз эшләү өчен OptiFine көйләнгән блок катламнары форматын кулланучы ресурс җыелмаларын рөхсәт итә торган Fabric моды."
 }
