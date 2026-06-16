@@ -27,8 +27,8 @@ public class ContinuityConfigScreen extends Screen {
 
 	@Override
 	protected void init() {
-		Value<Boolean> connectedTextures = Value.of(config.connectedTextures, Value.Flag.RELOAD_WORLD_RENDERER);
-		Value<Boolean> emissiveTextures = Value.of(config.emissiveTextures, Value.Flag.RELOAD_WORLD_RENDERER);
+		Value<Boolean> connectedTextures = Value.of(config.connectedTextures, Value.Flag.RELOAD_LEVEL_EXTRACTOR);
+		Value<Boolean> emissiveTextures = Value.of(config.emissiveTextures, Value.Flag.RELOAD_LEVEL_EXTRACTOR);
 
 		values = List.of(connectedTextures, emissiveTextures);
 
@@ -59,7 +59,7 @@ public class ContinuityConfigScreen extends Screen {
 
 	@Override
 	public void onClose() {
-		minecraft.setScreen(parent);
+		minecraft.gui.setScreen(parent);
 	}
 
 	private void saveValues() {
@@ -149,10 +149,10 @@ public class ContinuityConfigScreen extends Screen {
 		}
 
 		public enum Flag {
-			RELOAD_WORLD_RENDERER {
+			RELOAD_LEVEL_EXTRACTOR {
 				@Override
 				public void onSave() {
-					Minecraft.getInstance().levelRenderer.allChanged();
+					Minecraft.getInstance().levelExtractor.allChanged();
 				}
 			};
 
