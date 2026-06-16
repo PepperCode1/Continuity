@@ -1,7 +1,7 @@
 {
   "pack": {
     "min_format": 84,
-    "max_format": 999,
+    "max_format": 84,
     "description": {
       "translate": "resourcePack.continuity.glass_pane_culling_fix.description"
     }

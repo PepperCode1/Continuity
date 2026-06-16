@@ -34,7 +34,7 @@
   ],
 
   "depends": {
-    "minecraft": ">=26.1",
+    "minecraft": "~26.1",
     "fabric-api": ">=0.145.4"
   },
   "breaks": {
