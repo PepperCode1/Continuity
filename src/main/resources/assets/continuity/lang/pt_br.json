@@ -1,9 +1,13 @@
 {
-  "options.continuity.title": "Configuração de continuidade",
+  "options.continuity.title": "Configurações do Continuity",
   "options.continuity.connected_textures": "Texturas conectadas",
   "options.continuity.connected_textures.tooltip": "Habilitar ou desabilitar texturas conectadas para blocos.",
   "options.continuity.emissive_textures": "Texturas Emissivas",
   "options.continuity.emissive_textures.tooltip": "Habilite ou desabilite texturas emissivas para modelos de blocos e itens.",
   "options.continuity.custom_block_layers": "Camadas de bloco personalizadas",
-  "options.continuity.custom_block_layers.tooltip": "Habilitar ou desabilitar camadas de bloco personalizadas."
+  "options.continuity.custom_block_layers.tooltip": "Habilitar ou desabilitar camadas de bloco personalizadas.",
+  "resourcePack.continuity.default.name": "Texturas Conectadas Padrão",
+  "resourcePack.continuity.default.description": "Vidro, arenito, estantes de livros",
+  "resourcePack.continuity.glass_pane_culling_fix.name": "Correção de Culling do Painel de Vidro ",
+  "resourcePack.continuity.glass_pane_culling_fix.description": "Eliminar faces entre painéis de vidro"
 }
